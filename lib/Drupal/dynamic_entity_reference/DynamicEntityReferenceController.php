@@ -49,24 +49,9 @@ class DynamicEntityReferenceController extends ControllerBase {
     $items_typed = Tags::explode($items_typed);
     $match = Unicode::strtolower(array_pop($items_typed));
 
-    $query = $this->buildEntityQuery($target_type, $match, $match_operator);
-    $query->range(0, 10);
+    $options = $this->getReferenceableEntities($target_type, $match, $match_operator, 10);
 
-    $result = $query->execute();
-
-    if (empty($result)) {
-      return array();
-    }
-
-    $options = array();
     $matches = array();
-    $entities = $this->entityManager()->getStorage($target_type)->loadMultiple($result);
-    /** @var \Drupal\Core\Entity\EntityInterface $entity */
-    foreach ($entities as $entity_id => $entity) {
-      $bundle = $entity->bundle();
-      $options[$bundle][$entity_id] = String::checkPlain($entity->label());
-    }
-
     // Loop through the entities and convert them into autocomplete output.
     foreach ($options as $values) {
       foreach ($values as $entity_id => $label) {
@@ -76,7 +61,7 @@ class DynamicEntityReferenceController extends ControllerBase {
         $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
         // Names containing commas or quotes must be wrapped in quotes.
         $key = Tags::encode($key);
-        $matches[] = array('value' => $prefix . $key, 'label' => $label);
+        $matches[] = array('value' => $key, 'label' => $label);
       }
     }
 
@@ -115,4 +100,24 @@ class DynamicEntityReferenceController extends ControllerBase {
     return $query;
   }
 
+  public function getReferenceableEntities($target_type, $match, $match_operator, $limit) {
+
+    $query = $this->buildEntityQuery($target_type, $match, $match_operator);
+    $query->range(0, $limit);
+
+    $result = $query->execute();
+
+    if (empty($result)) {
+      return array();
+    }
+
+    $options = array();
+    $entities = $this->entityManager()->getStorage($target_type)->loadMultiple($result);
+    /** @var \Drupal\Core\Entity\EntityInterface $entity */
+    foreach ($entities as $entity_id => $entity) {
+      $bundle = $entity->bundle();
+      $options[$bundle][$entity_id] = String::checkPlain($entity->label());
+    }
+    return $options;
+  }
 }

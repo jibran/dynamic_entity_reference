@@ -10,6 +10,7 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\dynamic_entity_reference\DynamicEntityReferenceController;
 use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 use Drupal\user\EntityOwnerInterface;
 
@@ -38,7 +39,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       'field_name' => $this->fieldDefinition->getName(),
       'entity_type' => $entity->getEntityTypeId(),
       'bundle_name' => $entity->bundle(),
-      'target_type' => $items->get($delta)->entity_type,
+      'target_type' => $items->get($delta)->target_type,
     );
 
     $element += array(
@@ -63,7 +64,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       '#type' => 'select',
       '#options' => $available,
       '#title' => $this->t('Entity type'),
-      '#default_value' => $items->get($delta)->entity_type,
+      '#default_value' => $items->get($delta)->target_type,
       '#weight' => -50,
       '#attributes' => array(
         'class' => array('dynamic-entity-reference-entity-type'),
@@ -75,7 +76,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       '#attributes' => array(
         'class' => array('container-inline'),
       ),
-      'entity_type' => $entity_type,
+      'target_type' => $entity_type,
       'target_id' => $element,
       '#attached' => array(
         'library' => array(
@@ -83,6 +84,78 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
         ),
       ),
     );
+  }
+
+  /**
+   * Checks whether a content entity is referenced.
+   *
+   * @param string $target_type
+   *   The value target entity type
+   * @return bool
+   */
+  protected function isContentReferenced($target_type) {
+    $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
+    return $target_type_info->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function elementValidate($element, &$form_state, $form) {
+    // If a value was entered into the autocomplete.
+    $value = NULL;
+    if (!empty($element['#value'])) {
+      $values = $form_state['values'][$element['#field_name']][$element['#delta']];
+      // Take "label (entity id)', match the id from parenthesis.
+      if ($this->isContentReferenced($values['target_type']) && preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
+        $value = $matches[1];
+      }
+      elseif (preg_match("/.+\(([\w.]+)\)/", $element['#value'], $matches)) {
+        $value = $matches[1];
+      }
+      if (!$value) {
+        // Try to get a match from the input string when the user didn't use the
+        // autocomplete but filled in a value manually.
+        $value = $this->validateAutocompleteInput($values['target_type'], $element['#value'], $element, $form_state, $form);
+      }
+
+    }
+    form_set_value($element, $value, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
+    // @todo Make this a service.
+    $controller = new DynamicEntityReferenceController();
+    $entities = $controller->getReferenceableEntities($target_type, $input, '=', 6);
+    $params = array(
+      '%value' => $input,
+      '@value' => $input,
+    );
+    if (empty($entities)) {
+      // Error if there are no entities available for a required field.
+      form_error($element, $form_state, t('There are no entities matching "%value".', $params));
+    }
+    elseif (count($entities) > 5) {
+      $params['@id'] = key($entities);
+      // Error if there are more than 5 matching entities.
+      form_error($element, $form_state, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
+    }
+    elseif (count($entities) > 1) {
+      // More helpful error if there are only a few matching entities.
+      $multiples = array();
+      foreach ($entities as $id => $name) {
+        $multiples[] = $name . ' (' . $id . ')';
+      }
+      $params['@id'] = $id;
+      form_error($element, $form_state, t('Multiple entities match this reference; "%multiple". Specify the one you want by appending the id in parentheses, like "@value (@id)".', array('%multiple' => implode('", "', $multiples))));
+    }
+    else {
+      // Take the one and only matching entity.
+      return key($entities);
+    }
   }
 
 }
