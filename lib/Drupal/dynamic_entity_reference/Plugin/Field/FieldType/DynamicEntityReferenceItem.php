@@ -35,6 +35,8 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   label = @Translation("Dynamic entity reference"),
  *   description = @Translation("An entity field containing a dynamic entity reference."),
  *   no_ui = FALSE,
+ *   default_widget = "dynamic_entity_reference_default",
+ *   default_formatter = "dynamic_entity_reference_default",
  *   constraints = {"ValidReference" = {}}
  * )
  */
@@ -137,15 +139,16 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    * @todo update
    */
-  public function settingsForm(array &$form, array &$form_state, $has_data) {
-    $element['target_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Type of item to reference'),
-      '#options' => \Drupal::entityManager()->getEntityTypeLabels(),
-      '#default_value' => $this->getSetting('target_type'),
-      '#required' => TRUE,
+  public function settingsForm(array $form, array &$form_state, $has_data) {
+    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
+
+    $element['excluded_entity_type_ids'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Items to exclude'),
+      // @todo inject this.
+      '#options' => $labels['Content'],
+      '#default_value' => $this->getSetting('excluded_entity_type_ids'),
       '#disabled' => $has_data,
-      '#size' => 1,
     );
 
     return $element;
@@ -153,72 +156,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
 
   /**
    * {@inheritdoc}
-   * @todo update
    */
   public function instanceSettingsForm(array $form, array &$form_state) {
-    $instance = $form_state['instance'];
-
-    // Get all selection plugins for this entity type.
-    $selection_plugins = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionGroups($this->getSetting('target_type'));
-    $handler_groups = array_keys($selection_plugins);
-
-    $handlers = \Drupal::service('plugin.manager.entity_reference.selection')->getDefinitions();
-    $handlers_options = array();
-    foreach ($handlers as $plugin_id => $plugin) {
-      // We only display base plugins (e.g. 'default', 'views', ...) and not
-      // entity type specific plugins (e.g. 'default_node', 'default_user',
-      // ...).
-      if (in_array($plugin_id, $handler_groups)) {
-        $handlers_options[$plugin_id] = check_plain($plugin['label']);
-      }
-    }
-
-    $form = array(
-      '#type' => 'container',
-      '#attached' => array(
-        'css' => array(drupal_get_path('module', 'entity_reference') . '/css/entity_reference.admin.css'),
-      ),
-      '#process' => array(
-        '_entity_reference_field_instance_settings_ajax_process',
-      ),
-      '#element_validate' => array(array(get_class($this), 'instanceSettingsFormValidate')),
-    );
-    $form['handler'] = array(
-      '#type' => 'details',
-      '#title' => t('Reference type'),
-      '#open' => TRUE,
-      '#tree' => TRUE,
-      '#process' => array('_entity_reference_form_process_merge_parent'),
-    );
-
-    $form['handler']['handler'] = array(
-      '#type' => 'select',
-      '#title' => t('Reference method'),
-      '#options' => $handlers_options,
-      '#default_value' => $instance->getSetting('handler'),
-      '#required' => TRUE,
-      '#ajax' => TRUE,
-      '#limit_validation_errors' => array(),
-    );
-    $form['handler']['handler_submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Change handler'),
-      '#limit_validation_errors' => array(),
-      '#attributes' => array(
-        'class' => array('js-hide'),
-      ),
-      '#submit' => array('entity_reference_settings_ajax_submit'),
-    );
-
-    $form['handler']['handler_settings'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('entity_reference-settings')),
-    );
-
-    $handler = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionHandler($instance);
-    $form['handler']['handler_settings'] += $handler->settingsForm($instance);
-
-    return $form;
+    return array();
   }
 
   /**
