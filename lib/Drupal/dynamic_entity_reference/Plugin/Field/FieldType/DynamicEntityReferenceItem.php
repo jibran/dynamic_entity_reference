@@ -20,6 +20,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataReferenceDefinition;
+use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
 /**
@@ -69,8 +70,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       ->setLabel(t('Entity ID'));
     $properties['target_type'] = DataDefinition::create('string')
       ->setLabel(t('Target Entity Type'));
-    // @todo ad new 'dynamic_entity' typed data.
-    $properties['entity'] = DataReferenceDefinition::create('entity')
+    $properties['entity'] = DataDynamicReferenceDefinition::create('entity')
       ->setLabel(t('Entity'))
       ->setDescription(t('The referenced entity'))
       // The entity object is computed out of the entity ID.
@@ -196,11 +196,20 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     }
     else {
       // Make sure that the 'entity' property gets set as 'target_id'.
-      if (isset($values['target_id']) && !isset($values['entity'])) {
-        $values['entity'] = $values['target_id'];
+      if (isset($values['target_id']) && isset($values['target_type']) && !isset($values['entity'])) {
+        $values['entity'] = entity_load($values['target_type'], $values['target_id']);
       }
       parent::setValue($values, $notify);
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getValue($include_computed = FALSE) {
+    $values = parent::getValue($include_computed);
+    $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+    return $this->values;
   }
 
 }

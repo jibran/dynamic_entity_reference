@@ -8,6 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\Tags;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\dynamic_entity_reference\DynamicEntityReferenceController;
@@ -156,6 +157,43 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       // Take the one and only matching entity.
       return key($entities);
     }
+  }
+
+  /**
+   * Gets the entity labels.
+   */
+  protected function getLabels(FieldItemListInterface $items, $delta) {
+    if ($items->isEmpty()) {
+      return array();
+    }
+
+    $entity_labels = array();
+
+    if ($entity_type = $this->getEntityType($items, $delta)) {
+      // Load those entities and loop through them to extract their labels.
+      $entities = entity_load_multiple($entity_type, $this->getEntityIds($items, $delta));
+    }
+
+    foreach ($entities as $entity_id => $entity_item) {
+      $label = $entity_item->label();
+      $key = "$label ($entity_id)";
+      // Labels containing commas or quotes must be wrapped in quotes.
+      $key = Tags::encode($key);
+      $entity_labels[] = $key;
+    }
+    return $entity_labels;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEntityType(FieldItemListInterface $items, $delta) {
+    // The autocomplete widget outputs one entity label per form element.
+    if (isset($items[$delta])) {
+      return $items[$delta]->target_type;
+    }
+
+    return FALSE;
   }
 
 }
