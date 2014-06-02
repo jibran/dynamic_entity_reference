@@ -184,7 +184,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (empty($values['target_type']) && !empty($values['target_id'])) {
       throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
     }
-    $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+    if (!empty($values['target_type'])) {
+      $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+    }
     if (isset($values) && !is_array($values)) {
       // Directly update the property instead of invoking the parent, so it can
       // handle objects and IDs.
@@ -208,7 +210,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   public function getValue($include_computed = FALSE) {
     $values = parent::getValue($include_computed);
-    $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+    if (!empty($values['target_type'])) {
+      $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+    }
     return $this->values;
   }
 

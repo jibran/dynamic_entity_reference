@@ -94,7 +94,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
    *   The value target entity type
    * @return bool
    */
-  protected function isContentReferenced($target_type) {
+  protected function isContentReferenced($target_type = NULL) {
     $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
     return $target_type_info->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface');
   }
