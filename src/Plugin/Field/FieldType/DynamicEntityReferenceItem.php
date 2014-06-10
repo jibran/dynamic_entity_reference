@@ -139,7 +139,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    * @todo update
    */
-  public function settingsForm(array $form, array &$form_state, $has_data) {
+  public function settingsForm(array &$form, array &$form_state, $has_data) {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
     $element['excluded_entity_type_ids'] = array(
