@@ -34,6 +34,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
     $entity = $items->getEntity();
+    $target = $items->get($delta)->entity;
 
     // Prepare the autocomplete route parameters.
     $autocomplete_route_parameters = array(
@@ -46,7 +47,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     $element += array(
       '#type' => 'textfield',
       '#maxlength' => 1024,
-      '#default_value' => implode(', ', $this->getLabels($items, $delta)),
+      '#default_value' => $target ? $target->label() . ' (' . $target->id() . ')' : '',
       '#autocomplete_route_name' => 'dynamic_entity_reference.autocomplete',
       '#autocomplete_route_parameters' => $autocomplete_route_parameters,
       '#size' => $this->getSetting('size'),
@@ -157,31 +158,6 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       // Take the one and only matching entity.
       return key($entities);
     }
-  }
-
-  /**
-   * Gets the entity labels.
-   */
-  protected function getLabels(FieldItemListInterface $items, $delta) {
-    if ($items->isEmpty()) {
-      return array();
-    }
-
-    $entity_labels = array();
-
-    if ($entity_type = $this->getEntityType($items, $delta)) {
-      // Load those entities and loop through them to extract their labels.
-      $entities = entity_load_multiple($entity_type, $this->getEntityIds($items, $delta));
-    }
-
-    foreach ($entities as $entity_id => $entity_item) {
-      $label = $entity_item->label();
-      $key = "$label ($entity_id)";
-      // Labels containing commas or quotes must be wrapped in quotes.
-      $key = Tags::encode($key);
-      $entity_labels[] = $key;
-    }
-    return $entity_labels;
   }
 
   /**
