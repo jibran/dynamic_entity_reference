@@ -1,12 +1,4 @@
 <?php
-
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReference.
- */
-
-namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
-
 /**
  * @file
  * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem.
@@ -15,11 +7,8 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Entity\TypedData\EntityDataDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\TypedData\DataReferenceDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
@@ -139,7 +128,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    * @todo update
    */
-  public function settingsForm(array $form, array &$form_state, $has_data) {
+  public function settingsForm(array &$form, array &$form_state, $has_data) {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
     $element['excluded_entity_type_ids'] = array(

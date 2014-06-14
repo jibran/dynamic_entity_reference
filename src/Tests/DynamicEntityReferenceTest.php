@@ -7,7 +7,6 @@
 
 namespace Drupal\dynamic_entity_reference\Tests;
 
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\simpletest\WebTestBase;
 
 /**

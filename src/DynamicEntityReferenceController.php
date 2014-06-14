@@ -11,17 +11,41 @@ use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Tags;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\entity_reference\EntityReferenceController;
+use Drupal\Core\Entity\Query\QueryFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Defines route controller for entity reference.
+ * Defines route controller for dynamic entity reference.
  */
 class DynamicEntityReferenceController extends ControllerBase {
+
+  /**
+   * The entity query object.
+   *
+   * @var \Drupal\Core\Entity\Query\QueryFactory $entity_query
+   */
+  protected $entityQuery;
+
+  /**
+   * Constructs a new route controller for entity reference.
+   *
+   * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
+   *   The entity query object.
+   */
+  public function __construct(QueryFactory $entity_query) {
+    $this->entityQuery = $entity_query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity.query')
+    );
+  }
 
   /**
    * Autocomplete the label of an entity.
@@ -41,8 +65,11 @@ class DynamicEntityReferenceController extends ControllerBase {
    *   The matched labels as json.
    */
   public function handleAutocomplete(Request $request, $field_name, $entity_type, $bundle_name, $target_type) {
-    // @todo inject this.
-    $widget = entity_get_form_display($entity_type, $bundle_name, 'default')->getComponent($field_name);
+    $form_mode = 'default';
+    $widget = $this->entityManager()
+      ->getStorage('entity_form_display')
+      ->load($entity_type . '.' . $bundle_name . '.' . $form_mode)
+      ->getComponent($field_name);
     $match_operator = !empty($widget['settings']['match_operator']) ? $widget['settings']['match_operator'] : 'CONTAINS';
     // Get the typed string, if exists from the URL.
     $items_typed = $request->query->get('q');
@@ -58,7 +85,7 @@ class DynamicEntityReferenceController extends ControllerBase {
         $key = "$label ($entity_id)";
         // Strip things like starting/trailing white spaces, line breaks and
         // tags.
-        $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
+        $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(String::decodeEntities(strip_tags($key)))));
         // Names containing commas or quotes must be wrapped in quotes.
         $key = Tags::encode($key);
         $matches[] = array('value' => $key, 'label' => $label);
@@ -84,10 +111,9 @@ class DynamicEntityReferenceController extends ControllerBase {
    *   it.
    */
   protected function buildEntityQuery($target_type, $match = NULL, $match_operator = 'CONTAINS') {
-    $entity_type = $this->entityManager()->getDefinition($target_type);
 
-    // @todo inject this.
-    $query = \Drupal::entityQuery($target_type);
+    $entity_type = $this->entityManager()->getDefinition($target_type);
+    $query = $this->entityQuery->get($target_type);
 
     if (isset($match) && $label_key = $entity_type->getKey('label')) {
       $query->condition($label_key, $match, $match_operator);
@@ -100,6 +126,23 @@ class DynamicEntityReferenceController extends ControllerBase {
     return $query;
   }
 
+  /**
+   * Gets referenceable entities.
+   *
+   * @param string $target_type
+   *   The target entity type.
+   * @param string|null $match
+   *   (Optional) Text to match the label against. Defaults to NULL.
+   * @param string $match_operator
+   *   (Optional) The operation the matching should be done with. Defaults
+   *   to "CONTAINS".
+   * @param int $limit
+   *   The query limit.
+   *
+   * @return \Drupal\Core\Entity\Query\QueryInterface
+   *   The EntityQuery object with the basic conditions and sorting applied to
+   *   it.
+   */
   public function getReferenceableEntities($target_type, $match, $match_operator, $limit) {
 
     $query = $this->buildEntityQuery($target_type, $match, $match_operator);
@@ -112,8 +155,8 @@ class DynamicEntityReferenceController extends ControllerBase {
     }
 
     $options = array();
+    /* @var \Drupal\Core\Entity\EntityInterface[] $entities */
     $entities = $this->entityManager()->getStorage($target_type)->loadMultiple($result);
-    /** @var \Drupal\Core\Entity\EntityInterface $entity */
     foreach ($entities as $entity_id => $entity) {
       $bundle = $entity->bundle();
       $options[$bundle][$entity_id] = String::checkPlain($entity->label());

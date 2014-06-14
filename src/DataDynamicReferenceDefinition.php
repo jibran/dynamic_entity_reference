@@ -6,7 +6,7 @@
  */
 
 namespace Drupal\dynamic_entity_reference;
-use Drupal\Core\TypedData\DataDefinition;
+
 use Drupal\Core\TypedData\DataReferenceDefinition;
 
 /**
@@ -25,10 +25,11 @@ class DataDynamicReferenceDefinition extends DataReferenceDefinition {
    * @param string $target_data_type
    *   The data type of the referenced data.
    *
-   * @return static
+   * @return $this
    */
   public static function create($target_data_type) {
     $definition['type'] = 'dynamic_' . $target_data_type . '_reference';
+    /* @var $definition \Drupal\Core\TypedData\DataReferenceDefinition; */
     $definition = new static($definition);
     return $definition->setTargetDefinition(\Drupal::typedDataManager()->createDataDefinition($target_data_type));
   }
