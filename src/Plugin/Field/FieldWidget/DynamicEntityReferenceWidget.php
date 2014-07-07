@@ -51,6 +51,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       '#placeholder' => $this->getSetting('placeholder'),
       '#element_validate' => array(array($this, 'elementValidate')),
       '#autocreate_uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
+      '#field_name' => $items->getName(),
     );
 
     $element['#title'] = $this->t('Label');
