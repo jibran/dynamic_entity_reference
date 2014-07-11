@@ -10,7 +10,9 @@ namespace Drupal\dynamic_entity_reference\Tests;
 use Drupal\simpletest\WebTestBase;
 
 /**
- * Tests related to Dynamic Entity Reference widget.
+ * Ensures that Dynamic Entity References field works correctly.
+ *
+ * @group dynamic_entity_reference
  */
 class DynamicEntityReferenceTest extends WebTestBase {
 
@@ -49,17 +51,6 @@ class DynamicEntityReferenceTest extends WebTestBase {
     'administer entity_test fields',
     'administer entity_test content',
   );
-
-  /**
-   * Declares test information.
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Dynamic Entity Reference',
-      'description' => 'Ensures that Dynamic Entity References field works correctly.',
-      'group' => 'Dynamic Entity Reference',
-    );
-  }
 
   /**
    * Sets the test up.
