@@ -8,6 +8,7 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
@@ -128,7 +129,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    * @todo update
    */
-  public function settingsForm(array &$form, array &$form_state, $has_data) {
+  public function settingsForm(array &$form, FormStateInterface $form_state, $has_data) {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
     $element['excluded_entity_type_ids'] = array(
@@ -146,7 +147,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public function instanceSettingsForm(array $form, array &$form_state) {
+  public function instanceSettingsForm(array $form, FormStateInterface $form_state) {
     return array();
   }
 
@@ -155,11 +156,11 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    *
    * @param array $form
    *   The form where the settings form is being included in.
-   * @param array $form_state
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state of the (entire) configuration form.
    * @todo update
    */
-  public static function instanceSettingsFormValidate(array $form, array &$form_state) {
+  public static function instanceSettingsFormValidate(array $form, FormStateInterface $form_state) {
     if (isset($form_state['values']['instance'])) {
       unset($form_state['values']['instance']['settings']['handler_submit']);
       $form_state['instance']->settings = $form_state['values']['instance']['settings'];

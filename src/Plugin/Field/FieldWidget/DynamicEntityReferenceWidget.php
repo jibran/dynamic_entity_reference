@@ -8,6 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\dynamic_entity_reference\DynamicEntityReferenceController;
 use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 use Drupal\user\EntityOwnerInterface;
@@ -29,7 +30,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $entity = $items->getEntity();
     $target = $items->get($delta)->entity;
 
@@ -101,7 +102,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   /**
    * {@inheritdoc}
    */
-  public function elementValidate($element, &$form_state, $form) {
+  public function elementValidate($element, FormStateInterface $form_state, $form) {
     // If a value was entered into the autocomplete.
     $value = NULL;
     if (!empty($element['#value'])) {
@@ -126,7 +127,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   /**
    * {@inheritdoc}
    */
-  public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
+  public function validateAutocompleteInput($input, &$element, FormStateInterface $form_state, $form) {
     // @todo Make this a service.
     $controller = new DynamicEntityReferenceController();
     $entities = $controller->getReferenceableEntities($target_type, $input, '=', 6);
