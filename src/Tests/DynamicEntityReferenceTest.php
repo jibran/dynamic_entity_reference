@@ -7,7 +7,9 @@
 
 namespace Drupal\dynamic_entity_reference\Tests;
 
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
+use Symfony\Component\CssSelector\CssSelector;
 
 /**
  * Ensures that Dynamic Entity References field works correctly.
@@ -58,6 +60,34 @@ class DynamicEntityReferenceTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser($this->permissions);
+  }
+
+  /**
+   * Tests field settings of dynamic entity reference field.
+   */
+  public function testFieldSettings() {
+    $this->drupalLogin($this->adminUser);
+    // Add a new dynamic entity reference field.
+    $this->drupalGet('entity_test/structure/entity_test/fields');
+    $edit = array(
+      'fields[_add_new_field][label]' => 'Foobar',
+      'fields[_add_new_field][field_name]' => 'foobar',
+      'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, array(
+      'field[cardinality]' => '-1',
+      'field[settings][excluded_entity_type_ids][user]' => 'user',
+    ), t('Save field settings'));
+    $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
+    $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
+    $this->assertNoFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=user]'), 'user');
+    $this->drupalPostForm(NULL, array(), t('Save settings'));
+    $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
+    $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
+      ->getSetting('excluded_entity_type_ids');
+    $this->assertIdentical($excluded_entity_type_ids['entity_test'], 0);
+    $this->assertIdentical($excluded_entity_type_ids['user'], 'user');
   }
 
   /**
