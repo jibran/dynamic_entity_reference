@@ -2,33 +2,18 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter\DynamicEntityReferenceFormatter.
+ * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter\DynamicEntityReferenceFormatterTrait.
  */
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
-use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
-
 /**
- * Plugin implementation of the 'dynamic entity reference label' formatter.
- *
- * @FieldFormatter(
- *   id = "dynamic_entity_reference_default",
- *   label = @Translation("Label"),
- *   description = @Translation("Display the label of the referenced entities."),
- *   field_types = {
- *     "dynamic_entity_reference"
- *   }
- * )
+ * Trait to override EntityReferenceFormatterBase::prepareView().
  */
-class DynamicEntityReferenceFormatter extends EntityReferenceLabelFormatter {
+trait DynamicEntityReferenceFormatterTrait {
 
   /**
-   * {@inheritdoc}
-   *
-   * Mark the accessible IDs a user can see. We do not unset unaccessible
-   * values, as other may want to act on those values, even if they can
-   * not be accessed.
+   * Overrides EntityReferenceFormatterBase::prepareView().
    */
   public function prepareView(array $entities_items) {
     $target_ids = array();

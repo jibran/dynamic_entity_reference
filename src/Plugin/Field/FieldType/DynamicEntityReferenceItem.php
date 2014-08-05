@@ -27,7 +27,7 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   description = @Translation("An entity field containing a dynamic entity reference."),
  *   no_ui = FALSE,
  *   default_widget = "dynamic_entity_reference_default",
- *   default_formatter = "dynamic_entity_reference_default",
+ *   default_formatter = "dynamic_entity_reference_label",
  *   constraints = {"ValidReference" = {}}
  * )
  */
