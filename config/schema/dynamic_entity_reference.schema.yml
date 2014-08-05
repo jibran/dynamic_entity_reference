@@ -1,0 +1,13 @@
+# Schema for the configuration files of the Dynamic Entity Reference module.
+
+entity_view_display.field.dynamic_entity_reference_label:
+  type: entity_field_view_display_base
+  label: 'Dynamic entity reference label display format settings'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        link:
+          type: boolean
+          label: 'Link label to the referenced entity'
