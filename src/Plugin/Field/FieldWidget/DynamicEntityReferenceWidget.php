@@ -122,7 +122,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       }
 
     }
-    \Drupal::formBuilder()->setValue($element, $value, $form_state);
+    $form_state->setValueForElement($element, $value);
   }
 
   /**
