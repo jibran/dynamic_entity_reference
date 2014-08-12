@@ -18,8 +18,6 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *
  * Supported settings (below the definition's 'settings' key) are:
  * - excluded_entity_type_ids: The entity type ids that cannot be referenced.
- * - excluded_bundle_ids: The bundle ids that cannot be referenced.
- *   Specified as {entity_type}:{bundle_id}
  *
  * @FieldType(
  *   id = "dynamic_entity_reference",
@@ -39,7 +37,6 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public static function defaultSettings() {
     return array(
       'excluded_entity_type_ids' => array(),
-      'excluded_bundle_ids' => array(),
     ) + parent::defaultSettings();
   }
 
