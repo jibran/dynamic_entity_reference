@@ -77,7 +77,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->drupalPostForm(NULL, array(
       'field[cardinality]' => '-1',
-      'field[settings][excluded_entity_type_ids][user]' => 'user',
+      'field[settings][excluded_entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
     $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
@@ -86,8 +86,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('excluded_entity_type_ids');
-    $this->assertIdentical($excluded_entity_type_ids['entity_test'], 0);
-    $this->assertIdentical($excluded_entity_type_ids['user'], 'user');
+    $this->assertNotNull($excluded_entity_type_ids);
+    $this->assertIdentical(array_keys($excluded_entity_type_ids), array('user'));
   }
 
   /**

@@ -130,15 +130,16 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * @todo update
    */
   public function settingsForm(array &$form, FormStateInterface $form_state, $has_data) {
+    // @todo inject this.
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
     $element['excluded_entity_type_ids'] = array(
-      '#type' => 'checkboxes',
+      '#type' => 'select',
       '#title' => t('Items to exclude'),
-      // @todo inject this.
       '#options' => $labels['Content'],
       '#default_value' => $this->getSetting('excluded_entity_type_ids'),
       '#disabled' => $has_data,
+      '#multiple' => TRUE,
     );
 
     return $element;
