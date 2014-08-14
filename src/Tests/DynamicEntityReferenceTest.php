@@ -77,7 +77,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->drupalPostForm(NULL, array(
       'field[cardinality]' => '-1',
-      'field[settings][excluded_entity_type_ids][]' => 'user',
+      'field[settings][entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
     $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
@@ -85,7 +85,24 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostForm(NULL, array(), t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
-      ->getSetting('excluded_entity_type_ids');
+      ->getSetting('entity_type_ids');
+    $this->assertNotNull($excluded_entity_type_ids);
+    $this->assertIdentical(array_keys($excluded_entity_type_ids), array('user'));
+    // Check the include entity settings.
+    $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar/storage');
+    $this->drupalPostForm(NULL, array(
+      'field[cardinality]' => '-1',
+      'field[settings][exclude_entity_types]' => FALSE,
+      'field[settings][entity_type_ids][]' => 'user',
+    ), t('Save field settings'));
+    $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
+    $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
+    $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=user]'), 'user');
+    $this->assertNoFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
+    $this->drupalPostForm(NULL, array(), t('Save settings'));
+    $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
+    $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
+      ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
     $this->assertIdentical(array_keys($excluded_entity_type_ids), array('user'));
   }

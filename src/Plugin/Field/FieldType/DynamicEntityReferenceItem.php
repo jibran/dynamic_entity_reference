@@ -17,7 +17,8 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  * Defines the 'dynamic_entity_reference' entity field type.
  *
  * Supported settings (below the definition's 'settings' key) are:
- * - excluded_entity_type_ids: The entity type ids that cannot be referenced.
+ * - exclude_entity_types: Allow user to include or exclude entity_types.
+ * - entity_type_ids: The entity type ids that can or cannot be referenced.
  *
  * @FieldType(
  *   id = "dynamic_entity_reference",
@@ -36,7 +37,8 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   public static function defaultSettings() {
     return array(
-      'excluded_entity_type_ids' => array(),
+      'exclude_entity_types' => TRUE,
+      'entity_type_ids' => array(),
     ) + parent::defaultSettings();
   }
 
@@ -130,11 +132,18 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     // @todo inject this.
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
-    $element['excluded_entity_type_ids'] = array(
+    $element['exclude_entity_types'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Exclude the selected items'),
+      '#default_value' => $this->getSetting('exclude_entity_types'),
+      '#disabled' => $has_data,
+    );
+
+    $element['entity_type_ids'] = array(
       '#type' => 'select',
-      '#title' => t('Items to exclude'),
+      '#title' => t('Select items'),
       '#options' => $labels['Content'],
-      '#default_value' => $this->getSetting('excluded_entity_type_ids'),
+      '#default_value' => $this->getSetting('entity_type_ids'),
       '#disabled' => $has_data,
       '#multiple' => TRUE,
     );

@@ -60,7 +60,13 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     // @todo inject this.
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
     $options = $labels['Content'];
-    $available = array_diff_key($options, $items->getSetting('excluded_entity_type_ids') ?: array());
+    $entity_type_ids = $items->getSetting('entity_type_ids');
+    if ($items->getSetting('exclude_entity_types')) {
+      $available = array_diff_key($options, $entity_type_ids ?: array());
+    }
+    else {
+      $available = array_intersect_key($options, $entity_type_ids ?: array());
+    }
     $entity_type = array(
       '#type' => 'select',
       '#options' => $available,
