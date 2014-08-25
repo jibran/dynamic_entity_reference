@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update hooks for the module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function dynamic_entity_reference_field_schema($field) {
+  if ($field['type'] == 'dynamic_entity_reference') {
+    $columns = array(
+      'target_id' => array(
+        'description' => 'The ID of the target entity.',
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'target_type' => array(
+        'description' => 'The Entity Type ID of the target entity.',
+        'type' => 'varchar',
+        'length' => 64,
+      ),
+    );
+
+    $schema = array(
+      'columns' => $columns,
+      'indexes' => array(
+        'target_id' => array('target_id'),
+      ),
+    );
+
+    return $schema;
+  }
+}

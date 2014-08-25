@@ -1,7 +1,0 @@
-name: Dynamic Entity Reference
-type: module
-description: 'Provides an entity reference field that can reference multiple entity types.'
-package: Field types
-core: 8.x
-dependencies:
-  - entity_reference
