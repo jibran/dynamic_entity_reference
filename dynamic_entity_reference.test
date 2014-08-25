@@ -33,7 +33,6 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     'entity',
     'field_ui',
     'dynamic_entity_reference',
-    'field_test',
     'node',
   );
 
@@ -52,9 +51,10 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
    */
   protected $permissions = array(
     'access administration pages',
-    'access field_test content',
-    'administer field_test content',
     'administer content types',
+    'create ponies content',
+    'edit any ponies content',
+    'administer nodes',
   );
 
   /**
@@ -62,8 +62,8 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
    */
   protected function setUp() {
     parent::setUp(self::$modules);
-    $this->adminUser = $this->drupalCreateUser($this->permissions);
     $this->drupalCreateContentType(array('type' => 'ponies'));
+    $this->adminUser = $this->drupalCreateUser($this->permissions);
   }
 
   /**
@@ -77,16 +77,18 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
       'fields[_add_new_field][label]' => 'Foobar',
       'fields[_add_new_field][field_name]' => 'foobar',
       'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+      'fields[_add_new_field][widget_type]' => 'dynamic_entity_reference_default'
     );
     $this->drupalPost(NULL, $edit, t('Save'));
     $this->drupalPost(NULL, array(
-      'field[cardinality]' => '-1',
       'field[settings][entity_type_ids][]' => 'user',
     ), t('Save field settings'));
-    $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
-    $this->assertFieldByXPath("descendant-or-self::select[@name = 'default_value_input[field_foobar][0][target_type]']/option[@value = 'entity_test']", 'field_test');
-    $this->assertNoFieldByXPath("descendant-or-self::select[@name = 'default_value_input[field_foobar][0][target_type]']/option[@value = 'user']", 'user');
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->assertFieldByName('field_foobar[und][0][target_type]');
+    $this->assertFieldByXPath("descendant-or-self::select[@name = 'field_foobar[und][0][target_type]']/option[@value = 'node']", 'node');
+    $this->assertNoFieldByXPath("descendant-or-self::select[@name = 'field_foobar[und][0][target_type]']/option[@value = 'user']", 'user');
+    $this->drupalPost(NULL, array(
+      'field[cardinality]' => '-1',
+    ), t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
     $field = field_info_field('field_foobar');
     $excluded_entity_type_ids = $field['settings']['entity_type_ids'];
@@ -98,11 +100,11 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
       'field[cardinality]' => '-1',
       'field[settings][exclude_entity_types]' => FALSE,
       'field[settings][entity_type_ids][]' => 'user',
-    ), t('Save field settings'));
+    ), t('Save settings'));
     $this->drupalGet('admin/structure/types/manage/ponies/fields/field_foobar');
-    $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
-    $this->assertFieldByXPath("descendant-or-self::select[@name = 'default_value_input[field_foobar][0][target_type]']/option[@value = 'user']", 'user');
-    $this->assertNoFieldByXPath("descendant-or-self::select[@name = 'default_value_input[field_foobar][0][target_type]']/option[@value = 'entity_test']", 'entity_test');
+    $this->assertFieldByName('field_foobar[und][0][target_type]');
+    $this->assertFieldByXPath("descendant-or-self::select[@name = 'field_foobar[und][0][target_type]']/option[@value = 'user']", 'user');
+    $this->assertNoFieldByXPath("descendant-or-self::select[@name = 'field_foobar[und][0][target_type]']/option[@value = 'node']", 'node');
     $this->drupalPost(NULL, array(), t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
     $field = field_info_field('field_foobar');
@@ -122,43 +124,49 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
       'fields[_add_new_field][label]' => 'Foobar',
       'fields[_add_new_field][field_name]' => 'foobar',
       'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+      'fields[_add_new_field][widget_type]' => 'dynamic_entity_reference_default'
     );
     $this->drupalPost(NULL, $edit, t('Save'));
     $this->drupalPost(NULL, array(
-      'field[cardinality]' => '-1',
     ), t('Save field settings'));
 
-    $this->drupalPost(NULL, array(), t('Save settings'));
+    $this->drupalPost(NULL, array(
+      'field[cardinality]' => '-1',
+    ), t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
+    $this->drupalPost('admin/structure/types/manage/ponies/display', array(
+      'fields[field_foobar][type]' => 'dynamic_entity_reference_default',
+    ), t('Save'));
 
     // Create some items to reference.
-    $item1 = entity_create('field_test', array(
-      'name' => 'item1',
+    $item1 = $this->drupalCreateNode(array(
+      'type' => 'ponies',
+      'title' => 'item1',
+      'status' => 1,
     ));
-    $item1->save();
-    $item2 = entity_create('field_test', array(
-      'name' => 'item2',
+    $item2 = $this->drupalCreateNode(array(
+      'type' => 'ponies',
+      'title' => 'item2',
+      'status' => 1,
     ));
-    $item2->save();
 
-    // Test the new entity commenting inherits default.
-    $this->drupalGet('test-entity/add/test-bundle');
-    $this->assertField('field_foobar[0][target_id]', 'Found foobar field target id');
-    $this->assertField('field_foobar[0][target_type]', 'Found foobar field target type');
+    // Test the new entity inherits default.
+    $this->drupalGet('node/add/ponies');
+    $this->assertField('field_foobar[und][0][target_id]', 'Found foobar field target id');
+    $this->assertField('field_foobar[und][0][target_type]', 'Found foobar field target type');
 
     // Add some extra dynamic entity reference fields.
-    $this->drupalPostAjax(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'field-test-form');
-    $this->drupalPostAjax(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'field-test-form');
+    $this->drupalPostAjax(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'ponies-node-form');
+    $this->drupalPostAjax(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'ponies-node-form');
 
     $edit = array(
-      'field_foobar[0][target_id]' => $this->adminUser->name . ' (' . $this->adminUser->uid . ')',
-      'field_foobar[0][target_type]' => 'user',
-      'field_foobar[1][target_id]' => 'item1 (' . $item1->id() . ')',
-      'field_foobar[1][target_type]' => 'entity_test',
-      'field_foobar[2][target_id]' => 'item2 (' . $item2->id() . ')',
-      'field_foobar[2][target_type]' => 'entity_test',
+      'field_foobar[und][0][target_id]' => $this->adminUser->name . ' (' . $this->adminUser->uid . ')',
+      'field_foobar[und][0][target_type]' => 'user',
+      'field_foobar[und][1][target_id]' => 'item1 (' . $item1->nid . ')',
+      'field_foobar[und][1][target_type]' => 'node',
+      'field_foobar[und][2][target_id]' => 'item2 (' . $item2->nid . ')',
+      'field_foobar[und][2][target_type]' => 'node',
       'title' => 'Barfoo',
-      'name' => $this->adminUser->name,
     );
 
     $this->drupalPost(NULL, $edit, t('Save'));
@@ -174,22 +182,24 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     $this->assertText('item2');
 
     $this->assertEqual(count($node->field_foobar[LANGUAGE_NONE]), 3, 'Three items in field');
-    $wrapper = entity_metadata_wrapper('node', $node);
-    $this->assertEqual($wrapper->field_foobar[0]->entity->label(), $this->adminUser->name);
-    $this->assertEqual($wrapper->field_foobar[1]->entity->label(), 'item1');
-    $this->assertEqual($wrapper->field_foobar[2]->entity->label(), 'item2');
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][0]['target_type'], 'user');
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][0]['target_id'], $this->adminUser->uid);
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][1]['target_type'], 'node');
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][1]['target_id'], $item1->nid);
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][2]['target_type'], 'node');
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][2]['target_id'], $item2->nid);
 
     $this->drupalGet('node/' . $node->nid . '/edit');
     $edit = array(
-      'name' => 'Bazbar',
+      'title' => 'Bazbar',
       // Remove one child.
-      'field_foobar[2][target_id]' => '',
+      'field_foobar[und][2][target_id]' => '',
     );
     $this->drupalPost(NULL, $edit, t('Save'));
-    $this->drupalGet('entity_test/' . $node->nid);
+    $this->drupalGet('node/' . $node->nid);
     $this->assertText('Bazbar');
     // Reload entity.
-    $node = entity_load('entity_test', $node->nid, array(), TRUE);
+    $node = node_load($node->nid, NULL, TRUE);
     $this->assertEqual(count($node->field_foobar[LANGUAGE_NONE]), 2, 'Two values in field');
   }
 
