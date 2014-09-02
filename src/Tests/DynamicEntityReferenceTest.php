@@ -143,8 +143,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertField('field_foobar[0][target_type]', 'Found foobar field target type');
 
     // Add some extra dynamic entity reference fields.
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-form');
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
 
     $edit = array(
       'field_foobar[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
