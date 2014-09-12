@@ -34,12 +34,23 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     $entity = $items->getEntity();
     $target = $items->get($delta)->entity;
 
+    // @todo inject this.
+    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
+    $options = $labels['Content'];
+    $entity_type_ids = $items->getSetting('entity_type_ids');
+    if ($items->getSetting('exclude_entity_types')) {
+      $available = array_diff_key($options, $entity_type_ids ?: array());
+    }
+    else {
+      $available = array_intersect_key($options, $entity_type_ids ?: array());
+    }
+
     // Prepare the autocomplete route parameters.
     $autocomplete_route_parameters = array(
       'field_name' => $this->fieldDefinition->getName(),
       'entity_type' => $entity->getEntityTypeId(),
       'bundle_name' => $entity->bundle(),
-      'target_type' => $items->get($delta)->target_type,
+      'target_type' => $items->get($delta)->target_type ?: key($available),
     );
 
     $element += array(
@@ -57,16 +68,6 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
 
     $element['#title'] = $this->t('Label');
 
-    // @todo inject this.
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = $labels['Content'];
-    $entity_type_ids = $items->getSetting('entity_type_ids');
-    if ($items->getSetting('exclude_entity_types')) {
-      $available = array_diff_key($options, $entity_type_ids ?: array());
-    }
-    else {
-      $available = array_intersect_key($options, $entity_type_ids ?: array());
-    }
     $entity_type = array(
       '#type' => 'select',
       '#options' => $available,

@@ -19,11 +19,6 @@ use Symfony\Component\CssSelector\CssSelector;
 class DynamicEntityReferenceTest extends WebTestBase {
 
   /**
-   * Profile to use.
-   */
-  protected $profile = 'testing';
-
-  /**
    * Admin user
    *
    * @var \Drupal\Core\Session\AccountInterface
@@ -142,6 +137,11 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertField('field_foobar[0][target_id]', 'Found foobar field target id');
     $this->assertField('field_foobar[0][target_type]', 'Found foobar field target type');
 
+    // Ensure that the autocomplete path is correct.
+    $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[0][target_id]'))[0];
+    $expected_autocomplete_path = 'dynamic_entity_reference/autocomplete/field_foobar/entity_test/entity_test/entity_test_label';
+    $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
+
     // Add some extra dynamic entity reference fields.
     $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
     $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
@@ -176,6 +176,14 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertEqual($entity->field_foobar[2]->entity->label(), 'item2');
 
     $this->drupalGet('entity_test/manage/' . $entity->id());
+
+    // Ensure that the autocomplete path is correct.
+    foreach (array('0' => 'user', '1' => 'entity_test', '2' => 'entity_test') as $index => $expected_entity_type) {
+      $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[' . $index . '][target_id]'))[0];
+      $expected_autocomplete_path = 'dynamic_entity_reference/autocomplete/field_foobar/entity_test/entity_test/' . $expected_entity_type;
+      $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
+    }
+
     $edit = array(
       'name' => 'Bazbar',
       // Remove one child.
