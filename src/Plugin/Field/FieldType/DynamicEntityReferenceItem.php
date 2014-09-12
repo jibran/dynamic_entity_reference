@@ -181,25 +181,12 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (empty($values['target_type']) && !empty($values['target_id'])) {
       throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
     }
+    // Make sure that the reference object has the correct target type
+    // set, so it can load the entity when requested.
     if (!empty($values['target_type'])) {
       $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
     }
-    if (isset($values) && !is_array($values)) {
-      // Directly update the property instead of invoking the parent, so it can
-      // handle objects and IDs.
-      $this->properties['entity']->setValue($values, $notify);
-      // If notify was FALSE, ensure the target_id property gets synched.
-      if (!$notify) {
-        $this->set('target_id', $this->properties['entity']->getTargetIdentifier(), FALSE);
-      }
-    }
-    else {
-      // Make sure that the 'entity' property gets set as 'target_id'.
-      if (isset($values['target_id']) && isset($values['target_type']) && !isset($values['entity'])) {
-        $values['entity'] = entity_load($values['target_type'], $values['target_id']);
-      }
-      parent::setValue($values, $notify);
-    }
+    parent::setValue($values, $notify);
   }
 
   /**
