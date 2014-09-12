@@ -133,22 +133,26 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   /**
    * {@inheritdoc}
    */
-  public function validateAutocompleteInput($input, &$element, FormStateInterface $form_state, $form) {
+  public function validateAutocompleteInput($target_type, $input, &$element, FormStateInterface $form_state, $form) {
     // @todo Make this a service.
-    $controller = new DynamicEntityReferenceController();
-    $entities = $controller->getReferenceableEntities($target_type, $input, '=', 6);
+    $controller = new DynamicEntityReferenceController(\Drupal::service('entity.query'));
+    $bundled_entities = $controller->getReferenceableEntities($target_type, $input, '=', 6);
     $params = array(
       '%value' => $input,
       '@value' => $input,
     );
+    $entities = array();
+    foreach ($bundled_entities as $entities_list) {
+      $entities += $entities_list;
+    }
     if (empty($entities)) {
       // Error if there are no entities available for a required field.
-      \Drupal::formBuilder()->setError($element, $form_state, t('There are no entities matching "%value".', $params));
+      $form_state->setError($element, t('There are no entities matching "%value".', $params));
     }
     elseif (count($entities) > 5) {
       $params['@id'] = key($entities);
       // Error if there are more than 5 matching entities.
-      \Drupal::formBuilder()->setError($element, $form_state, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
+      $form_state->setError($element, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
     }
     elseif (count($entities) > 1) {
       // More helpful error if there are only a few matching entities.
@@ -157,7 +161,8 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
         $multiples[] = $name . ' (' . $id . ')';
       }
       $params['@id'] = $id;
-      \Drupal::formBuilder()->setError($element, $form_state, t('Multiple entities match this reference; "%multiple". Specify the one you want by appending the id in parentheses, like "@value (@id)".', array('%multiple' => implode('", "', $multiples))));
+      $params['%multiple'] = implode('", "', $multiples);
+      $form_state->setError($element, t('Multiple entities match this reference; "%multiple". Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
     }
     else {
       // Take the one and only matching entity.

@@ -149,7 +149,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $edit = array(
       'field_foobar[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
       'field_foobar[0][target_type]' => 'user',
-      'field_foobar[1][target_id]' => 'item1 (' . $item1->id() . ')',
+      // Ensure that an exact match on a unique label is accepted.
+      'field_foobar[1][target_id]' => 'item1',
       'field_foobar[1][target_type]' => 'entity_test',
       'field_foobar[2][target_id]' => 'item2 (' . $item2->id() . ')',
       'field_foobar[2][target_type]' => 'entity_test',
@@ -187,6 +188,61 @@ class DynamicEntityReferenceTest extends WebTestBase {
     \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
     $entity = entity_load('entity_test', $entity->id());
     $this->assertEqual(count($entity->field_foobar), 2, 'Two values in field');
+
+    // Create two entities with the same label.
+    $labels = array();
+    $duplicates = array();
+    for ($i = 0; $i < 2; $i++) {
+      $duplicates[$i] = entity_create('entity_test', array(
+        'name' => 'duplicate label',
+      ));
+      $duplicates[$i]->save();
+      $labels[$i] = $duplicates[$i]->label() . ' (' . $duplicates[$i]->id() . ')';
+    }
+
+    // Now try to submit and just specify the label.
+    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $edit = array(
+      'field_foobar[1][target_id]' => 'duplicate label',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    // We don't know the order in which the entities will be listed, so just
+    // assert parts and make sure both are shown.
+    $error_message = t('Multiple entities match this reference;');
+    $this->assertRaw($error_message);
+    $this->assertRaw($labels[0]);
+    $this->assertRaw($labels[1]);
+
+    // Create a few more to trigger the case where there are more than 5
+    // matching results.
+    for ($i = 2; $i < 7; $i++) {
+      $duplicates[$i] = entity_create('entity_test', array(
+        'name' => 'duplicate label',
+      ));
+      $duplicates[$i]->save();
+      $labels[$i] = $duplicates[$i]->label() . ' (' . $duplicates[$i]->id() . ')';
+    }
+
+    // Submit again with the same values.
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+
+    $params = array(
+      '%value' => 'duplicate label',
+    );
+    // We don't know which id it will display, so just assert a part of the
+    // error.
+    $error_message = t('Many entities are called %value. Specify the one you want by appending the id in parentheses', $params);
+    $this->assertRaw($error_message);
+
+    // Submit with a label that does not match anything.
+    // Now try to submit and just specify the label.
+    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $edit = array(
+      'field_foobar[1][target_id]' => 'does not exist',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
   }
 
 }
