@@ -113,7 +113,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     // If a value was entered into the autocomplete.
     $value = NULL;
     if (!empty($element['#value'])) {
-      $values = $form_state['values'][$element['#field_name']][$element['#delta']];
+      $values = $form_state->getValue(array($element['#field_name'], $element['#delta']));
       // Take "label (entity id)', match the id from parenthesis.
       if ($this->isContentReferenced($values['target_type']) && preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
         $value = $matches[1];
