@@ -21,12 +21,12 @@ class DynamicEntityReferenceServiceProvider extends ServiceProviderBase {
    */
   public function alter(ContainerBuilder $container) {
     $modules = $container->getParameter('container.modules');
-    if (isset($modules['rest'])) {
+    if (isset($modules['rest']) && isset($modules['serialization']) && isset($modules['hal'])) {
 
       // Add a normalizer service for dynamic_entity_reference fields.
       $service_definition = new Definition('Drupal\dynamic_entity_reference\Normalizer\DynamicEntityReferenceItemNormalizer', array(
         new Reference('rest.link_manager'),
-        new Reference('@serializer.entity_resolver'),
+        new Reference('serializer.entity_resolver'),
         new Reference('module_handler'),
       ));
       // The priority must be higher than that of
