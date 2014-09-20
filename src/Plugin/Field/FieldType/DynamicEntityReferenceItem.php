@@ -35,20 +35,20 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public static function defaultSettings() {
+  public static function defaultStorageSettings() {
     return array(
       'exclude_entity_types' => TRUE,
       'entity_type_ids' => array(),
-    ) + parent::defaultSettings();
+    ) + parent::defaultStorageSettings();
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function defaultInstanceSettings() {
+  public static function defaultFieldSettings() {
     return array(
       'handler' => 'default',
-    ) + parent::defaultInstanceSettings();
+    ) + parent::defaultFieldSettings();
   }
 
   /**
@@ -128,7 +128,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    * @todo update
    */
-  public function settingsForm(array &$form, FormStateInterface $form_state, $has_data) {
+  public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
     // @todo inject this.
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
 
@@ -154,7 +154,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public function instanceSettingsForm(array $form, FormStateInterface $form_state) {
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     return array();
   }
 
@@ -167,7 +167,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    *   The form state of the (entire) configuration form.
    * @todo update
    */
-  public static function instanceSettingsFormValidate(array $form, FormStateInterface $form_state) {
+  public static function fieldSettingsFormValidate(array $form, FormStateInterface $form_state) {
     if ($form_state->hasValue('instance')) {
       $form_state->unsetValue(array('instance', 'settings', 'handler_submit'));
       $form_state->get('instance')->settings = $form_state->getValue(array('instance', 'settings'));

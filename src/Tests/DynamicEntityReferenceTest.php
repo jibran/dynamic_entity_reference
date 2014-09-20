@@ -71,8 +71,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->drupalPostForm(NULL, array(
-      'field[cardinality]' => '-1',
-      'field[settings][entity_type_ids][]' => 'user',
+      'field_storage[cardinality]' => '-1',
+      'field_storage[settings][entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
     $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
@@ -86,9 +86,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     // Check the include entity settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar/storage');
     $this->drupalPostForm(NULL, array(
-      'field[cardinality]' => '-1',
-      'field[settings][exclude_entity_types]' => FALSE,
-      'field[settings][entity_type_ids][]' => 'user',
+      'field_storage[cardinality]' => '-1',
+      'field_storage[settings][exclude_entity_types]' => FALSE,
+      'field_storage[settings][entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
@@ -116,7 +116,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->drupalPostForm(NULL, array(
-      'field[cardinality]' => '-1',
+      'field_storage[cardinality]' => '-1',
     ), t('Save field settings'));
 
     $this->drupalPostForm(NULL, array(), t('Save settings'));
