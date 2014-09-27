@@ -154,8 +154,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'field_foobar[1][target_type]' => 'entity_test',
       'field_foobar[2][target_id]' => 'item2 (' . $item2->id() . ')',
       'field_foobar[2][target_type]' => 'entity_test',
-      'name' => 'Barfoo',
-      'user_id' => $this->adminUser->id(),
+      'name[0][value]' => 'Barfoo',
+      'user_id[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
@@ -185,7 +185,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     }
 
     $edit = array(
-      'name' => 'Bazbar',
+      'name[0][value]' => 'Bazbar',
       // Remove one child.
       'field_foobar[2][target_id]' => '',
     );
@@ -254,7 +254,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
     $this->drupalGet('entity_test/manage/' . $entity->id());
     $edit = array(
-      'name' => 'Bazbar',
+      'name[0][value]' => 'Bazbar',
       // Reference itself.
       'field_foobar[1][target_id]' => 'Bazbar (' . $entity->id() . ')',
     );
