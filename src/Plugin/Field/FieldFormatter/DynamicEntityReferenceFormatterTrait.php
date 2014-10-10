@@ -77,6 +77,7 @@ trait DynamicEntityReferenceFormatterTrait {
 
         // Mark item as accessible.
         $item->access = TRUE;
+        $item->originalEntity = $target_entities[$item->target_type][$identifier];
       }
 
       // Rekey the items array if needed.
