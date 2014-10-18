@@ -168,9 +168,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * @todo update
    */
   public static function fieldSettingsFormValidate(array $form, FormStateInterface $form_state) {
-    if ($form_state->hasValue('instance')) {
-      $form_state->unsetValue(array('instance', 'settings', 'handler_submit'));
-      $form_state->get('instance')->settings = $form_state->getValue(array('instance', 'settings'));
+    if ($form_state->hasValue('field')) {
+      $form_state->unsetValue(array('field', 'settings', 'handler_submit'));
+      $form_state->get('field')->settings = $form_state->getValue(array('field', 'settings'));
     }
   }
 
