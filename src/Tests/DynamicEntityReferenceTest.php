@@ -7,6 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Tests;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
 use Symfony\Component\CssSelector\CssSelector;
@@ -100,6 +101,16 @@ class DynamicEntityReferenceTest extends WebTestBase {
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
     $this->assertIdentical(array_keys($excluded_entity_type_ids), array('user'));
+
+    $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
+    $this->drupalPostForm(NULL, array(
+      'default_value_input[field_foobar][0][target_type]' => 'user',
+      'default_value_input[field_foobar][0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
+    ), t('Save settings'));
+
+    $field_config = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->toArray();
+    $this->assertEqual($field_config['default_value']['0'], array('target_id' => $this->adminUser->id(), 'target_type' => 'user'));
+
   }
 
   /**
