@@ -38,6 +38,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
     $options = $labels['Content'];
     $entity_type_ids = $items->getSetting('entity_type_ids');
+    $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
     if ($items->getSetting('exclude_entity_types')) {
       $available = array_diff_key($options, $entity_type_ids ?: array());
     }
@@ -79,7 +80,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       ),
     );
 
-    return array(
+    $form_element = array(
       '#type' => 'container',
       '#attributes' => array(
         'class' => array('container-inline'),
@@ -92,6 +93,15 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
         ),
       ),
     );
+    // Render field as item.
+    if ($cardinality == 1) {
+      return array(
+      '#type' => 'item',
+      '#title' => $items->getFieldDefinition()->getLabel(),
+      '#markup' => drupal_render($form_element),
+      );
+    }
+    return $form_element;
   }
 
   /**
