@@ -18,18 +18,15 @@ field.dynamic_entity_reference.storage_settings:
           label: 'Entity Type ID'
 
 field.dynamic_entity_reference.field_settings:
-  type: sequence
+  type: mapping
   label: 'Dynamic entity reference settings'
-  sequence:
-    - type: mapping
-      label: 'Entity Type ID'
-      mapping:
-        handler:
-          type: string
-          label: 'Reference method'
-        handler_settings:
-          type: entity_reference.[%parent.handler].handler_settings
-          label: 'Reference method settings'
+  mapping:
+    handler:
+      type: string
+      label: 'Reference method'
+    handler_settings:
+      type: entity_reference.[%parent.handler].handler_settings
+      label: 'Reference method settings'
 
 field.dynamic_entity_reference.value:
   type: sequence
@@ -39,7 +36,7 @@ field.dynamic_entity_reference.value:
       label: 'Values'
       mapping:
         target_id:
-          type: integer
+          type: string
           label: 'Entity ID'
         target_type:
           type: string
