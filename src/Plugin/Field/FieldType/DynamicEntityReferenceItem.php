@@ -114,12 +114,12 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public function onChange($property_name) {
     // Make sure that the target ID and type and the target property stay in
     // sync.
-    // @todo something with target_type
     if ($property_name == 'target_id') {
       $this->properties['entity']->setValue($this->target_id, FALSE);
     }
     elseif ($property_name == 'entity') {
       $this->set('target_id', $this->properties['entity']->getTargetIdentifier(), FALSE);
+      $this->set('target_type', $this->properties['entity']->getValue()->getEntityTypeId(), FALSE);
     }
     parent::onChange($property_name);
   }
@@ -198,6 +198,23 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
     }
     return $this->values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preSave() {
+    if ($this->hasNewEntity()) {
+      $this->entity->save();
+    }
+    // Handle the case where an unsaved entity was directly set using the public
+    // 'entity' property and then saved before this entity. In this case
+    // ::hasNewEntity() will return FALSE but $this->target_id will still be
+    // empty.
+    if ((empty($this->target_id) || empty($this->target_type)) && $this->entity) {
+      $this->target_id = $this->entity->id();
+      $this->target_type = $this->entity->getEntityTypeId();
+    }
   }
 
 }

@@ -32,52 +32,16 @@ use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 class DynamicEntityReference extends EntityReference {
 
   /**
-   * The entity ID.
-   *
-   * @var integer|string
-   */
-  protected $id;
-
-  /**
-   * Returns the definition of the referenced entity.
-   *
-   * @return \Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface
-   *   The reference target's definition.
-   */
-  public function getTargetDefinition() {
-    return $this->definition->getTargetDefinition();
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function getTarget() {
     if (!isset($this->target) && isset($this->id)) {
       // If we have a valid reference, return the entity object which is typed
       // data itself.
-      $this->target = entity_load($this->parent->getValue()['target_type'], $this->id);
+      $entity = entity_load($this->parent->getValue()['target_type'], $this->id);
+      $this->target = isset($entity) ? $entity->getTypedData() : NULL;
     }
     return $this->target;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getTargetIdentifier() {
-    if (isset($this->id)) {
-      return $this->id;
-    }
-    elseif ($entity = $this->getValue()) {
-      return $entity->id();
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getValue() {
-    // Entities are already typed data, so just return that.
-    return $this->getTarget();
   }
 
   /**
@@ -89,10 +53,13 @@ class DynamicEntityReference extends EntityReference {
 
     // Both the entity ID and the entity object may be passed as value. The
     // reference may also be unset by passing NULL as value.
-    if (!isset($value) || $value instanceof EntityInterface) {
-      $this->target = $value;
+    if (!isset($value)) {
+      $this->target = NULL;
     }
-    elseif (!is_scalar($value) || $this->getTargetDefinition()->getEntityTypeId() === NULL) {
+    elseif ($value instanceof EntityInterface) {
+      $this->target = $value->getTypedData();
+    }
+    elseif (!is_scalar($value) || $this->parent->getValue()['target_type'] === NULL) {
       throw new \InvalidArgumentException('Value is not a valid entity.');
     }
     else {
@@ -104,13 +71,4 @@ class DynamicEntityReference extends EntityReference {
     }
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getString() {
-    if ($entity = $this->getValue()) {
-      return $entity->label();
-    }
-    return '';
-  }
 }
