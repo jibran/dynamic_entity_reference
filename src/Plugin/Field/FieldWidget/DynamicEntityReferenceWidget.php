@@ -106,8 +106,10 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
    * Checks whether a content entity is referenced.
    *
    * @param string $target_type
-   *   The value target entity type
+   *   The value target entity type.
+   *
    * @return bool
+   *   TRUE if a content entity is referenced.
    */
   protected function isContentReferenced($target_type = NULL) {
     $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
@@ -123,10 +125,17 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     if (!empty($element['#value'])) {
       // If this is the default value of the field.
       if ($form_state->hasValue('default_value_input')) {
-        $values = $form_state->getValue(array('default_value_input', $element['#field_name'], $element['#delta']));
+        $values = $form_state->getValue(array(
+          'default_value_input',
+          $element['#field_name'],
+          $element['#delta'],
+        ));
       }
       else {
-        $values = $form_state->getValue(array($element['#field_name'], $element['#delta']));
+        $values = $form_state->getValue(array(
+          $element['#field_name'],
+          $element['#delta'],
+        ));
       }
       // Take "label (entity id)', match the id from parenthesis.
       if ($this->isContentReferenced($values['target_type']) && preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
@@ -135,10 +144,31 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       elseif (preg_match("/.+\(([\w.]+)\)/", $element['#value'], $matches)) {
         $value = $matches[1];
       }
-      if (!$value) {
-        // Try to get a match from the input string when the user didn't use the
-        // autocomplete but filled in a value manually.
-        $value = $this->validateAutocompleteInput($values['target_type'], $element['#value'], $element, $form_state, $form);
+      $auto_create = $this->getHandlerSetting('auto_create', $values['target_type']);
+      // Try to get a match from the input string when the user didn't use the
+      // autocomplete but filled in a value manually.
+      if ($value === NULL) {
+        // To use entity_reference selection_handler for this target_type we
+        // have to change these settings to entity_reference field settings.
+        // @todo Remove these once https://www.drupal.org/node/1959806
+        //   and https://www.drupal.org/node/2107243 are fixed.
+        $this->fakeFieldSettings($values['target_type']);
+        /** @var \Drupal\entity_reference\Plugin\Type\Selection\SelectionInterface $handler */
+        $handler = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionHandler($this->fieldDefinition);
+        $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form, !$auto_create);
+      }
+      // Auto-create item. See
+      // \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::presave().
+      if (!$value && $auto_create && (count($this->getHandlerSetting('target_bundles', $values['target_type'])) == 1)) {
+        $value = array(
+          'target_id' => NULL,
+          'entity' => $this->createNewEntity($element['#value'], $element['#autocreate_uid']),
+          // Keep the weight property.
+          '_weight' => $element['#weight'],
+        );
+        // Change the element['#parents'], so in form_set_value() we populate
+        // the correct key.
+        array_pop($element['#parents']);
       }
 
     }
@@ -146,55 +176,39 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   }
 
   /**
-   * {@inheritdoc}
+   * Sets the fake field settings values.
+   *
+   * These settings are required by
+   * \Drupal\entity_reference\Plugin\Type\SelectionPluginManager to select the
+   * proper selection plugin and these settings are also used by
+   * \Drupal\entity_reference\Plugin\entity_reference\selection\SelectionBase
+   * @todo Remove these once https://www.drupal.org/node/1959806
+   *   and https://www.drupal.org/node/2107243 are fixed.
+   *
+   * @param string $entity_type_id
+   *   The id of the entity type.
    */
-  public function validateAutocompleteInput($target_type, $input, &$element, FormStateInterface $form_state, $form) {
-    // @todo Make this a service.
-    $controller = new DynamicEntityReferenceController(\Drupal::service('entity.query'));
-    $bundled_entities = $controller->getReferenceableEntities($target_type, $input, '=', 6);
-    $params = array(
-      '%value' => $input,
-      '@value' => $input,
-    );
-    $entities = array();
-    foreach ($bundled_entities as $entities_list) {
-      $entities += $entities_list;
-    }
-    if (empty($entities)) {
-      // Error if there are no entities available for a required field.
-      $form_state->setError($element, t('There are no entities matching "%value".', $params));
-    }
-    elseif (count($entities) > 5) {
-      $params['@id'] = key($entities);
-      // Error if there are more than 5 matching entities.
-      $form_state->setError($element, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
-    }
-    elseif (count($entities) > 1) {
-      // More helpful error if there are only a few matching entities.
-      $multiples = array();
-      foreach ($entities as $id => $name) {
-        $multiples[] = $name . ' (' . $id . ')';
-      }
-      $params['@id'] = $id;
-      $params['%multiple'] = implode('", "', $multiples);
-      $form_state->setError($element, t('Multiple entities match this reference; "%multiple". Specify the one you want by appending the id in parentheses, like "@value (@id)".', $params));
-    }
-    else {
-      // Take the one and only matching entity.
-      return key($entities);
-    }
+  protected function fakeFieldSettings($entity_type_id) {
+    $settings = $this->getFieldSettings();
+    $this->fieldDefinition->settings['target_type'] = $entity_type_id;
+    $this->fieldDefinition->settings['handler'] = $settings[$entity_type_id]['handler'];
+    $this->fieldDefinition->settings['handler_settings'] = $settings[$entity_type_id]['handler_settings'];
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the value of a setting for the entity reference selection handler.
+   *
+   * @param string $setting_name
+   *   The setting name.
+   * @param string $entity_type_id
+   *   The id of the entity type.
+   *
+   * @return mixed
+   *   The setting value.
    */
-  protected function getEntityType(FieldItemListInterface $items, $delta) {
-    // The autocomplete widget outputs one entity label per form element.
-    if (isset($items[$delta])) {
-      return $items[$delta]->target_type;
-    }
-
-    return FALSE;
+  protected function getHandlerSetting($setting_name, $entity_type_id) {
+    $settings = $this->getFieldSettings();
+    return isset($settings[$entity_type_id]['handler_settings'][$setting_name]) ? $settings[$entity_type_id]['handler_settings'][$setting_name] : NULL;
   }
 
 }

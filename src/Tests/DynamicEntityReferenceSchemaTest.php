@@ -60,7 +60,20 @@ class DynamicEntityReferenceSchemaTest extends EntityUnitTestBase {
       'entity_type' => 'entity_test',
       'field_name' => 'field_test',
       'bundle' => 'entity_test',
-      'settings' => array(),
+      'settings' => array(
+        'entity_test' => array(
+          'handler' => 'default',
+          'handler_settings' => array(
+            'target_bundles' => array(
+              'entity_test' => 'entity_test',
+            ),
+            'sort' => array(
+              'field' => '_none',
+            ),
+            'auto_create' => FALSE,
+          ),
+        ),
+      ),
     ));
     $entity_storage= \Drupal::entityManager()->getStorage('entity_test');
     $referenced_entity = $entity_storage->create(array());
