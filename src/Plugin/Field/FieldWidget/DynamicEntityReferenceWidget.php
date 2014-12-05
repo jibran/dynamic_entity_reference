@@ -93,13 +93,11 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
         ),
       ),
     );
-    // Render field as item.
+    // Render field as details.
     if ($cardinality == 1) {
-      return array(
-      '#type' => 'item',
-      '#title' => $items->getFieldDefinition()->getLabel(),
-      '#markup' => drupal_render($form_element),
-      );
+      $form_element['#type'] = 'details';
+      $form_element['#title'] = $items->getFieldDefinition()->getLabel();
+      $form_element['#open'] = TRUE;
     }
     return $form_element;
   }
