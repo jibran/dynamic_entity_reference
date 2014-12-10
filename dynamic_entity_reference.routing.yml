@@ -2,6 +2,5 @@ dynamic_entity_reference.autocomplete:
   path: '/dynamic_entity_reference/autocomplete/{field_name}/{entity_type}/{bundle_name}/{target_type}'
   defaults:
     _controller: '\Drupal\dynamic_entity_reference\DynamicEntityReferenceController::handleAutocomplete'
-    target_type: 'NULL'
   requirements:
     _access: 'TRUE'

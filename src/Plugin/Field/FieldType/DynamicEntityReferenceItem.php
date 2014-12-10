@@ -54,7 +54,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     $options = $labels['Content'];
     // Field storage settings are not accessible here so we are assuming that
     // all the entity types are referenceable by default.
-    // see https://www.drupal.org/node/2346273#comment-9385179 for more details.
+    // See https://www.drupal.org/node/2346273#comment-9385179 for more details.
     foreach (array_keys($options) as $entity_type_id) {
       $default_settings[$entity_type_id] = array(
         'handler' => 'default',
@@ -260,7 +260,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * @return string[]
    *   All the entity type ids that can be referenced.
    */
-  protected static function getAllEntityTypeIds($settings) {
+  public static function getAllEntityTypeIds($settings) {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
     $options = $labels['Content'];
 

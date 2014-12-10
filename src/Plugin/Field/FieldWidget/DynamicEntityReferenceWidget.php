@@ -9,7 +9,7 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\dynamic_entity_reference\DynamicEntityReferenceController;
+use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 use Drupal\user\EntityOwnerInterface;
 
@@ -34,17 +34,8 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     $entity = $items->getEntity();
     $target = $items->get($delta)->entity;
 
-    // @todo inject this.
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = $labels['Content'];
-    $entity_type_ids = $items->getSetting('entity_type_ids');
+    $available = DynamicEntityReferenceItem::getAllEntityTypeIds($this->getFieldSettings());
     $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
-    if ($items->getSetting('exclude_entity_types')) {
-      $available = array_diff_key($options, $entity_type_ids ?: array());
-    }
-    else {
-      $available = array_intersect_key($options, $entity_type_ids ?: array());
-    }
 
     // Prepare the autocomplete route parameters.
     $autocomplete_route_parameters = array(
