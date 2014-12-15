@@ -10,6 +10,7 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
@@ -218,7 +219,39 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (!empty($values['target_type'])) {
       $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
     }
-    parent::setValue($values, $notify);
+    if (isset($values) && !is_array($values)) {
+      // If either a scalar or an object was passed as the value for the item,
+      // assign it to the 'entity' property since that works for both cases.
+      $this->set('entity', $values, $notify);
+    }
+    else {
+      // We have to bypass the EntityReferenceItem::setValue() here because we
+      // also want to invoke onChange for target_type.
+      FieldItemBase::setValue($values, FALSE);
+      // Support setting the field item with only one property, but make sure
+      // values stay in sync if only property is passed.
+      if (isset($values['target_id']) && !isset($values['entity'])) {
+        $this->onChange('target_type', FALSE);
+        $this->onChange('target_id', FALSE);
+      }
+      elseif (!isset($values['target_id']) && isset($values['entity'])) {
+        $this->onChange('entity', FALSE);
+      }
+      elseif (isset($values['target_id']) && isset($values['entity'])) {
+        // If both properties are passed, verify the passed values match. The
+        // only exception we allow is when we have a new entity: in this case
+        // its actual id and target_id will be different, due to the new entity
+        // marker.
+        if (($this->get('entity')->getTargetIdentifier() != $values['target_id']
+            || $this->get('entity')->getTargetDefinition()->getEntityTypeId() != $values['target_type'])) {
+          throw new \InvalidArgumentException('The target id, target type and entity passed to the dynamic entity reference item do not match.');
+        }
+      }
+      // Notify the parent if necessary.
+      if ($notify && $this->parent) {
+        $this->parent->onChange($this->getName());
+      }
+    }
   }
 
   /**

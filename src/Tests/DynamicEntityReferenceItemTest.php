@@ -131,6 +131,51 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     ));
     $term2->save();
 
+    // Test all the possible ways of assigning a value.
+    $entity->field_der->target_type = $entity_type_id;
+    $entity->field_der->target_id = $term->id();
+    $this->assertEqual($entity->field_der->entity->id(), $term->id());
+    $this->assertEqual($entity->field_der->entity->getName(), $term->getName());
+
+    $entity->field_der = ['target_id' => $term2->id(), 'target_type' => $entity_type_id];
+    $this->assertEqual($entity->field_der->entity->id(), $term2->id());
+    $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
+
+    // Test value assignment via the computed 'entity' property.
+    $entity->field_der->entity = $term;
+    $this->assertEqual($entity->field_der->target_id, $term->id());
+    $this->assertEqual($entity->field_der->entity->getName(), $term->getName());
+
+    $entity->field_der = ['entity' => $term2];
+    $this->assertEqual($entity->field_der->target_id, $term2->id());
+    $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
+
+    // Test assigning an invalid item throws an exception.
+    try {
+      $entity->field_der = [
+        'target_id' => 'invalid',
+        'target_type' => $entity_type_id,
+        'entity' => $term2
+      ];
+      $this->fail('Assigning an invalid item throws an exception.');
+    }
+    catch (\InvalidArgumentException $e) {
+      $this->pass('Assigning an invalid item throws an exception.');
+    }
+
+    // Test assigning an invalid item throws an exception.
+    try {
+      $entity->field_der = [
+        'target_id' => $term2->id(),
+        'target_type' => 'invalid',
+        'entity' => $term2
+      ];
+      $this->fail('Assigning an invalid item throws an exception.');
+    }
+    catch (\InvalidArgumentException $e) {
+      $this->pass('Assigning an invalid item throws an exception.');
+    }
+
     $entity->field_der->target_type = $entity_type_id;
     $entity->field_der->target_id = $term2->id();
     $this->assertEqual($entity->field_der->entity->id(), $term2->id());
