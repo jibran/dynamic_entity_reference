@@ -124,17 +124,15 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public function onChange($property_name) {
-    // Make sure that the target ID and type and the target property stay in
-    // sync.
-    if ($property_name == 'target_id') {
-      $this->properties['entity']->setValue($this->target_id, FALSE);
+  public function onChange($property_name, $notify = TRUE) {
+    if ($property_name == 'target_type') {
+      $this->get('entity')->getDataDefinition()->getTargetDefinition()->setEntityTypeId($this->get('target_type')->getValue());
     }
+    // Make sure that the target type and the target property stay in sync.
     elseif ($property_name == 'entity') {
-      $this->set('target_id', $this->properties['entity']->getTargetIdentifier(), FALSE);
-      $this->set('target_type', $this->properties['entity']->getValue()->getEntityTypeId(), FALSE);
+      $this->writePropertyValue('target_type', $this->get('entity')->getValue()->getEntityTypeId());
     }
-    parent::onChange($property_name);
+    parent::onChange($property_name, $notify);
   }
 
   /**

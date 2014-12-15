@@ -38,8 +38,14 @@ class DynamicEntityReference extends EntityReference {
     if (!isset($this->target) && isset($this->id)) {
       // If we have a valid reference, return the entity object which is typed
       // data itself.
-      $entity = entity_load($this->parent->getValue()['target_type'], $this->id);
+      $target_type = $this->getTargetDefinition()->getEntityTypeId() ?: $this->parent->getValue()['target_type'];
+      $entity = entity_load($target_type, $this->id);
       $this->target = isset($entity) ? $entity->getTypedData() : NULL;
+    }
+    // Keep the entity-type in sync.
+    if ($this->target) {
+      $this->getTargetDefinition()->setEntityTypeId($this->target->getValue()
+        ->getEntityTypeId());
     }
     return $this->target;
   }
@@ -58,8 +64,9 @@ class DynamicEntityReference extends EntityReference {
     }
     elseif ($value instanceof EntityInterface) {
       $this->target = $value->getTypedData();
+      $this->getTargetDefinition()->setEntityTypeId($value->getEntityTypeId());
     }
-    elseif (!is_scalar($value) || $this->parent->getValue()['target_type'] === NULL) {
+    elseif (!is_scalar($value) || $this->getTargetDefinition()->getEntityTypeId() === NULL) {
       throw new \InvalidArgumentException('Value is not a valid entity.');
     }
     else {
