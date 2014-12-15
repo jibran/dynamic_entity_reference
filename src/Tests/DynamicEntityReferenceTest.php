@@ -69,13 +69,13 @@ class DynamicEntityReferenceTest extends WebTestBase {
   public function testFieldSettings() {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
-    $this->drupalGet('entity_test/structure/entity_test/fields');
+    $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
     $edit = array(
-      'fields[_add_new_field][label]' => 'Foobar',
-      'fields[_add_new_field][field_name]' => 'foobar',
-      'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+      'label' => 'Foobar',
+      'field_name' => 'foobar',
+      'new_storage_type' => 'dynamic_entity_reference',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
       'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'field_storage[settings][entity_type_ids][]' => 'user',
@@ -143,13 +143,13 @@ class DynamicEntityReferenceTest extends WebTestBase {
   public function testDynamicEntityReference() {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
-    $this->drupalGet('entity_test/structure/entity_test/fields');
+    $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
     $edit = array(
-      'fields[_add_new_field][label]' => 'Foobar',
-      'fields[_add_new_field][field_name]' => 'foobar',
-      'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+      'label' => 'Foobar',
+      'field_name' => 'foobar',
+      'new_storage_type' => 'dynamic_entity_reference',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
       'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ), t('Save field settings'));
@@ -333,20 +333,20 @@ class DynamicEntityReferenceTest extends WebTestBase {
     ));
     $vocabulary->save();
     $term = Term::create(array(
-        'name' => $this->randomMachineName(),
-        'vid' => $vocabulary->id(),
-        'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+      'name' => $this->randomMachineName(),
+      'vid' => $vocabulary->id(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ));
     $term->save();
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
-    $this->drupalGet('entity_test/structure/entity_test/fields');
+    $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
     $edit = array(
-      'fields[_add_new_field][label]' => 'Foobar',
-      'fields[_add_new_field][field_name]' => 'foobar',
-      'fields[_add_new_field][type]' => 'dynamic_entity_reference',
+      'label' => 'Foobar',
+      'field_name' => 'foobar',
+      'new_storage_type' => 'dynamic_entity_reference',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
       'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'field_storage[settings][exclude_entity_types]' => FALSE,
