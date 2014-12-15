@@ -214,11 +214,6 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (empty($values['target_type']) && !empty($values['target_id'])) {
       throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
     }
-    // Make sure that the reference object has the correct target type
-    // set, so it can load the entity when requested.
-    if (!empty($values['target_type'])) {
-      $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
-    }
     if (isset($values) && !is_array($values)) {
       // If either a scalar or an object was passed as the value for the item,
       // assign it to the 'entity' property since that works for both cases.
@@ -271,14 +266,16 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public function preSave() {
     if ($this->hasNewEntity()) {
       $this->entity->save();
+      $this->target_id = $this->entity->id();
+      $this->target_type = $this->entity->getEntityTypeId();
     }
     // Handle the case where an unsaved entity was directly set using the public
     // 'entity' property and then saved before this entity. In this case
     // ::hasNewEntity() will return FALSE but $this->target_id will still be
     // empty.
     if ((empty($this->target_id) || empty($this->target_type)) && $this->entity) {
-      $this->set('target_id', $this->entity->id(), FALSE);
-      $this->set('target_type', $this->entity->getEntityTypeId(), FALSE);
+      $this->target_id = $this->entity->id();
+      $this->target_type = $this->entity->getEntityTypeId();
     }
   }
 
