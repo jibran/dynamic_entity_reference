@@ -45,6 +45,10 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       'target_type' => $items->get($delta)->target_type ?: key($available),
     );
 
+    if ($entity_id = $entity->id()) {
+      $autocomplete_route_parameters['entity_id'] = $entity_id;
+    }
+
     $element += array(
       '#type' => 'textfield',
       '#maxlength' => 1024,

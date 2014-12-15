@@ -61,11 +61,14 @@ class DynamicEntityReferenceController extends ControllerBase {
    *   The bundle name.
    * @param string $target_type
    *   The target entity type ID to search for results.
+   * @param string $entity_id
+   *   (optional) The entity ID the entity reference field is attached to.
+   *   Defaults to ''.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   The matched labels as json.
    */
-  public function handleAutocomplete(Request $request, $field_name, $entity_type, $bundle_name, $target_type) {
+  public function handleAutocomplete(Request $request, $field_name, $entity_type, $bundle_name, $target_type, $entity_id) {
     $definitions = $this->entityManager()->getFieldDefinitions($entity_type, $bundle_name);
 
     if (!isset($definitions[$field_name])) {
@@ -96,7 +99,7 @@ class DynamicEntityReferenceController extends ControllerBase {
     $items_typed = Tags::explode($items_typed);
     $last_item = Unicode::strtolower(array_pop($items_typed));
 
-    $matches = $this->entityReferenceAutocomplete->getMatches($field_definition, $entity_type, $bundle_name, 'NULL', '', $last_item);
+    $matches = $this->entityReferenceAutocomplete->getMatches($field_definition, $entity_type, $bundle_name, $entity_id, '', $last_item);
 
     return new JsonResponse($matches);
   }
