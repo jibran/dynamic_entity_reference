@@ -92,6 +92,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'field[settings][entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
       'field[settings][entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
       'field[settings][entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
+      'field[settings][entity_test_mul_langcode_key][handler_settings][target_bundles][entity_test_mul_langcode_key]' => TRUE,
       'field[settings][entity_test_rev][handler_settings][target_bundles][entity_test_rev]' => TRUE,
       'field[settings][entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
       'field[settings][entity_test_constraint_violation][handler_settings][target_bundles][entity_test_constraint_violation]' => TRUE,
@@ -163,6 +164,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'field[settings][entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
       'field[settings][entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
       'field[settings][entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
+      'field[settings][entity_test_mul_langcode_key][handler_settings][target_bundles][entity_test_mul_langcode_key]' => TRUE,
       'field[settings][entity_test_rev][handler_settings][target_bundles][entity_test_rev]' => TRUE,
       'field[settings][entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
       'field[settings][entity_test_constraint_violation][handler_settings][target_bundles][entity_test_constraint_violation]' => TRUE,
@@ -172,6 +174,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'field[settings][entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'field[settings][entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
       'field[settings][entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
+
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));

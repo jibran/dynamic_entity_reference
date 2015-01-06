@@ -188,10 +188,10 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $entity->save();
 
     // Test the generateSampleValue() method.
-//    $entity = EntityTest::create();
-//    $entity->field_der->generateSampleItems();
-//    $entity->field_test_taxonomy_vocabulary->generateSampleItems();
-//    $this->entityValidateAndSave($entity);
+    $entity = EntityTest::create();
+    $entity->field_der->generateSampleItems();
+    $entity->field_der->generateSampleItems();
+    $this->entityValidateAndSave($entity);
   }
 
   /**

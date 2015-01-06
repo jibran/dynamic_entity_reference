@@ -7,12 +7,14 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
@@ -69,10 +71,15 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties['target_id'] = DataDefinition::create('string')
-      ->setLabel(t('Entity ID'));
+    $properties['target_id'] = DataDefinition::create('integer')
+      ->setLabel(t('Entity ID'))
+      ->setSetting('unsigned', TRUE)
+      ->setRequired(TRUE);
+
     $properties['target_type'] = DataDefinition::create('string')
-      ->setLabel(t('Target Entity Type'));
+      ->setLabel(t('Target Entity Type'))
+      ->setRequired(TRUE);
+
     $properties['entity'] = DataDynamicReferenceDefinition::create('entity')
       ->setLabel(t('Entity'))
       ->setDescription(t('The referenced entity'))
@@ -80,19 +87,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       ->setComputed(TRUE)
       ->setReadOnly(FALSE);
 
-    if (isset($settings['target_bundle'])) {
-      // @todo Add new NotBundle validator
-      // $properties['entity']->getTargetDefinition()->addConstraint('Bundle', $settings['target_bundle']);
-    }
-
     return $properties;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function mainPropertyName() {
-    return 'target_id';
   }
 
   /**
@@ -102,8 +97,8 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     $columns = array(
       'target_id' => array(
         'description' => 'The ID of the target entity.',
-        'type' => 'varchar',
-        'length' => '255',
+        'type' => 'int',
+        'unsigned' => TRUE,
       ),
       'target_type' => array(
         'description' => 'The Entity Type ID of the target entity.',
@@ -115,7 +110,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     $schema = array(
       'columns' => $columns,
       'indexes' => array(
-        'target_id' => array('target_id'),
+        'target_id' => array('target_id', 'target_type'),
       ),
     );
 
@@ -126,14 +121,51 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    */
   public function onChange($property_name, $notify = TRUE) {
-    if ($property_name == 'target_type') {
-      $this->get('entity')->getDataDefinition()->getTargetDefinition()->setEntityTypeId($this->get('target_type')->getValue());
+    /* @var \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference $entity_property */
+    $entity_property = $this->get('entity');
+    if ($property_name == 'target_type' && !$entity_property->getValue()) {
+      $entity_property->getTargetDefinition()->setEntityTypeId($this->get('target_type')->getValue());
     }
     // Make sure that the target type and the target property stay in sync.
     elseif ($property_name == 'entity') {
-      $this->writePropertyValue('target_type', $this->get('entity')->getValue()->getEntityTypeId());
+      $this->writePropertyValue('target_type', $entity_property->getValue()->getEntityTypeId());
     }
     parent::onChange($property_name, $notify);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSettableOptions(AccountInterface $account = NULL) {
+    $options = array();
+    $field_definition = $this->getFieldDefinition();
+    $settings = $this->getSettings();
+    $entity_type_ids = static::getAllEntityTypeIds($settings);
+    foreach (array_keys($entity_type_ids) as $entity_type_id) {
+      // We put the dummy value here so selection plugins can work.
+      // @todo Remove these once https://www.drupal.org/node/1959806
+      //   and https://www.drupal.org/node/2107243 are fixed.
+      $field_definition->settings['target_type'] = $entity_type_id;
+      $field_definition->settings['handler'] = $settings[$entity_type_id]['handler'];
+      $field_definition->settings['handler_settings'] = $settings[$entity_type_id]['handler_settings'];
+      $options[$entity_type_id] = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionHandler($field_definition, $this->getEntity())->getReferenceableEntities();
+    }
+    if (empty($options)) {
+      return array();
+    }
+    $return = array();
+    foreach ($options as $target_type) {
+
+      // Rebuild the array by changing the bundle key into the bundle label.
+      $bundles = \Drupal::entityManager()->getBundleInfo($target_type);
+
+      foreach ($options[$target_type] as $bundle => $entity_ids) {
+        $bundle_label = String::checkPlain($bundles[$bundle]['label']);
+        $return[$entity_type_ids[$target_type]][$bundle_label] = $entity_ids;
+      }
+    }
+
+    return $return;
   }
 
   /**
@@ -214,9 +246,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (empty($values['target_type']) && !empty($values['target_id'])) {
       throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
     }
+    // If either a scalar or an object was passed as the value for the item,
+    // assign it to the 'entity' property since that works for both cases.
     if (isset($values) && !is_array($values)) {
-      // If either a scalar or an object was passed as the value for the item,
-      // assign it to the 'entity' property since that works for both cases.
       $this->set('entity', $values, $notify);
     }
     else {
@@ -232,13 +264,19 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       elseif (!isset($values['target_id']) && isset($values['entity'])) {
         $this->onChange('entity', FALSE);
       }
+      // If both properties are passed, verify the passed values match. The
+      // only exception we allow is when we have a new entity: in this case
+      // its actual id and target_id will be different, due to the new entity
+      // marker.
       elseif (isset($values['target_id']) && isset($values['entity'])) {
-        // If both properties are passed, verify the passed values match. The
-        // only exception we allow is when we have a new entity: in this case
-        // its actual id and target_id will be different, due to the new entity
-        // marker.
-        if (($this->get('entity')->getTargetIdentifier() != $values['target_id']
-            || $this->get('entity')->getTargetDefinition()->getEntityTypeId() != $values['target_type'])) {
+        /* @var \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference $entity_property */
+        $entity_property = $this->get('entity');
+        $entity_id = $entity_property->getTargetIdentifier();
+        /* @var \Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface $targetDefinition */
+        $targetDefinition = $entity_property->getTargetDefinition();
+        $entity_type = $targetDefinition->getEntityTypeId();
+        if ((($entity_id != $values['target_id']) || ($entity_type != $values['target_type']))
+          && ($values['target_id'] != static::$NEW_ENTITY_MARKER || !$this->entity->isNew())) {
           throw new \InvalidArgumentException('The target id, target type and entity passed to the dynamic entity reference item do not match.');
         }
       }
@@ -255,7 +293,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public function getValue($include_computed = FALSE) {
     $values = parent::getValue($include_computed);
     if (!empty($values['target_type'])) {
-      $this->properties['entity']->getDataDefinition()->getTargetDefinition()->setEntityTypeId($values['target_type']);
+      $this->get('entity')->getTargetDefinition()->setEntityTypeId($values['target_type']);
     }
     return $this->values;
   }
@@ -265,40 +303,38 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   public function preSave() {
     if ($this->hasNewEntity()) {
-      $this->entity->save();
-      $this->target_id = $this->entity->id();
-      $this->target_type = $this->entity->getEntityTypeId();
-    }
-    // Handle the case where an unsaved entity was directly set using the public
-    // 'entity' property and then saved before this entity. In this case
-    // ::hasNewEntity() will return FALSE but $this->target_id will still be
-    // empty.
-    if ((empty($this->target_id) || empty($this->target_type)) && $this->entity) {
+      // Save the entity if it has not already been saved by some other code.
+      if ($this->entity->isNew()) {
+        $this->entity->save();
+      }
+      // Make sure the parent knows we are updating this property so it can
+      // react properly.
       $this->target_id = $this->entity->id();
       $this->target_type = $this->entity->getEntityTypeId();
     }
   }
 
   /**
-   * Helper function to get all the entity type ids that can be referenced.
-   *
-   * @param array $settings
-   *   The settings of the field storage.
-   *
-   * @return string[]
-   *   All the entity type ids that can be referenced.
+   * {@inheritdoc}
    */
-  public static function getAllEntityTypeIds($settings) {
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = $labels['Content'];
-
-    if ($settings['exclude_entity_types']) {
-      $entity_type_ids = array_diff_key($options, $settings['entity_type_ids'] ?: array());
+  public static function generateSampleValue(FieldDefinitionInterface $field_definition) {
+    $manager = \Drupal::service('plugin.manager.entity_reference.selection');
+    $settings = $field_definition->getSettings();
+    $entity_type_ids = static::getAllEntityTypeIds($settings);
+    foreach (array_keys($entity_type_ids) as $entity_type_id) {
+      $values['target_type'] = $entity_type_id;
+      // We put the dummy value here so selection plugins can work.
+      // @todo Remove these once https://www.drupal.org/node/1959806
+      //   and https://www.drupal.org/node/2107243 are fixed.
+      $field_definition->settings['target_type'] = $entity_type_id;
+      $field_definition->settings['handler'] = $settings[$entity_type_id]['handler'];
+      $field_definition->settings['handler_settings'] = $settings[$entity_type_id]['handler_settings'];
+      if ($referenceable = $manager->getSelectionHandler($field_definition)->getReferenceableEntities()) {
+        $group = array_rand($referenceable);
+        $values['target_id'] = array_rand($referenceable[$group]);
+        return $values;
+      }
     }
-    else {
-      $entity_type_ids = array_intersect_key($options, $settings['entity_type_ids'] ?: array());
-    }
-    return $entity_type_ids;
   }
 
   /**
@@ -324,6 +360,28 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       }
     }
     return $dependencies;
+  }
+
+  /**
+   * Helper function to get all the entity type ids that can be referenced.
+   *
+   * @param array $settings
+   *   The settings of the field storage.
+   *
+   * @return string[]
+   *   All the entity type ids that can be referenced.
+   */
+  public static function getAllEntityTypeIds($settings) {
+    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
+    $options = $labels['Content'];
+
+    if ($settings['exclude_entity_types']) {
+      $entity_type_ids = array_diff_key($options, $settings['entity_type_ids'] ?: array());
+    }
+    else {
+      $entity_type_ids = array_intersect_key($options, $settings['entity_type_ids'] ?: array());
+    }
+    return $entity_type_ids;
   }
 
 }

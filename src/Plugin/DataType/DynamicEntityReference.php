@@ -13,13 +13,19 @@ use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 /**
  * Defines a 'dynamic_entity_reference' data type.
  *
- * This serves as 'dynamic_entity' property of entity reference field items and
- * gets its value set from the parent.
+ * This serves as 'entity' property of dynamic entity reference field items and
+ * gets its value set from the parent, i.e. DynamicEntityReferenceItem.
  *
+ * The plain value of this reference is the entity object, i.e. an instance of
+ * \Drupal\Core\Entity\EntityInterface. For setting the value the entity object
+ * or the entity ID may be passed.
+ *
+ * Note that the definition of the referenced entity's type is required. A
+ * reference defining the type of the referenced entity can be created as
+ * following:
  * @code
- * $definition = \Drupal\Core\Entity\EntityDefinition::create($entity_type)
- *   ->addConstraint('Bundle', $bundle);
- * \Drupal\Core\TypedData\DataReferenceDefinition::create('dynamic_entity')
+ * $definition = \Drupal\Core\Entity\EntityDefinition::create($entity_type);
+ * \Drupal\Core\TypedData\DataReferenceDefinition::create('entity')
  *   ->setTargetDefinition($definition);
  * @endcode
  *
@@ -35,41 +41,21 @@ class DynamicEntityReference extends EntityReference {
    * {@inheritdoc}
    */
   public function getTarget() {
+    // If we have a valid reference, return the entity's TypedData adapter.
     if (!isset($this->target) && isset($this->id)) {
-      // If we have a valid reference, return the entity object which is typed
-      // data itself.
+      // For \Drupal\Core\Entity\Plugin\DataType\EntityReference
+      // $this->getTargetDefinition()->getEntityTypeId() will always be set
+      // because $target_type exists in EntityReferenceItem storage settings but
+      // for
+      // \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference
+      // $target_type will be NULL because it doesn't exist in
+      // DynamicEntityReferenceItem storage settings it is selected dynamically
+      // so it exists in DynamicEntityReferenceItem::values['target_type'].
       $target_type = $this->parent->getValue()['target_type'];
       $entity = entity_load($target_type, $this->id);
       $this->target = isset($entity) ? $entity->getTypedData() : NULL;
     }
     return $this->target;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setValue($value, $notify = TRUE) {
-    unset($this->target);
-    unset($this->id);
-
-    // Both the entity ID and the entity object may be passed as value. The
-    // reference may also be unset by passing NULL as value.
-    if (!isset($value)) {
-      $this->target = NULL;
-    }
-    elseif ($value instanceof EntityInterface) {
-      $this->target = $value->getTypedData();
-    }
-    elseif (!is_scalar($value) || $this->getTargetDefinition()->getEntityTypeId() === NULL) {
-      throw new \InvalidArgumentException('Value is not a valid entity.');
-    }
-    else {
-      $this->id = $value;
-    }
-    // Notify the parent of any changes.
-    if ($notify && isset($this->parent)) {
-      $this->parent->onChange($this->name);
-    }
   }
 
 }
