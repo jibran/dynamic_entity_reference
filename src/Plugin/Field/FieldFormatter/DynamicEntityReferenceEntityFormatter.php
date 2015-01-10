@@ -7,6 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter;
 
 /**
@@ -23,5 +24,12 @@ use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceEntityFor
  */
 class DynamicEntityReferenceEntityFormatter extends EntityReferenceEntityFormatter {
   use DynamicEntityReferenceFormatterTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function isApplicable(FieldDefinitionInterface $field_definition) {
+    return TRUE;
+  }
 
 }
