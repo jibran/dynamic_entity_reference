@@ -31,6 +31,7 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   label = @Translation("Dynamic entity reference"),
  *   description = @Translation("An entity field containing a dynamic entity reference."),
  *   no_ui = FALSE,
+ *   list_class = "\Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList",
  *   default_widget = "dynamic_entity_reference_default",
  *   default_formatter = "dynamic_entity_reference_label",
  *   constraints = {"ValidReference" = {}}
@@ -348,8 +349,8 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       foreach ($target_entity_types as $target_entity_type) {
         $key = $target_entity_type instanceof ConfigEntityType ? 'config' : 'content';
         foreach ($field_definition->default_value as $default_value) {
-          if (is_array($default_value) && isset($default_value['target_uuid'])) {
-            $entity = \Drupal::entityManager()->loadEntityByUuid($target_entity_type->id(), $default_value['target_uuid']);
+          if (is_array($default_value) && isset($default_value['target_uuid']) && isset($default_value['target_type'])) {
+            $entity = \Drupal::entityManager()->loadEntityByUuid($default_value['target_type'], $default_value['target_uuid']);
             // If the entity does not exist do not create the dependency.
             // @see \Drupal\Core\Field\EntityReferenceFieldItemList::processDefaultValue()
             if ($entity) {

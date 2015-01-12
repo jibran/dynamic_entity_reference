@@ -134,7 +134,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     ), t('Save settings'));
 
     $field_config = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->toArray();
-    $this->assertEqual($field_config['default_value']['0'], array('target_id' => $this->adminUser->id(), 'target_type' => 'user'));
+    $this->assertEqual($field_config['default_value']['0'], array('target_type' => 'user', 'target_uuid' => $this->adminUser->uuid()));
 
   }
 

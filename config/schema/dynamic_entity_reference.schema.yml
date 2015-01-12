@@ -38,6 +38,9 @@ field.value.dynamic_entity_reference:
     target_id:
       type: string
       label: 'Entity ID'
+    target_uuid:
+      type: string
+      label: 'Target UUID'
     target_type:
       type: string
       label: 'Type of item to reference'
