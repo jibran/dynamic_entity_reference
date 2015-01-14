@@ -8,7 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter;
+use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter;
 
 /**
  * Plugin implementation of the 'rendered entity' formatter.

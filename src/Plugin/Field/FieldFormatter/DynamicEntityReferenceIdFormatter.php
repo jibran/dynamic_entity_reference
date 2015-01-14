@@ -7,7 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
-use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceIdFormatter;
+use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceIdFormatter;
 
 /**
  * Plugin implementation of the 'dynamic entity reference ID' formatter.

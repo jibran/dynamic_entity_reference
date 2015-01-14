@@ -7,7 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
-use Drupal\entity_reference\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
+use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
 
 /**
  * Plugin implementation of the 'dynamic entity reference label' formatter.
