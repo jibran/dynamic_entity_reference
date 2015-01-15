@@ -29,23 +29,25 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     // Collect the IDs of existing entities to load, and directly grab the
     // "autocreate" entities that are already populated in $item->entity.
     $target_entities = $ids = array();
-    /** @var \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem $item */
     foreach ($this->list as $delta => $item) {
       if ($item->hasNewEntity()) {
         $target_entities[$delta] = $item->entity;
       }
       elseif ($item->target_id !== NULL) {
-        $ids[$delta] = $item->target_id;
+        $ids[$item->target_type][$delta] = $item->target_id;
       }
     }
 
     // Load and add the existing entities.
     if ($ids) {
-      $target_type = $item->target_type;
-      $entities = \Drupal::entityManager()->getStorage($target_type)->loadMultiple($ids);
-      foreach ($ids as $delta => $target_id) {
-        if (isset($entities[$target_id])) {
-          $target_entities[$delta] = $entities[$target_id];
+      foreach ($ids as $target_type => $entity_type_ids) {
+        $entities = \Drupal::entityManager()
+          ->getStorage($target_type)
+          ->loadMultiple($entity_type_ids);
+        foreach ($entity_type_ids as $delta => $target_id) {
+          if (isset($entities[$target_id])) {
+            $target_entities[$delta] = $entities[$target_id];
+          }
         }
       }
       // Ensure the returned array is ordered by deltas.
