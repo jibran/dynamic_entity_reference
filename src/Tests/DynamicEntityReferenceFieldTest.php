@@ -89,6 +89,49 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
   }
 
   /**
+   * Tests reference field validation.
+   */
+  public function testEntityReferenceFieldValidation() {
+    // Test a valid reference.
+    $referenced_entity = entity_create($this->referencedEntityType, array('type' => $this->bundle));
+    $referenced_entity->save();
+
+    $entity = entity_create($this->entityType, array('type' => $this->bundle));
+    $entity->{$this->fieldName}->target_type = $referenced_entity->getEntityTypeId();
+    $entity->{$this->fieldName}->target_id = $referenced_entity->id();
+    $violations = $entity->{$this->fieldName}->validate();
+    $this->assertEqual($violations->count(), 0, 'Validation passes.');
+
+    $entity = entity_create($this->entityType, array('type' => $this->bundle));
+    $entity->{$this->fieldName}->entity = $referenced_entity;
+    $violations = $entity->{$this->fieldName}->validate();
+    $this->assertEqual($violations->count(), 0, 'Validation passes.');
+
+    // Test an invalid reference.
+    $entity->{$this->fieldName}->target_type = $referenced_entity->getEntityTypeId();
+    $entity->{$this->fieldName}->target_id = 9999;
+    $violations = $entity->{$this->fieldName}->validate();
+    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->referencedEntityType, '%id' => 9999)));
+
+    // Test an invalid target_type.
+    $entity->{$this->fieldName}->target_type = $entity->getEntityTypeId();
+    $entity->{$this->fieldName}->target_id = $referenced_entity->id();
+    $violations = $entity->{$this->fieldName}->validate();
+    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->entityType, '%id' => $referenced_entity->id())));
+
+    // Test an invalid entity.
+    $entity->{$this->fieldName}->entity = $entity;
+    $violations = $entity->{$this->fieldName}->validate();
+    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $entity->getEntityTypeId(), '%id' => -1)));
+
+    // @todo Implement a test case for invalid bundle references after
+    // https://drupal.org/node/2064191 is fixed
+  }
+
+  /**
    * Tests the multiple target entities loader.
    */
   public function testReferencedEntitiesMultipleLoad() {

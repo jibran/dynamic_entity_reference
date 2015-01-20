@@ -34,7 +34,7 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   list_class = "\Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList",
  *   default_widget = "dynamic_entity_reference_default",
  *   default_formatter = "dynamic_entity_reference_label",
- *   constraints = {"ValidReference" = {}}
+ *   constraints = {"ValidDynamicReference" = {}}
  * )
  */
 class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
