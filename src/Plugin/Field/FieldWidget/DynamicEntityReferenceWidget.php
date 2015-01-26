@@ -34,7 +34,7 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
     $entity = $items->getEntity();
     $target = $items->get($delta)->entity;
 
-    $available = DynamicEntityReferenceItem::getAllEntityTypeIds($this->getFieldSettings());
+    $available = DynamicEntityReferenceItem::getTargetTypes($this->getFieldSettings());
     $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
 
     // Prepare the autocomplete route parameters.
@@ -107,6 +107,9 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
    *   TRUE if a content entity is referenced.
    */
   protected function isContentReferenced($target_type = NULL) {
+    if ($target_type === NULL) {
+      return parent::isContentReferenced();
+    }
     $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
     return $target_type_info->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface');
   }
@@ -139,25 +142,20 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
       elseif (preg_match("/.+\(([\w.]+)\)/", $element['#value'], $matches)) {
         $value = $matches[1];
       }
-      $auto_create = $this->getHandlerSetting('auto_create', $values['target_type']);
+      $auto_create = $this->getSelectionHandlerSetting('auto_create', $values['target_type']);
       // Try to get a match from the input string when the user didn't use the
       // autocomplete but filled in a value manually.
       if ($value === NULL) {
-        // To use entity_reference selection_handler for this target_type we
-        // have to change these settings to entity_reference field settings.
-        // @todo Remove these once https://www.drupal.org/node/1959806
-        //   and https://www.drupal.org/node/2107243 are fixed.
-        $this->fakeFieldSettings($values['target_type']);
-        /** @var \Drupal\entity_reference\Plugin\Type\Selection\SelectionInterface $handler */
-        $handler = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionHandler($this->fieldDefinition);
+        /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
+        $handler = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($this->fieldDefinition, NULL, $values['target_type']);
         $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form, !$auto_create);
       }
       // Auto-create item. See
-      // \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::presave().
-      if (!$value && $auto_create && (count($this->getHandlerSetting('target_bundles', $values['target_type'])) == 1)) {
+      // \Drupal\Core\Field\Plugin\Field\FieldType\DynamicEntityReferenceItem::presave().
+      if (!$value && $auto_create && (count($this->getSelectionHandlerSetting('target_bundles', $values['target_type'])) == 1)) {
         $value = array(
           'target_id' => NULL,
-          'entity' => $this->createNewEntity($element['#value'], $element['#autocreate_uid']),
+          'entity' => $this->createNewEntity($element['#value'], $element['#autocreate_uid'], $values['target_type']),
           // Keep the weight property.
           '_weight' => $element['#weight'],
         );
@@ -171,39 +169,67 @@ class DynamicEntityReferenceWidget extends AutocompleteWidget {
   }
 
   /**
-   * Sets the fake field settings values.
-   *
-   * These settings are required by
-   * \Drupal\entity_reference\Plugin\Type\SelectionPluginManager to select the
-   * proper selection plugin and these settings are also used by
-   * \Drupal\entity_reference\Plugin\entity_reference\selection\SelectionBase
-   * @todo Remove these once https://www.drupal.org/node/1959806
-   *   and https://www.drupal.org/node/2107243 are fixed.
-   *
-   * @param string $entity_type_id
-   *   The id of the entity type.
-   */
-  protected function fakeFieldSettings($entity_type_id) {
-    $settings = $this->getFieldSettings();
-    $this->fieldDefinition->settings['target_type'] = $entity_type_id;
-    $this->fieldDefinition->settings['handler'] = $settings[$entity_type_id]['handler'];
-    $this->fieldDefinition->settings['handler_settings'] = $settings[$entity_type_id]['handler_settings'];
-  }
-
-  /**
-   * Returns the value of a setting for the entity reference selection handler.
+   * Returns the value of a setting for the dynamic entity reference handler.
    *
    * @param string $setting_name
    *   The setting name.
-   * @param string $entity_type_id
-   *   The id of the entity type.
+   * @param string $target_type
+   *   The id of the target entity type.
    *
    * @return mixed
    *   The setting value.
    */
-  protected function getHandlerSetting($setting_name, $entity_type_id) {
+  protected function getSelectionHandlerSetting($setting_name, $target_type = NULL) {
+    if ($target_type === NULL) {
+      return parent::getSelectionHandlerSetting($setting_name);
+    }
     $settings = $this->getFieldSettings();
-    return isset($settings[$entity_type_id]['handler_settings'][$setting_name]) ? $settings[$entity_type_id]['handler_settings'][$setting_name] : NULL;
+    return isset($settings[$target_type]['handler_settings'][$setting_name]) ? $settings[$target_type]['handler_settings'][$setting_name] : NULL;
+  }
+
+  /**
+   * Creates a new entity from a label entered in the autocomplete input.
+   *
+   * @param string $label
+   *   The entity label.
+   * @param int $uid
+   *   The entity uid.
+   * @param string $target_type
+   *   The target entity type id.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The newly created entity.
+   */
+  protected function createNewEntity($label, $uid, $target_type = NULL) {
+    if ($target_type === NULL) {
+      return parent::createNewEntity($label, $uid);
+    }
+    $entity_manager = \Drupal::entityManager();
+    $target_bundles = $this->getSelectionHandlerSetting('target_bundles', $target_type);
+
+    // Get the bundle.
+    if (!empty($target_bundles)) {
+      $bundle = reset($target_bundles);
+    }
+    else {
+      $bundles = $entity_manager->getBundleInfo($target_type);
+      $bundle = reset($bundles);
+    }
+
+    $entity_type = $entity_manager->getDefinition($target_type);
+    $bundle_key = $entity_type->getKey('bundle');
+    $label_key = $entity_type->getKey('label');
+
+    $entity = $entity_manager->getStorage($target_type)->create(array(
+      $label_key => $label,
+      $bundle_key => $bundle,
+    ));
+
+    if ($entity instanceof EntityOwnerInterface) {
+      $entity->setOwnerId($uid);
+    }
+
+    return $entity;
   }
 
 }

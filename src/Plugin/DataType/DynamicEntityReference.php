@@ -7,7 +7,6 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\DataType;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 
 /**

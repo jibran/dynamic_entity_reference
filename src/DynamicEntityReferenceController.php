@@ -82,15 +82,15 @@ class DynamicEntityReferenceController extends ControllerBase {
     }
 
     $settings = $field_definition->getSettings();
-    $target_types = DynamicEntityReferenceItem::getAllEntityTypeIds($settings);
+    $target_types = DynamicEntityReferenceItem::getTargetTypes($settings);
     if (!in_array($target_type, array_keys($target_types))) {
       throw new AccessDeniedHttpException();
     }
 
     // We put the dummy value here so selection plugins can work.
-    // @todo Remove these once https://www.drupal.org/node/1959806
-    //   and https://www.drupal.org/node/2107243 are fixed.
-    $field_definition->settings['target_type'] = $target_type;
+    // @todo Remove these once https://www.drupal.org/node/1959806 is fixed.
+    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getSelectionHandler().
+    $field_definition->getFieldStorageDefinition()->settings['target_type'] = $target_type;
     $field_definition->settings['handler'] = $settings[$target_type]['handler'];
     $field_definition->settings['handler_settings'] = $settings[$target_type]['handler_settings'];
 

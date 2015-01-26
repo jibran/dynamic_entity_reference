@@ -29,6 +29,10 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     // Collect the IDs of existing entities to load, and directly grab the
     // "autocreate" entities that are already populated in $item->entity.
     $target_entities = $ids = array();
+    /**
+     * @var int $delta
+     * @var \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem $item
+     */
     foreach ($this->list as $delta => $item) {
       if ($item->hasNewEntity()) {
         $target_entities[$delta] = $item->entity;
