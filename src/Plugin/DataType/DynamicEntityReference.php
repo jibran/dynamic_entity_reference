@@ -28,6 +28,10 @@ use Drupal\Core\Entity\Plugin\DataType\EntityReference;
  *   ->setTargetDefinition($definition);
  * @endcode
  *
+ * @property int id
+ * @property \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem parent
+ * @property \Drupal\Core\Entity\Plugin\DataType\EntityAdapter target
+ *
  * @DataType(
  *   id = "dynamic_entity_reference",
  *   label = @Translation("Dynamic entity reference"),
