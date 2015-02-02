@@ -8,22 +8,34 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
 /**
- * Trait to override EntityReferenceFormatterBase::prepareView().
+ * Trait to override \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase::prepareView().
  */
 trait DynamicEntityReferenceFormatterTrait {
 
   /**
-   * Overrides EntityReferenceFormatterBase::prepareView().
+   * Overrides \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase::prepareView().
+   *
+   * Loads the entities referenced in that field across all the entities being
+   * viewed.
+   *
+   * @param \Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList[] $entities_items
+   *   Array of field values, keyed by entity ID.
    */
   public function prepareView(array $entities_items) {
     // Load the existing (non-autocreate) entities. For performance, we want to
     // use a single "multiple entity load" to load all the entities for the
     // multiple "entity reference item lists" that are being displayed. We thus
     // cannot use
-    // \Drupal\Core\Field\EntityReferenceFieldItemList::referencedEntities().
+    // \Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList::referencedEntities().
     $ids = array();
     foreach ($entities_items as $items) {
+      /** @var \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem $item */
       foreach ($items as $item) {
+        // To avoid trying to reload non-existent entities in
+        // getEntitiesToView(), explicitly mark the items where $item->entity
+        // contains a valid entity ready for display. All items are initialized
+        // at FALSE.
+        $item->_loaded = FALSE;
         if ($item->target_id !== NULL) {
           $ids[$item->target_type][] = $item->target_id;
         }
@@ -35,15 +47,16 @@ trait DynamicEntityReferenceFormatterTrait {
       }
     }
 
-    // For each item, place the referenced entity where getEntitiesToView()
-    // reads it.
+    // For each item, pre-populate the loaded entity in $item->entity, and set
+    // the 'loaded' flag.
     foreach ($entities_items as $items) {
       foreach ($items as $item) {
         if (isset($target_entities[$item->target_type]) && isset($target_entities[$item->target_type][$item->target_id])) {
-          $item->originalEntity = $target_entities[$item->target_type][$item->target_id];
+          $item->entity = $target_entities[$item->target_type][$item->target_id];
+          $item->_loaded = TRUE;
         }
         elseif ($item->hasNewEntity()) {
-          $item->originalEntity = $item->entity;
+          $item->_loaded = TRUE;
         }
       }
     }
