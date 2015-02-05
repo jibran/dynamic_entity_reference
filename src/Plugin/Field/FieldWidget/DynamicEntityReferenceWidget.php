@@ -8,9 +8,9 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
-use Drupal\entity_reference\Plugin\Field\FieldWidget\AutocompleteWidget;
 use Drupal\user\EntityOwnerInterface;
 
 /**
@@ -25,7 +25,7 @@ use Drupal\user\EntityOwnerInterface;
  *   }
  * )
  */
-class DynamicEntityReferenceWidget extends AutocompleteWidget {
+class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
 
   /**
    * {@inheritdoc}

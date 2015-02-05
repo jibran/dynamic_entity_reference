@@ -10,8 +10,8 @@ namespace Drupal\dynamic_entity_reference;
 use Drupal\Component\Utility\Tags;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityAutocompleteMatcher;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
-use Drupal\entity_reference\EntityReferenceAutocomplete;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,18 +25,18 @@ class DynamicEntityReferenceController extends ControllerBase {
   /**
    * The entity query object.
    *
-   * @var \Drupal\entity_reference\EntityReferenceAutocomplete
+   * @var \Drupal\Core\Entity\EntityAutocompleteMatcher
    */
-  protected $entityReferenceAutocomplete;
+  protected $matcher;
 
   /**
    * Constructs a DynamicEntityReferenceController object.
    *
-   * @param \Drupal\entity_reference\EntityReferenceAutocomplete $entity_reference_autocompletion
-   *   The autocompletion helper for entity references.
+   * @param \Drupal\Core\Entity\EntityAutocompleteMatcher $matcher
+   *   The autocomplete matcher for entity references.
    */
-  public function __construct(EntityReferenceAutocomplete $entity_reference_autocompletion) {
-    $this->entityReferenceAutocomplete = $entity_reference_autocompletion;
+  public function __construct(EntityAutocompleteMatcher $matcher) {
+    $this->matcher = $matcher;
   }
 
   /**
@@ -44,7 +44,7 @@ class DynamicEntityReferenceController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_reference.autocomplete')
+      $container->get('entity.autocomplete_matcher')
     );
   }
 
@@ -69,6 +69,7 @@ class DynamicEntityReferenceController extends ControllerBase {
    *   The matched labels as json.
    */
   public function handleAutocomplete(Request $request, $field_name, $entity_type, $bundle_name, $target_type, $entity_id) {
+    $matches = array();
     $definitions = $this->entityManager()->getFieldDefinitions($entity_type, $bundle_name);
 
     if (!isset($definitions[$field_name])) {
@@ -86,20 +87,19 @@ class DynamicEntityReferenceController extends ControllerBase {
     if (!in_array($target_type, array_keys($target_types))) {
       throw new AccessDeniedHttpException();
     }
+    $selection_handler = $settings[$target_type]['handler'];
+    $selection_settings = $settings[$target_type]['handler_settings'];
 
-    // We put the dummy value here so selection plugins can work.
-    // @todo Remove these once https://www.drupal.org/node/1959806 is fixed.
-    // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager::getSelectionHandler().
-    $field_definition->getFieldStorageDefinition()->settings['target_type'] = $target_type;
-    $field_definition->settings['handler'] = $settings[$target_type]['handler'];
-    $field_definition->settings['handler_settings'] = $settings[$target_type]['handler_settings'];
+    // Get the typed string from the URL, if it exists.
+    if ($input = $request->query->get('q')) {
+      $typed_string = Tags::explode($input);
+      $typed_string = Unicode::strtolower(array_pop($typed_string));
 
-    // Get the typed string, if exists from the URL.
-    $items_typed = $request->query->get('q');
-    $items_typed = Tags::explode($items_typed);
-    $last_item = Unicode::strtolower(array_pop($items_typed));
+      // Selection settings are passed in as an encoded serialized array.
+      $selection_settings = $selection_settings ? unserialize(base64_decode($selection_settings)) : array();
 
-    $matches = $this->entityReferenceAutocomplete->getMatches($field_definition, $entity_type, $bundle_name, $entity_id, '', $last_item);
+      $matches = $this->matcher->getMatches($target_type, $selection_handler, $selection_settings, $typed_string);
+    }
 
     return new JsonResponse($matches);
   }
