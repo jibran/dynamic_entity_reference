@@ -231,8 +231,8 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
       ->save();
     $entity = EntityTest::create();
     $account = User::load(1);
-    $entity->field_der[0]->entity = $this->term;
-    $entity->field_der[1]->entity = $account;
+    $entity->field_der[] = array('entity' => $this->term);
+    $entity->field_der[] = array('entity' => $account);
     $entity->save();
     // Check term reference correctly.
     $this->assertEqual($entity->field_der[0]->target_id, $this->term->id());
