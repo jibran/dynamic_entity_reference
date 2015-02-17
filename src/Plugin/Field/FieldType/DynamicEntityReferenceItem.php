@@ -140,6 +140,11 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
 
   /**
    * {@inheritdoc}
+   *
+   * To select both target_type and target_id the option value is
+   * changed from target_id to target_type-target_id.
+   *
+   * @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget\DynamicEntityReferenceOptionsTrait::massageFormValues()
    */
   public function getSettableOptions(AccountInterface $account = NULL) {
     $field_definition = $this->getFieldDefinition();
@@ -153,12 +158,14 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       return array();
     }
     $return = array();
-    foreach ($options as $target_type) {
+    foreach ($options as $target_type => $referenceable_entities) {
       // Rebuild the array by changing the bundle key into the bundle label.
       $bundles = \Drupal::entityManager()->getBundleInfo($target_type);
-      foreach ($options[$target_type] as $bundle => $entity_ids) {
+      foreach ($referenceable_entities as $bundle => $entities) {
         $bundle_label = String::checkPlain($bundles[$bundle]['label']);
-        $return[$target_types[$target_type]][$bundle_label] = $entity_ids;
+        foreach ($entities as $id => $entity_label) {
+          $return[$bundle_label]["{$target_type}-{$id}"] = $entity_label;
+        }
       }
     }
 
@@ -321,6 +328,14 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   /**
    * {@inheritdoc}
    */
+  public static function mainPropertyName() {
+    // We have two main properties i.e. target_type and target_id.
+    return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setValue($values, $notify = TRUE) {
     if (empty($values['target_type']) && !empty($values['target_id'])) {
       throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
@@ -420,14 +435,13 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     if (is_array($field_definition->default_value) && count($field_definition->default_value)) {
       $target_entity_types = static::getTargetTypes($field_definition->getFieldStorageDefinition()->getSettings());
       foreach ($target_entity_types as $target_entity_type) {
-        $key = $target_entity_type instanceof ConfigEntityType ? 'config' : 'content';
         foreach ($field_definition->default_value as $default_value) {
           if (is_array($default_value) && isset($default_value['target_uuid']) && isset($default_value['target_type'])) {
             $entity = \Drupal::entityManager()->loadEntityByUuid($default_value['target_type'], $default_value['target_uuid']);
             // If the entity does not exist do not create the dependency.
             // @see \Drupal\Core\Field\DynamicEntityReferenceFieldItemList::processDefaultValue()
             if ($entity) {
-              $dependencies[$key][] = $entity->getConfigDependencyName();
+              $dependencies[$entity->getConfigDependencyKey()][] = $entity->getConfigDependencyName();
             }
           }
         }

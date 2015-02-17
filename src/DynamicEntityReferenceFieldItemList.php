@@ -80,20 +80,16 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
       $entity_uuids = array();
       foreach ($all_uuids as $target_type => $uuids) {
         if ($uuids) {
-          $entity_ids = \Drupal::entityQuery($target_type)
-            ->condition('uuid', $uuids, 'IN')
-            ->execute();
           $entities = \Drupal::entityManager()
             ->getStorage($target_type)
-            ->loadMultiple($entity_ids);
+            ->loadByProperties(array('uuid' => $uuids));
           $entity_uuids[$target_type] = array();
           foreach ($entities as $id => $entity) {
             $entity_uuids[$target_type][$entity->uuid()] = $id;
           }
           foreach ($uuids as $delta => $uuid) {
-            if (isset($entity_uuids[$uuid])) {
+            if (isset($entity_uuids[$target_type]) && isset($entity_uuids[$target_type][$uuid])) {
               $default_value[$delta]['target_id'] = $entity_uuids[$target_type][$uuid];
-              $default_value[$delta]['target_type'] = $target_type;
               unset($default_value[$delta]['target_uuid']);
             }
             else {
