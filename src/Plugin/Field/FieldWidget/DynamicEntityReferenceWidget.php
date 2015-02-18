@@ -7,9 +7,11 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\user\EntityOwnerInterface;
 
@@ -32,35 +34,38 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $entity = $items->getEntity();
-    $target = $items->get($delta)->entity;
+    $referenced_entities = $items->referencedEntities();
 
-    $available = DynamicEntityReferenceItem::getTargetTypes($this->getFieldSettings());
+    $settings = $this->getFieldSettings();
+    $available = DynamicEntityReferenceItem::getTargetTypes($settings);
     $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
-
-    // Prepare the autocomplete route parameters.
-    $autocomplete_route_parameters = array(
-      'field_name' => $this->fieldDefinition->getName(),
-      'entity_type' => $entity->getEntityTypeId(),
-      'bundle_name' => $entity->bundle(),
-      'target_type' => $items->get($delta)->target_type ?: key($available),
-    );
-
-    if ($entity_id = $entity->id()) {
-      $autocomplete_route_parameters['entity_id'] = $entity_id;
-    }
+    $target_type = $items->get($delta)->target_type ?: key($available);
 
     $element += array(
-      '#type' => 'textfield',
+      '#type' => 'entity_autocomplete',
+      '#target_type' => $target_type,
+      '#selection_handler' => $settings[$target_type]['handler'],
+      '#selection_settings' => $settings[$target_type]['handler_settings'],
+      // Dynamic entity reference field items are handling validation themselves
+      // via the 'ValidDynamicReference' constraint.
+      '#validate_reference' => FALSE,
       '#maxlength' => 1024,
-      '#default_value' => $target ? $target->label() . ' (' . $target->id() . ')' : '',
-      '#autocomplete_route_name' => 'dynamic_entity_reference.autocomplete',
-      '#autocomplete_route_parameters' => $autocomplete_route_parameters,
+      '#default_value' => isset($referenced_entities[$delta]) ? $referenced_entities[$delta] : NULL,
       '#size' => $this->getSetting('size'),
       '#placeholder' => $this->getSetting('placeholder'),
-      '#element_validate' => array(array($this, 'elementValidate')),
-      '#autocreate_uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
+      '#element_validate' => array_merge(
+        array(array($this, 'elementValidate')),
+        element_info_property('entity_autocomplete', '#element_validate', array())
+      ),
       '#field_name' => $items->getName(),
     );
+
+    if ($this->getSelectionHandlerSetting('auto_create', $target_type)) {
+      $element['#autocreate'] = array(
+        'bundle' => $this->getAutocreateBundle($target_type),
+        'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
+      );
+    }
 
     $element['#title'] = $this->t('Label');
 
@@ -68,7 +73,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#type' => 'select',
       '#options' => $available,
       '#title' => $this->t('Entity type'),
-      '#default_value' => $items->get($delta)->target_type,
+      '#default_value' => $target_type,
       '#weight' => -50,
       '#attributes' => array(
         'class' => array('dynamic-entity-reference-entity-type'),
@@ -86,6 +91,11 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         'library' => array(
           'dynamic_entity_reference/drupal.dynamic_entity_reference_widget',
         ),
+        'drupalSettings' => array(
+          'dynamic_entity_reference' => array(
+            "{$items->getName()}[$delta][target_type]" => $this->createAutoCompletePaths(array_keys($available)),
+          ),
+        ),
       ),
     );
     // Render field as details.
@@ -98,28 +108,9 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
   }
 
   /**
-   * Checks whether a content entity is referenced.
-   *
-   * @param string $target_type
-   *   The value target entity type.
-   *
-   * @return bool
-   *   TRUE if a content entity is referenced.
-   */
-  protected function isContentReferenced($target_type = NULL) {
-    if ($target_type === NULL) {
-      return parent::isContentReferenced();
-    }
-    $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
-    return $target_type_info->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface');
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public function elementValidate($element, FormStateInterface $form_state, $form) {
-    // If a value was entered into the autocomplete.
-    $value = NULL;
+  public function elementValidate(&$element, FormStateInterface $form_state, &$form) {
     if (!empty($element['#value'])) {
       // If this is the default value of the field.
       if ($form_state->hasValue('default_value_input')) {
@@ -135,37 +126,23 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
           $element['#delta'],
         ));
       }
-      // Take "label (entity id)', match the id from parenthesis.
-      if ($this->isContentReferenced($values['target_type']) && preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
-        $value = $matches[1];
-      }
-      elseif (preg_match("/.+\(([\w.]+)\)/", $element['#value'], $matches)) {
-        $value = $matches[1];
-      }
-      $auto_create = $this->getSelectionHandlerSetting('auto_create', $values['target_type']);
-      // Try to get a match from the input string when the user didn't use the
-      // autocomplete but filled in a value manually.
-      if ($value === NULL) {
-        /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
-        $handler = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($this->fieldDefinition, NULL, $values['target_type']);
-        $value = $handler->validateAutocompleteInput($element['#value'], $element, $form_state, $form, !$auto_create);
-      }
-      // Auto-create item. See
-      // \Drupal\Core\Field\Plugin\Field\FieldType\DynamicEntityReferenceItem::presave().
-      if (!$value && $auto_create && (count($this->getSelectionHandlerSetting('target_bundles', $values['target_type'])) == 1)) {
-        $value = array(
-          'target_id' => NULL,
-          'entity' => $this->createNewEntity($element['#value'], $element['#autocreate_uid'], $values['target_type']),
-          // Keep the weight property.
-          '_weight' => $element['#weight'],
+      $settings = $this->getFieldSettings();
+      $element['#target_type'] = $values['target_type'];
+      $element['#selection_handler'] = $settings[$values['target_type']]['handler'];
+      $element['#selection_settings'] = $settings[$values['target_type']]['handler_settings'];
+      if ($this->getSelectionHandlerSetting('auto_create', $values['target_type'])) {
+        $form_object = $form_state->getFormObject();
+        $entity =  $form_object instanceof EntityFormInterface ? $form_object->getEntity() : '';
+        $element['#autocreate'] = array(
+          'bundle' => $this->getAutocreateBundle($values['target_type']),
+          'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id()
         );
-        // Change the element['#parents'], so in form_set_value() we populate
-        // the correct key.
-        array_pop($element['#parents']);
+      }
+      else {
+        $element['#autocreate'] = NULL;
       }
 
     }
-    $form_state->setValueForElement($element, $value);
   }
 
   /**
@@ -187,49 +164,52 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     return isset($settings[$target_type]['handler_settings'][$setting_name]) ? $settings[$target_type]['handler_settings'][$setting_name] : NULL;
   }
 
-  /**
-   * Creates a new entity from a label entered in the autocomplete input.
-   *
-   * @param string $label
-   *   The entity label.
-   * @param int $uid
-   *   The entity uid.
-   * @param string $target_type
-   *   The target entity type id.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   The newly created entity.
+  /*
+   * {@inheritdoc}
    */
-  protected function createNewEntity($label, $uid, $target_type = NULL) {
+  protected function getAutocreateBundle($target_type = NULL) {
     if ($target_type === NULL) {
-      return parent::createNewEntity($label, $uid);
+      return parent::getAutocreateBundle();
     }
-    $entity_manager = \Drupal::entityManager();
-    $target_bundles = $this->getSelectionHandlerSetting('target_bundles', $target_type);
-
-    // Get the bundle.
-    if (!empty($target_bundles)) {
-      $bundle = reset($target_bundles);
-    }
-    else {
-      $bundles = $entity_manager->getBundleInfo($target_type);
-      $bundle = reset($bundles);
-    }
-
-    $entity_type = $entity_manager->getDefinition($target_type);
-    $bundle_key = $entity_type->getKey('bundle');
-    $label_key = $entity_type->getKey('label');
-
-    $entity = $entity_manager->getStorage($target_type)->create(array(
-      $label_key => $label,
-      $bundle_key => $bundle,
-    ));
-
-    if ($entity instanceof EntityOwnerInterface) {
-      $entity->setOwnerId($uid);
+    $bundle = NULL;
+    if ($this->getSelectionHandlerSetting('auto_create', $target_type)) {
+      // If the 'target_bundles' setting is restricted to a single choice, we
+      // can use that.
+      if (($target_bundles = $this->getSelectionHandlerSetting('target_bundles', $target_type)) && count($target_bundles) == 1) {
+        $bundle = reset($target_bundles);
+      }
+      // Otherwise use the first bundle as a fallback.
+      else {
+        // @todo Expose a proper UI for choosing the bundle for autocreated
+        // entities in https://www.drupal.org/node/2412569.
+        $bundles = entity_get_bundles($target_type);
+        $bundle = key($bundles);
+      }
     }
 
-    return $entity;
+    return $bundle;
+  }
+
+  /*
+   * Creates auto complete path for all the given target types
+   *
+   * @param string[] $target_types
+   *   All the referenceable target types.
+   *
+   * @return array
+   *   Auto complete paths for all the referenceable target types.
+   */
+  protected function createAutoCompletePaths($target_types) {
+    $auto_complete_paths = array();
+    $settings = $this->getFieldSettings();
+    foreach ($target_types as $target_type) {
+      $auto_complete_paths[$target_type] = Url::fromRoute('system.entity_autocomplete', array(
+        'target_type' => $target_type,
+        'selection_handler' => $settings[$target_type]['handler'],
+        'selection_settings' => $settings[$target_type]['handler_settings'] ? base64_encode(serialize($settings[$target_type]['handler_settings'])) : '',
+      ))->toString();
+    }
+    return $auto_complete_paths;
   }
 
 }

@@ -8,45 +8,21 @@
   "use strict";
 
   Drupal.behaviors.dynamicEntityReferenceWidget = {
-    attach: function (context) {
-      var $context = $(context);
-      var $selects = $context.find('select.dynamic-entity-reference-entity-type').once('dynamic-entity-reference');
-      if ($selects.length) {
-        $selects.change(function() {
-          var $select = $(this);
-          var $autocomplete = $select.parents('.container-inline').find('.form-autocomplete');
-          var basePath;
-          var entityId = $autocomplete.data('entity-id');
-          if (!(basePath = $autocomplete.data('base-autocomplete-path'))) {
-            // This is the first time this has run, copy the default value.
-            var autocompletePath = $autocomplete.attr('data-autocomplete-path');
-            entityId = autocompletePath.substring(autocompletePath.lastIndexOf('/') + 1, autocompletePath.length);
-            if ($.isNumeric(entityId)) {
-              // By default, the base path contains the default suffix, so cut
-              // that off.
-              basePath = autocompletePath.substring(0, autocompletePath.lastIndexOf('/'));
-              basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
-
-            }
-            else {
-              entityId = null;
-              // By default, the base path contains the default suffix, so cut
-              // that off.
-              basePath = autocompletePath.substring(0, autocompletePath.lastIndexOf('/') + 1);
-            }
-            // Store for subsequent calls.
-            $autocomplete.data('base-autocomplete-path', basePath);
-            $autocomplete.data('entity-id', entityId);
-          }
-          if (entityId) {
-            $autocomplete.attr('data-autocomplete-path', basePath + $select.val() + '/' + entityId);
-          }
-          else {
-            $autocomplete.attr('data-autocomplete-path', basePath + $select.val());
-          }
-        });
-        $selects.change();
+    attach: function (context, settings) {
+      function dynamicEntityReferenceWidgetSelect(e) {
+        var data = e.data;
+        var $select = $(data.select);
+        var $autocomplete = $select.parents('.container-inline').find('.form-autocomplete');
+        var entityTypeId = $select.val();
+        $autocomplete.attr('data-autocomplete-path', settings.dynamic_entity_reference[$select[0].name][entityTypeId]);
       }
+      Object.keys(settings.dynamic_entity_reference).forEach(function(fieldName){
+        var select = 'select[name="' + fieldName + '"]';
+        $(select)
+          .once('dynamic-entity-reference')
+          .on('change', {select: select}, dynamicEntityReferenceWidgetSelect)
+          .trigger('change');
+      });
     }
   };
 

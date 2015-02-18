@@ -10,6 +10,7 @@ namespace Drupal\dynamic_entity_reference\Tests;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -196,7 +197,12 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[0][target_id]'))[0];
-    $expected_autocomplete_path = 'dynamic_entity_reference/autocomplete/field_foobar/entity_test/entity_test/entity_test_label';
+    $settings = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->getSettings();
+    $expected_autocomplete_path = Url::fromRoute('system.entity_autocomplete', array(
+      'target_type' => 'entity_test_label',
+      'selection_handler' => $settings['entity_test_label']['handler'],
+      'selection_settings' => $settings['entity_test_label']['handler_settings'] ? base64_encode(serialize($settings['entity_test_label']['handler_settings'])) : '',
+    ))->toString();
     $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
 
     // Add some extra dynamic entity reference fields.
@@ -216,7 +222,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = entity_load_multiple_by_properties('entity_test', array(
+    $entities = \Drupal::entityManager()
+      ->getStorage('entity_test')
+      ->loadByProperties(array(
       'name' => 'Barfoo',
     ));
     $this->assertEqual(1, count($entities), 'Entity was saved');
@@ -237,7 +245,11 @@ class DynamicEntityReferenceTest extends WebTestBase {
     // Ensure that the autocomplete path is correct.
     foreach (array('0' => 'user', '1' => 'entity_test', '2' => 'entity_test') as $index => $expected_entity_type) {
       $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[' . $index . '][target_id]'))[0];
-      $expected_autocomplete_path = 'dynamic_entity_reference/autocomplete/field_foobar/entity_test/entity_test/' . $expected_entity_type;
+      $expected_autocomplete_path = Url::fromRoute('system.entity_autocomplete', array(
+        'target_type' => $expected_entity_type,
+        'selection_handler' => $settings[$expected_entity_type]['handler'],
+        'selection_settings' => $settings[$expected_entity_type]['handler_settings'] ? base64_encode(serialize($settings[$expected_entity_type]['handler_settings'])) : '',
+      ))->toString();
       $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
     }
 
@@ -378,7 +390,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = entity_load_multiple_by_properties('entity_test', array(
+    $entities = \Drupal::entityManager()
+      ->getStorage('entity_test')
+      ->loadByProperties(array(
       'name' => 'Barfoo',
     ));
     $this->assertEqual(1, count($entities), 'Entity was saved');
