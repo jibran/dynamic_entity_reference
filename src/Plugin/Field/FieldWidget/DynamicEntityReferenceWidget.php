@@ -32,6 +32,17 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
   /**
    * {@inheritdoc}
    */
+  public static function defaultSettings() {
+    return array(
+      'match_operator' => 'CONTAINS',
+      'size' => '40',
+      'placeholder' => '',
+    ) + parent::defaultSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $entity = $items->getEntity();
     $referenced_entities = $items->referencedEntities();
