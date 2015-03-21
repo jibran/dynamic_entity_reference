@@ -2,7 +2,7 @@
 
 field.storage_settings.dynamic_entity_reference:
   type: mapping
-  label: 'Dynamic entity reference settings'
+  label: 'Dynamic entity reference field storage settings'
   mapping:
     target_type:
       type: string
@@ -19,7 +19,7 @@ field.storage_settings.dynamic_entity_reference:
 
 field.field_settings.dynamic_entity_reference:
   type: sequence
-  label: 'Dynamic entity reference settings'
+  label: 'Dynamic entity reference field settings'
   sequence:
     type: mapping
     label: 'Entity Type ID'
@@ -28,8 +28,8 @@ field.field_settings.dynamic_entity_reference:
         type: string
         label: 'Reference method'
       handler_settings:
-        type: entity_reference.[%parent.handler].handler_settings
-        label: 'Reference method settings'
+        type: entity_reference_selection.[%parent.handler]
+        label: 'Dynamic entity reference selection plugin settings'
 
 field.value.dynamic_entity_reference:
   type: mapping

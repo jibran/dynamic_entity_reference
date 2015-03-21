@@ -32,7 +32,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('dynamic_entity_reference', 'taxonomy', 'text', 'filter');
+  public static $modules = array('dynamic_entity_reference', 'taxonomy', 'text', 'filter', 'views');
 
   /**
    * The taxonomy vocabulary to test with.
@@ -245,6 +245,43 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $this->assertEqual($entity->field_der[1]->target_type, $account->getEntityTypeId());
     $this->assertEqual($entity->field_der[1]->entity->id(), $account->id());
     $this->assertEqual($entity->field_der[1]->entity->uuid(), $account->uuid());
+  }
+
+  /**
+   * Tests that the 'handler' field setting stores the proper plugin ID.
+   */
+  public function testSelectionHandlerSettings() {
+    $field_name = Unicode::strtolower($this->randomMachineName());
+    $field_storage = FieldStorageConfig::create(array(
+      'field_name' => $field_name,
+      'entity_type' => 'entity_test',
+      'type' => 'dynamic_entity_reference',
+      'settings' => array(
+        'exclude_entity_types' => FALSE,
+        'entity_type_ids' => array(
+          'entity_test' => 'entity_test',
+        ),
+      ),
+    ));
+    $field_storage->save();
+
+    // Do not specify any value for the 'handler' setting in order to verify
+    // that the default value is properly used.
+    $field = FieldConfig::create(array(
+      'field_storage' => $field_storage,
+      'bundle' => 'entity_test',
+    ));
+    $field->save();
+
+    $field = FieldConfig::load($field->id());
+    $field_settings = $field->getSettings();
+    $this->assertTrue($field_settings['entity_test']['handler'] == 'default:entity_test');
+
+    $field->settings['entity_test']['handler'] = 'views';
+    $field->save();
+    $field = FieldConfig::load($field->id());
+    $field_settings = $field->getSettings();
+    $this->assertTrue($field_settings['entity_test']['handler'] == 'views');
   }
 
 }

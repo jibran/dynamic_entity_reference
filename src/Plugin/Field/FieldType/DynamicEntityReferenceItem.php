@@ -66,7 +66,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     // See https://www.drupal.org/node/2346273#comment-9385179 for more details.
     foreach (array_keys($options) as $entity_type_id) {
       $default_settings[$entity_type_id] = array(
-        'handler' => 'default',
+        'handler' => "default:$entity_type_id",
         'handler_settings' => array(),
       );
     }
@@ -251,7 +251,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       }
       elseif (array_key_exists($selection_group_id . ':' . $target_type, $selection_plugins[$selection_group_id])) {
         $selection_group_plugin = $selection_group_id . ':' . $target_type;
-        $handlers_options[$selection_group_id] = String::checkPlain($selection_plugins[$selection_group_id][$selection_group_plugin]['base_plugin_label']);
+        $handlers_options[$selection_group_plugin] = String::checkPlain($selection_plugins[$selection_group_id][$selection_group_plugin]['base_plugin_label']);
       }
     }
 
