@@ -36,7 +36,7 @@ trait DynamicEntityReferenceFormatterTrait {
         // contains a valid entity ready for display. All items are initialized
         // at FALSE.
         $item->_loaded = FALSE;
-        if ($item->target_id !== NULL) {
+        if (!$item->hasNewEntity()) {
           $ids[$item->target_type][] = $item->target_id;
         }
       }
