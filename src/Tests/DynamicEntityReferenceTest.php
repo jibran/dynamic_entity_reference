@@ -341,6 +341,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
    */
   public function testDynamicEntityReferenceAutoCreate() {
     \Drupal::service('module_installer')->install(array('taxonomy'));
+    // Update router to reflect newly installed module.
+    \Drupal::service('router.builder')->rebuild();
     $vocabulary = Vocabulary::create(array(
       'name' => $this->randomMachineName(),
       'vid' => Unicode::strtolower($this->randomMachineName()),
