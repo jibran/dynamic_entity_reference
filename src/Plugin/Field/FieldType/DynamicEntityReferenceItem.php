@@ -205,7 +205,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
 
     $settings_form = array();
-    $field = $form_state->get('field');
+    $field = $form_state->getFormObject()->getEntity();
     $settings = $this->getSettings();
     $target_types = static::getTargetTypes($settings);
     foreach (array_keys($target_types) as $target_type) {
@@ -235,7 +235,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   protected function targetTypeFieldSettingsForm(array $form, FormStateInterface $form_state, $target_type) {
     /** @var \Drupal\field\FieldConfigInterface $field */
-    $field = $form_state->get('field');
+    $field = $form_state->getFormObject()->getEntity();
     $field_settings = $field->getSettings();
     /** @var \Drupal\dynamic_entity_reference\SelectionPluginManager $manager */
     $manager = \Drupal::service('plugin.manager.dynamic_entity_reference_selection');
