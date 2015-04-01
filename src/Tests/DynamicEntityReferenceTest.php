@@ -78,8 +78,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
-      'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'field_storage[settings][entity_type_ids][]' => 'user',
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings[entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
     $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=entity_test]'), 'entity_test');
@@ -113,9 +113,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     // Check the include entity settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar/storage');
     $this->drupalPostForm(NULL, array(
-      'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'field_storage[settings][exclude_entity_types]' => FALSE,
-      'field_storage[settings][entity_type_ids][]' => 'user',
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings[exclude_entity_types]' => FALSE,
+      'settings[entity_type_ids][]' => 'user',
     ), t('Save field settings'));
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $this->assertFieldByName('default_value_input[field_foobar][0][target_type]');
@@ -153,7 +153,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
-      'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ), t('Save field settings'));
 
     $edit = array(
@@ -365,9 +365,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save and continue'));
     $this->drupalPostForm(NULL, array(
-      'field_storage[cardinality]' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'field_storage[settings][exclude_entity_types]' => FALSE,
-      'field_storage[settings][entity_type_ids][]' => array('taxonomy_term', 'user'),
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings[exclude_entity_types]' => FALSE,
+      'settings[entity_type_ids][]' => array('taxonomy_term', 'user'),
     ), t('Save field settings'));
     $edit = array(
       'field[settings][taxonomy_term][handler_settings][target_bundles]['. $vocabulary->id() .']' => $vocabulary->id(),
