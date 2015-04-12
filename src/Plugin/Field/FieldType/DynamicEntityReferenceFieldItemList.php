@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList.
+ * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList.
  */
 
-namespace Drupal\dynamic_entity_reference;
+namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
@@ -15,6 +15,8 @@ use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Defines a item list class for dynamic entity reference fields.
+ *
+ * @property DynamicEntityReferenceItem[] list
  */
 class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
 
@@ -29,10 +31,6 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     // Collect the IDs of existing entities to load, and directly grab the
     // "autocreate" entities that are already populated in $item->entity.
     $target_entities = $ids = array();
-    /**
-     * @var int $delta
-     * @var \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem $item
-     */
     foreach ($this->list as $delta => $item) {
       if ($item->hasNewEntity()) {
         $target_entities[$delta] = $item->entity;

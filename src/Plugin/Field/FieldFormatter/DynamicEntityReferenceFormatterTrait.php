@@ -18,7 +18,7 @@ trait DynamicEntityReferenceFormatterTrait {
    * Loads the entities referenced in that field across all the entities being
    * viewed.
    *
-   * @param \Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList[] $entities_items
+   * @param \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList[] $entities_items
    *   Array of field values, keyed by entity ID.
    */
   public function prepareView(array $entities_items) {
@@ -26,7 +26,7 @@ trait DynamicEntityReferenceFormatterTrait {
     // use a single "multiple entity load" to load all the entities for the
     // multiple "entity reference item lists" that are being displayed. We thus
     // cannot use
-    // \Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList::referencedEntities().
+    // \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::referencedEntities().
     $ids = array();
     foreach ($entities_items as $items) {
       /** @var \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem $item */

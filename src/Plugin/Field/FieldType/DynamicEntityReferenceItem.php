@@ -8,7 +8,6 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\String;
-use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
@@ -36,7 +35,7 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   description = @Translation("An entity field containing a dynamic entity reference."),
  *   category = @Translation("Reference"),
  *   no_ui = FALSE,
- *   list_class = "\Drupal\dynamic_entity_reference\DynamicEntityReferenceFieldItemList",
+ *   list_class = "\Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList",
  *   default_widget = "dynamic_entity_reference_default",
  *   default_formatter = "dynamic_entity_reference_label",
  *   constraints = {"ValidDynamicReference" = {}}
@@ -440,7 +439,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
           if (is_array($default_value) && isset($default_value['target_uuid']) && isset($default_value['target_type'])) {
             $entity = \Drupal::entityManager()->loadEntityByUuid($default_value['target_type'], $default_value['target_uuid']);
             // If the entity does not exist do not create the dependency.
-            // @see \Drupal\Core\Field\DynamicEntityReferenceFieldItemList::processDefaultValue()
+            // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
             if ($entity) {
               $dependencies[$entity->getConfigDependencyKey()][] = $entity->getConfigDependencyName();
             }
