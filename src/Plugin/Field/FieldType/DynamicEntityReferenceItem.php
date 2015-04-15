@@ -7,7 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
@@ -162,7 +162,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       // Rebuild the array by changing the bundle key into the bundle label.
       $bundles = \Drupal::entityManager()->getBundleInfo($target_type);
       foreach ($referenceable_entities as $bundle => $entities) {
-        $bundle_label = String::checkPlain($bundles[$bundle]['label']);
+        $bundle_label = SafeMarkup::checkPlain($bundles[$bundle]['label']);
         foreach ($entities as $id => $entity_label) {
           $return[$bundle_label]["{$target_type}-{$id}"] = $entity_label;
         }
@@ -246,11 +246,11 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       // entity type specific plugins (e.g. 'default:node', 'default:user',
       // ...).
       if (array_key_exists($selection_group_id, $selection_plugins[$selection_group_id])) {
-        $handlers_options[$selection_group_id] = String::checkPlain($selection_plugins[$selection_group_id][$selection_group_id]['label']);
+        $handlers_options[$selection_group_id] = SafeMarkup::checkPlain($selection_plugins[$selection_group_id][$selection_group_id]['label']);
       }
       elseif (array_key_exists($selection_group_id . ':' . $target_type, $selection_plugins[$selection_group_id])) {
         $selection_group_plugin = $selection_group_id . ':' . $target_type;
-        $handlers_options[$selection_group_plugin] = String::checkPlain($selection_plugins[$selection_group_id][$selection_group_plugin]['base_plugin_label']);
+        $handlers_options[$selection_group_plugin] = SafeMarkup::checkPlain($selection_plugins[$selection_group_id][$selection_group_plugin]['base_plugin_label']);
       }
     }
 
