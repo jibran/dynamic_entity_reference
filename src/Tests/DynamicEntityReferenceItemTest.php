@@ -150,6 +150,10 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $this->assertEqual($entity->field_der->target_id, $term2->id());
     $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
 
+    $entity->field_der->appendItem(['entity' => $term]);
+    $this->assertEqual($entity->field_der[1]->target_id, $term->id());
+    $this->assertEqual($entity->field_der[1]->entity->getName(), $term->getName());
+
     // Test assigning an invalid item throws an exception.
     try {
       $entity->field_der = [
