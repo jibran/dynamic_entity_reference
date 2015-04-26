@@ -8,6 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Tests;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
@@ -244,12 +245,22 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
     // The 'link' settings is TRUE by default.
     $build = $this->buildRenderArray([$this->referencedEntity, $this->unsavedReferencedEntity], $formatter);
 
+    $expected_field_cacheability = [
+      'contexts' => [],
+      'tags' => [],
+      'max-age' => Cache::PERMANENT,
+    ];
+    $this->assertEqual($build['#cache'], $expected_field_cacheability, 'The field render array contains the entity access cacheability metadata');
+
     $expected_item_1 = array(
       '#type' => 'link',
       '#title' => $this->referencedEntity->label(),
       '#url' => $this->referencedEntity->urlInfo(),
       '#options' => $this->referencedEntity->urlInfo()->getOptions(),
       '#cache' => array(
+        'contexts' => [
+          'user.permissions',
+        ],
         'tags' => $this->referencedEntity->getCacheTags(),
       ),
     );
@@ -260,10 +271,14 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
     $expected_item_2 = array(
       '#markup' => $this->unsavedReferencedEntity->label(),
       '#cache' => array(
+        'contexts' => [
+          'user.permissions',
+        ],
         'tags' => $this->unsavedReferencedEntity->getCacheTags(),
+        'max-age' => Cache::PERMANENT,
       ),
     );
-    $this->assertEqual($build[1], $expected_item_2, sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
+    $this->assertEqual($build[1], $expected_item_2, sprintf('The render array returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
 
     // Test with the 'link' setting set to FALSE.
     $build = $this->buildRenderArray([$this->referencedEntity, $this->unsavedReferencedEntity], $formatter, array('link' => FALSE));
