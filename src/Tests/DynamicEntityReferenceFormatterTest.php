@@ -265,6 +265,7 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
       ),
     );
     $this->assertEqual(\Drupal::service('renderer')->render($build[0]), \Drupal::service('renderer')->render($expected_item_1), sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
+    $this->assertEqual(CacheableMetadata::createFromRenderArray($build[0]), CacheableMetadata::createFromRenderArray($expected_item_1));
 
     // The second referenced entity is "autocreated", therefore not saved and
     // lacking any URL info.
