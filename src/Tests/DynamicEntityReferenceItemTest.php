@@ -146,6 +146,10 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $this->assertEqual($entity->field_der->target_id, $term->id());
     $this->assertEqual($entity->field_der->entity->getName(), $term->getName());
 
+    $entity->field_der->appendItem($term2);
+    $this->assertEqual($entity->field_der[1]->target_id, $term2->id());
+    $this->assertEqual($entity->field_der[1]->entity->getName(), $term2->getName());
+
     $entity->field_der = ['entity' => $term2];
     $this->assertEqual($entity->field_der->target_id, $term2->id());
     $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
@@ -153,6 +157,18 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $entity->field_der->appendItem(['entity' => $term]);
     $this->assertEqual($entity->field_der[1]->target_id, $term->id());
     $this->assertEqual($entity->field_der[1]->entity->getName(), $term->getName());
+
+    // Test assigning an invalid item throws an exception.
+    try {
+      $entity->field_der = [
+        'target_id' => $term->id(),
+        'target_type' => '',
+      ];
+      $this->fail('Assigning an item without target type throws an exception.');
+    }
+    catch (\InvalidArgumentException $e) {
+      $this->pass('Assigning an item without target type throws an exception.');
+    }
 
     // Test assigning an invalid item throws an exception.
     try {

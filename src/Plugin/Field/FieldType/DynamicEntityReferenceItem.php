@@ -337,15 +337,15 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    */
   public function setValue($values, $notify = TRUE) {
-    if (empty($values['target_type']) && !empty($values['target_id'])) {
-      throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
-    }
     // If either a scalar or an object was passed as the value for the item,
     // assign it to the 'entity' property since that works for both cases.
     if (isset($values) && !is_array($values)) {
       $this->set('entity', $values, $notify);
     }
     else {
+      if (empty($values['target_type']) && !empty($values['target_id'])) {
+        throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
+      }
       // We have to bypass the EntityReferenceItem::setValue() here because we
       // also want to invoke onChange for target_type.
       FieldItemBase::setValue($values, FALSE);
