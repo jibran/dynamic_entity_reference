@@ -296,8 +296,8 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $field = FieldConfig::load($field->id());
     $field_settings = $field->getSettings();
     $this->assertTrue($field_settings['entity_test']['handler'] == 'default:entity_test');
-
-    $field->settings['entity_test']['handler'] = 'views';
+    $field_settings['entity_test']['handler'] = 'views';
+    $field->setSettings($field_settings);
     $field->save();
     $field = FieldConfig::load($field->id());
     $field_settings = $field->getSettings();
