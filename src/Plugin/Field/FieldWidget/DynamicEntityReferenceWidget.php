@@ -7,10 +7,12 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\user\EntityOwnerInterface;
@@ -66,7 +68,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#placeholder' => $this->getSetting('placeholder'),
       '#element_validate' => array_merge(
         array(array($this, 'elementValidate')),
-        element_info_property('entity_autocomplete', '#element_validate', array())
+        \Drupal::service('element_info')->getInfoProperty('entity_autocomplete', '#element_validate', array())
       ),
       '#field_name' => $items->getName(),
     );
@@ -214,10 +216,19 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $auto_complete_paths = array();
     $settings = $this->getFieldSettings();
     foreach ($target_types as $target_type) {
+      // Store the selection settings in the key/value store and pass a hashed
+      // key in the route parameters.
+      $selection_settings = $settings[$target_type]['handler_settings'] ?: [];
+      $data = serialize($selection_settings) . $target_type . $settings[$target_type]['handler'];
+      $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
+      $key_value_storage = \Drupal::keyValue('entity_autocomplete');
+      if (!$key_value_storage->has($selection_settings_key)) {
+        $key_value_storage->set($selection_settings_key, $selection_settings);
+      }
       $auto_complete_paths[$target_type] = Url::fromRoute('system.entity_autocomplete', array(
         'target_type' => $target_type,
         'selection_handler' => $settings[$target_type]['handler'],
-        'selection_settings' => $settings[$target_type]['handler_settings'] ? base64_encode(serialize($settings[$target_type]['handler_settings'])) : '',
+        'selection_settings_key' => $selection_settings_key,
       ))->toString();
     }
     return $auto_complete_paths;

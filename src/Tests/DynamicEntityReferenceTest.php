@@ -7,9 +7,11 @@
 
 namespace Drupal\dynamic_entity_reference\Tests;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -206,10 +208,13 @@ class DynamicEntityReferenceTest extends WebTestBase {
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[0][target_id]'))[0];
     $settings = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->getSettings();
+    $selection_settings = $settings['entity_test_label']['handler_settings'] ?: [];
+    $data = serialize($selection_settings) . 'entity_test_label' . $settings['entity_test_label']['handler'];
+    $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
     $expected_autocomplete_path = Url::fromRoute('system.entity_autocomplete', array(
       'target_type' => 'entity_test_label',
       'selection_handler' => $settings['entity_test_label']['handler'],
-      'selection_settings' => $settings['entity_test_label']['handler_settings'] ? base64_encode(serialize($settings['entity_test_label']['handler_settings'])) : '',
+      'selection_settings_key' => $selection_settings_key,
     ))->toString();
     $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
 
@@ -252,11 +257,14 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
     // Ensure that the autocomplete path is correct.
     foreach (array('0' => 'user', '1' => 'entity_test', '2' => 'entity_test') as $index => $expected_entity_type) {
+      $selection_settings = $settings[$expected_entity_type]['handler_settings'] ?: [];
+      $data = serialize($selection_settings) . $expected_entity_type . $settings[$expected_entity_type]['handler'];
+      $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
       $input = $this->xpath('//input[@name=:name]', array(':name' => 'field_foobar[' . $index . '][target_id]'))[0];
       $expected_autocomplete_path = Url::fromRoute('system.entity_autocomplete', array(
         'target_type' => $expected_entity_type,
         'selection_handler' => $settings[$expected_entity_type]['handler'],
-        'selection_settings' => $settings[$expected_entity_type]['handler_settings'] ? base64_encode(serialize($settings[$expected_entity_type]['handler_settings'])) : '',
+        'selection_settings_key' => $selection_settings_key,
       ))->toString();
       $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
     }
