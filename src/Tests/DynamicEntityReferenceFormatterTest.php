@@ -12,6 +12,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestLabel;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\filter\Entity\FilterFormat;
@@ -294,9 +295,9 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
     $field_storage_config->setSetting('target_type', 'entity_test_label');
     $field_storage_config->save();
 
-    $referenced_entity_with_no_link_template = entity_create('entity_test_label', array(
+    $referenced_entity_with_no_link_template = EntityTestLabel::create([
       'name' => $this->randomMachineName(),
-    ));
+    ]);
     $referenced_entity_with_no_link_template->save();
 
     $build = $this->buildRenderArray([$referenced_entity_with_no_link_template], $formatter, array('link' => TRUE));

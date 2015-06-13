@@ -11,6 +11,7 @@ use Drupal\Component\Utility\Unicode;
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
 use Symfony\Component\CssSelector\CssSelector;
 
@@ -123,7 +124,7 @@ class DynamicEntityReferenceFieldDefaultValueTest extends WebTestBase {
     \Drupal::entityManager()->clearCachedFieldDefinitions();
 
     // Create a new node to check that UUID has been converted to numeric ID.
-    $new_node = entity_create('node', array('type' => 'reference_content'));
+    $new_node = Node::create(['type' => 'reference_content']);
     $this->assertEqual($new_node->get($field_name)->offsetGet(0)->target_type, $referenced_node->getEntityTypeId());
     $this->assertEqual($new_node->get($field_name)->offsetGet(0)->target_id, $referenced_node->id());
 

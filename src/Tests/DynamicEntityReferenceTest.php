@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -191,13 +192,13 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
 
     // Create some items to reference.
-    $item1 = entity_create('entity_test', array(
+    $item1 = EntityTest::create([
       'name' => 'item1',
-    ));
+    ]);
     $item1->save();
-    $item2 = entity_create('entity_test', array(
+    $item2 = EntityTest::create([
       'name' => 'item2',
-    ));
+    ]);
     $item2->save();
 
     // Test the new entity commenting inherits default.
@@ -286,9 +287,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $labels = array();
     $duplicates = array();
     for ($i = 0; $i < 2; $i++) {
-      $duplicates[$i] = entity_create('entity_test', array(
+      $duplicates[$i] = EntityTest::create([
         'name' => 'duplicate label',
-      ));
+      ]);
       $duplicates[$i]->save();
       $labels[$i] = $duplicates[$i]->label() . ' (' . $duplicates[$i]->id() . ')';
     }
@@ -310,9 +311,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     // Create a few more to trigger the case where there are more than 5
     // matching results.
     for ($i = 2; $i < 7; $i++) {
-      $duplicates[$i] = entity_create('entity_test', array(
+      $duplicates[$i] = EntityTest::create([
         'name' => 'duplicate label',
-      ));
+      ]);
       $duplicates[$i]->save();
       $labels[$i] = $duplicates[$i]->label() . ' (' . $duplicates[$i]->id() . ')';
     }
@@ -348,7 +349,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertText('Bazbar');
     // Reload entity.
     \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
-    $entity = entity_load('entity_test', $entity->id());
+    $entity = EntityTest::load($entity->id());
     $this->assertEqual($entity->field_foobar[1]->entity->label(), 'Bazbar');
   }
 

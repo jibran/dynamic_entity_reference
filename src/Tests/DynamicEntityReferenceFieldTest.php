@@ -92,11 +92,16 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
    * Tests reference field validation.
    */
   public function testEntityReferenceFieldValidation() {
+    $entity_manager = \Drupal::entityManager();
     // Test a valid reference.
-    $referenced_entity = entity_create($this->referencedEntityType, array('type' => $this->bundle));
+    $referenced_entity = $entity_manager
+      ->getStorage($this->referencedEntityType)
+      ->create(['type' => $this->bundle]);
     $referenced_entity->save();
 
-    $entity = entity_create($this->entityType, array('type' => $this->bundle));
+    $entity = $entity_manager
+      ->getStorage($this->entityType)
+      ->create(['type' => $this->bundle]);
     $entity->{$this->fieldName}->target_type = $referenced_entity->getEntityTypeId();
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
@@ -135,14 +140,19 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
    * Tests the multiple target entities loader.
    */
   public function testReferencedEntitiesMultipleLoad() {
+    $entity_manager = \Drupal::entityManager();
     // Create the parent entity.
-    $entity = entity_create($this->entityType, array('type' => $this->bundle));
+    $entity = $entity_manager
+      ->getStorage($this->entityType)
+      ->create(['type' => $this->bundle]);
 
     // Create three target entities and attach them to parent field.
     $target_entities = array();
     $reference_field = array();
     for ($i = 0; $i < 3; $i++) {
-      $target_entity = entity_create($this->referencedEntityType, array('type' => $this->bundle));
+      $target_entity = $entity_manager
+        ->getStorage($this->referencedEntityType)
+        ->create(['type' => $this->bundle]);
       $target_entity->save();
       $target_entities[] = $target_entity;
       $reference_field[] = array('target_id' => $target_entity->id(), 'target_type' => $this->referencedEntityType);
@@ -173,7 +183,9 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
 
     // Create a new target entity that is not saved, thus testing the
     // "autocreate" feature.
-    $target_entity_unsaved = entity_create($this->referencedEntityType, array('type' => $this->bundle, 'name' => $this->randomString()));
+    $target_entity_unsaved = $entity_manager
+      ->getStorage($this->referencedEntityType)
+      ->create(array('type' => $this->bundle, 'name' => $this->randomString()));
     $reference_field[8]['entity'] = $target_entity_unsaved;
     $target_entities[8] = $target_entity_unsaved;
 
