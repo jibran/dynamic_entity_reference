@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraint;
  *
  * Verifies that referenced entities are valid.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "ValidDynamicReference",
  *   label = @Translation("Dynamic Entity Reference valid reference", context = "Validation")
  * )
