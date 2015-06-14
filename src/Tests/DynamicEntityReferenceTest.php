@@ -220,8 +220,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
 
     // Add some extra dynamic entity reference fields.
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
 
     $edit = array(
       'field_foobar[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
@@ -394,8 +394,8 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalGet('entity_test/add');
 
     // Add some extra dynamic entity reference fields.
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
-    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'entity-test-entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
     $edit = array(
       'field_foobar[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
       'field_foobar[0][target_type]' => 'user',
