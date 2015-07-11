@@ -207,6 +207,8 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
    * Tests the entity formatter.
    */
   public function testEntityFormatter() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
     $formatter = 'dynamic_entity_reference_entity_view';
     $build = $this->buildRenderArray([$this->referencedEntity, $this->unsavedReferencedEntity], $formatter);
 
@@ -224,7 +226,7 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
       </div>
 </div>
 ';
-    \Drupal::service('renderer')->render($build[0]);
+    $renderer->renderRoot($build[0]);
     $this->assertEqual($build[0]['#markup'], 'default | ' . $this->referencedEntity->label() .  $expected_rendered_name_field_1 . $expected_rendered_body_field_1, sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
     $expected_cache_tags = Cache::mergeTags(
       \Drupal::entityManager()->getViewBuilder($this->entityType)->getCacheTags(),
@@ -234,7 +236,7 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
     $this->assertEqual($build[0]['#cache']['tags'], $expected_cache_tags, format_string('The @formatter formatter has the expected cache tags.', array('@formatter' => $formatter)));
 
     // Test the second field item.
-    \Drupal::service('renderer')->render($build[1]);
+    $renderer->renderRoot($build[1]);
     $this->assertEqual($build[1]['#markup'], $this->unsavedReferencedEntity->label(), sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
   }
 
@@ -242,6 +244,8 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
    * Tests the label formatter.
    */
   public function testLabelFormatter() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
     $formatter = 'dynamic_entity_reference_label';
 
     // The 'link' settings is TRUE by default.
@@ -266,7 +270,7 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
         'tags' => $this->referencedEntity->getCacheTags(),
       ),
     );
-    $this->assertEqual(\Drupal::service('renderer')->render($build[0]), \Drupal::service('renderer')->render($expected_item_1), sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
+    $this->assertEqual($renderer->renderRoot($build[0]), $renderer->renderRoot($expected_item_1), sprintf('The markup returned by the %s formatter is correct for an item with a saved entity.', $formatter));
     $this->assertEqual(CacheableMetadata::createFromRenderArray($build[0]), CacheableMetadata::createFromRenderArray($expected_item_1));
 
     // The second referenced entity is "autocreated", therefore not saved and
