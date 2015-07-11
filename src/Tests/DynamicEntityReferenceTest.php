@@ -110,6 +110,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
+      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
@@ -186,6 +187,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
+      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
 
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
