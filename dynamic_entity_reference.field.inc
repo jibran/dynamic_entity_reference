@@ -110,21 +110,12 @@ function dynamic_entity_reference_field_widget_form(&$form, &$form_state, $field
         }
       }
 
-      // Prepare the autocomplete path parameters.
-      $autocomplete_path_parameters = array(
-        'field_name' => $element['#field_name'],
-        'entity_type' => $element['#entity_type'],
-        'bundle_name' => $element['#bundle'],
-        'target_type' => $item ? $item['target_type'] : NULL,
-        'string' => NULL,
-      );
-
       global $user;
       $element += array(
         '#type' => 'textfield',
         '#maxlength' => 1024,
         '#default_value' => $item ? $item['entity']->label() . ' (' . $item['entity']->getIdentifier() . ')' : '',
-        '#autocomplete_path' => 'dynamic_entity_reference/autocomplete/' . implode('/', $autocomplete_path_parameters),
+        '#autocomplete_path' => 'dynamic_entity_reference/autocomplete',
         '#element_validate' => array('dynamic_entity_reference_field_widget_form_validate'),
         '#autocreate_uid' => isset($entity->uid) ? $entity->uid : $user->uid,
         '#field_name' => $element['#field_name'],

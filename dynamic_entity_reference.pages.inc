@@ -8,7 +8,7 @@
 /**
  * Dynamic entity reference auto-complete callback.
  */
-function dynamic_entity_reference_autocomplete($field_name, $entity_type, $bundle_name, $target_type = NULL, $string = NULL) {
+function dynamic_entity_reference_autocomplete($target_type = NULL, $string = NULL) {
   if ($target_type == NULL) {
     drupal_json_output(array());
   }

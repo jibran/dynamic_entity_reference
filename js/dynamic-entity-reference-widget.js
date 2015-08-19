@@ -19,12 +19,7 @@
           var basePath, basePathParts;
           if (!(basePath = $autocomplete.data('base-autocomplete-path'))) {
             // This is the first time this has run, copy the default value.
-            basePathParts = $proxy.val().split('/');
-            // Remove defaults stuff, as it's cruft.
-            basePathParts.pop();
-            basePathParts.pop();
-            // Store for subsequent calls.
-            basePath = basePathParts.join('/');
+            basePath = $proxy.val();
             $autocomplete.data('base-autocomplete-path', basePath);
           }
           $proxy.val(basePath + '/' + $select.val()).removeClass('autocomplete-processed');
