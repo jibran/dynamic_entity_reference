@@ -12,8 +12,8 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\views\Tests\ViewKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
-use Drupal\views\Tests\ViewUnitTestBase;
 use Drupal\views\Views;
 
 /**
@@ -22,7 +22,7 @@ use Drupal\views\Views;
  * @group dynamic_entity_reference
  * @see dynamic_entity_reference_field_views_data()
  */
-class DynamicEntityReferenceRelationshipTest extends ViewUnitTestBase {
+class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
 
   /**
    * Views used by this test.
