@@ -27,7 +27,7 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator {
     $id = $value->get('target_id')->getValue();
     $type = $value->get('target_type')->getValue();
     $types = DynamicEntityReferenceItem::getTargetTypes($value->getFieldDefinition()->getSettings());
-    $valid_type = !empty($type) && in_array($type, array_keys($types));
+    $valid_type = !empty($type) && in_array($type, $types);
     // '0' or NULL are considered valid empty references.
     if (empty($id) && $valid_type) {
       return;

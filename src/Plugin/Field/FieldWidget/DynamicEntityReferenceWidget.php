@@ -50,9 +50,10 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $referenced_entities = $items->referencedEntities();
 
     $settings = $this->getFieldSettings();
+    $labels = \Drupal::entityManager()->getEntityTypeLabels();
     $available = DynamicEntityReferenceItem::getTargetTypes($settings);
     $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
-    $target_type = $items->get($delta)->target_type ?: key($available);
+    $target_type = $items->get($delta)->target_type ?: reset($available);
 
     $element += array(
       '#type' => 'entity_autocomplete',
@@ -84,7 +85,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
 
     $entity_type = array(
       '#type' => 'select',
-      '#options' => $available,
+      '#options' => array_intersect_key($labels, array_combine($available, $available)),
       '#title' => $this->t('Entity type'),
       '#default_value' => $target_type,
       '#weight' => -50,
@@ -106,7 +107,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         ),
         'drupalSettings' => array(
           'dynamic_entity_reference' => array(
-            "{$items->getName()}[$delta][target_type]" => $this->createAutoCompletePaths(array_keys($available)),
+            "{$items->getName()}[$delta][target_type]" => $this->createAutoCompletePaths($available),
           ),
         ),
       ),

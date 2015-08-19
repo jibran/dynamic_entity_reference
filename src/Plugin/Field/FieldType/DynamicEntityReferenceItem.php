@@ -150,8 +150,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     $field_definition = $this->getFieldDefinition();
     $options = array();
     $settings = $this->getSettings();
-    $target_types = static::getTargetTypes($settings);
-    foreach (array_keys($target_types) as $target_type) {
+    foreach (static::getTargetTypes($settings) as $target_type) {
       $options[$target_type] = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($field_definition, $this->getEntity(), $target_type)->getReferenceableEntities();
     }
     if (empty($options)) {
@@ -204,12 +203,11 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
 
     $settings_form = array();
-    $field = $form_state->getFormObject()->getEntity();
     $settings = $this->getSettings();
-    $target_types = static::getTargetTypes($settings);
-    foreach (array_keys($target_types) as $target_type) {
+    foreach (static::getTargetTypes($settings) as $target_type) {
+      $entity_type = \Drupal::entityManager()->getDefinition($target_type);
       $settings_form[$target_type] = $this->targetTypeFieldSettingsForm($form, $form_state, $target_type);
-      $settings_form[$target_type]['handler']['#title'] = t('Reference type for @target_type', array('@target_type' => $target_types[$target_type]));
+      $settings_form[$target_type]['handler']['#title'] = t('Reference type for @target_type', ['@target_type' => $entity_type->getLabel()]);
     }
     return $settings_form;
   }
@@ -415,8 +413,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
     /** @var \Drupal\dynamic_entity_reference\SelectionPluginManager $manager */
     $manager = \Drupal::service('plugin.manager.dynamic_entity_reference_selection');
     $settings = $field_definition->getSettings();
-    $target_types = static::getTargetTypes($settings);
-    foreach (array_keys($target_types) as $target_type) {
+    foreach (static::getTargetTypes($settings) as $target_type) {
       $values['target_type'] = $target_type;
       if ($referenceable = $manager->getSelectionHandler($field_definition, NULL, $target_type)->getReferenceableEntities()) {
         $group = array_rand($referenceable);
@@ -461,15 +458,14 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   public static function getTargetTypes($settings) {
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = $labels['Content'];
+    $options = array_keys($labels['Content']);
 
-    if ($settings['exclude_entity_types']) {
-      $target_types = array_diff_key($options, $settings['entity_type_ids'] ?: array());
+    if (!empty($settings['exclude_entity_types'])) {
+      return array_diff($options, $settings['entity_type_ids'] ?: []);
     }
     else {
-      $target_types = array_intersect_key($options, $settings['entity_type_ids'] ?: array());
+      return array_intersect($options, $settings['entity_type_ids'] ?: []);
     }
-    return $target_types;
   }
 
 }
