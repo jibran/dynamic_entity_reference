@@ -78,9 +78,9 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
       'cardinality' => 1,
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
-          'taxonomy_term' => 'taxonomy_term',
-        ),
+        'entity_type_ids' => [
+          'taxonomy_term',
+        ],
       ),
     ))->save();
 
@@ -243,10 +243,10 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $field_storage = FieldStorageConfig::loadByName('entity_test', 'field_der');
     $field_storage->set('settings', array(
       'exclude_entity_types' => FALSE,
-      'entity_type_ids' => array(
-        'taxonomy_term' => 'taxonomy_term',
-        'user' => 'user',
-      ),
+      'entity_type_ids' => [
+        'taxonomy_term',
+        'user',
+      ],
     ))->set('cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->save();
     $entity = EntityTest::create();
@@ -278,9 +278,9 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
       'type' => 'dynamic_entity_reference',
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
-          'entity_test' => 'entity_test',
-        ),
+        'entity_type_ids' => [
+          'entity_test',
+        ],
       ),
     ));
     $field_storage->save();

@@ -65,10 +65,10 @@ class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
       'type' => 'dynamic_entity_reference',
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
+        'entity_type_ids' => [
           'entity_test',
           'entity_test_mul',
-        ),
+        ],
       ),
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ));
@@ -88,10 +88,10 @@ class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
       'type' => 'dynamic_entity_reference',
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
+        'entity_type_ids' => [
           'entity_test',
           'entity_test_mul',
-        ),
+        ],
       ),
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ));

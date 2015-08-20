@@ -72,9 +72,9 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
-          $this->referencedEntityType => $this->referencedEntityType,
-        ),
+        'entity_type_ids' => [
+          $this->referencedEntityType,
+        ],
       ),
     ))->save();
 

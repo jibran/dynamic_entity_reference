@@ -90,9 +90,9 @@ class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
-          $this->entityType => $this->entityType,
-        ),
+        'entity_type_ids' => [
+          $this->entityType,
+        ],
       ),
     ))->save();
 

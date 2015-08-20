@@ -46,7 +46,9 @@ class DynamicEntityReferenceSchemaTest extends EntityUnitTestBase {
       'type' => 'dynamic_entity_reference',
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array('entity_test'),
+        'entity_type_ids' => [
+          'entity_test',
+        ],
       ),
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ));

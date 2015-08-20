@@ -80,9 +80,9 @@ class DynamicEntityReferenceFieldDefaultValueTest extends WebTestBase {
       'type' => 'dynamic_entity_reference',
       'settings' => array(
         'exclude_entity_types' => FALSE,
-        'entity_type_ids' => array(
-          'node' => 'node',
-        ),
+        'entity_type_ids' => [
+          'node',
+        ],
       ),
     ));
     $field_storage->save();
