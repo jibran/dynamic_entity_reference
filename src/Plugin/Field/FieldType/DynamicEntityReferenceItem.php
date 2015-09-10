@@ -14,6 +14,7 @@ use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\TranslationWrapper;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
@@ -82,12 +83,12 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       ->setRequired(TRUE);
 
     $properties['target_type'] = DataDefinition::create('string')
-      ->setLabel(t('Target Entity Type'))
+      ->setLabel(new TranslationWrapper('Target Entity Type'))
       ->setRequired(TRUE);
 
     $properties['entity'] = DataDynamicReferenceDefinition::create('entity')
       ->setLabel(t('Entity'))
-      ->setDescription(t('The referenced entity'))
+      ->setDescription(new TranslationWrapper('The referenced entity'))
       // The entity object is computed out of the entity ID.
       ->setComputed(TRUE)
       ->setReadOnly(FALSE);
