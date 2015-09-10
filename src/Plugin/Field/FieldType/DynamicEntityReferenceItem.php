@@ -429,23 +429,42 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    */
   public static function calculateDependencies(FieldDefinitionInterface $field_definition) {
     $dependencies = [];
-
-    if (is_array($field_definition->default_value) && count($field_definition->default_value)) {
-      $target_entity_types = static::getTargetTypes($field_definition->getFieldStorageDefinition()->getSettings());
-      foreach ($target_entity_types as $target_entity_type) {
-        foreach ($field_definition->default_value as $default_value) {
-          if (is_array($default_value) && isset($default_value['target_uuid']) && isset($default_value['target_type'])) {
-            $entity = \Drupal::entityManager()->loadEntityByUuid($default_value['target_type'], $default_value['target_uuid']);
-            // If the entity does not exist do not create the dependency.
-            // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
-            if ($entity) {
-              $dependencies[$entity->getConfigDependencyKey()][] = $entity->getConfigDependencyName();
-            }
+    if ($default_value = $field_definition->getDefaultValueLiteral()) {
+      foreach ($default_value as $value) {
+        if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
+          $entity = \Drupal::entityManager()->loadEntityByUuid($value['target_type'], $value['target_uuid']);
+          // If the entity does not exist do not create the dependency.
+          // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
+          if ($entity) {
+            $dependencies[$entity->getEntityType()->getConfigDependencyKey()][] = $entity->getConfigDependencyName();
           }
         }
       }
     }
     return $dependencies;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function onDependencyRemoval(FieldDefinitionInterface $field_definition, array $dependencies) {
+    $changed = FALSE;
+    if ($default_value = $field_definition->getDefaultValueLiteral()) {
+      foreach ($default_value as $key => $value) {
+        if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
+          $entity = \Drupal::entityManager()->loadEntityByUuid($value['target_type'], $value['target_uuid']);
+          // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
+          if ($entity && isset($dependencies[$entity->getConfigDependencyKey()][$entity->getConfigDependencyName()])) {
+            unset($default_value[$key]);
+            $changed = TRUE;
+          }
+        }
+      }
+      if ($changed) {
+        $field_definition->setDefaultValue($default_value);
+      }
+    }
+    return $changed;
   }
 
   /**
