@@ -174,8 +174,8 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
     $reference_field[6]['target_type'] = NULL;
     $target_entities[6] = NULL;
 
-    // Attach the first created target entity as the sixth item ($delta == 5) of
-    // the parent entity field. We want to test the case when the same target
+    // Attach the first created target entity as the eighth item ($delta == 7)
+    // of the parent entity field. We want to test the case when the same target
     // entity is referenced twice (or more times) in the same entity reference
     // field.
     $reference_field[7] = $reference_field[0];
@@ -214,7 +214,7 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
       else {
         // A non-existent or NULL entity target id must not return any item in
         // the target entities set.
-        $this->assertFalse(isset($loaded_entities[$delta]));
+        $this->assertFalse(isset($entities[$delta]));
       }
     }
   }
