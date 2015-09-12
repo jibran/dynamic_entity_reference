@@ -176,8 +176,8 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
 
     // Attach the first created target entity as the eighth item ($delta == 7)
     // of the parent entity field. We want to test the case when the same target
-    // entity is referenced twice (or more times) in the same entity reference
-    // field.
+    // entity is referenced twice (or more times) in the same dynamic entity
+    // reference field.
     $reference_field[7] = $reference_field[0];
     $target_entities[7] = $target_entities[0];
 
