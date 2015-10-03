@@ -113,7 +113,14 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     // Convert numeric IDs to UUIDs to ensure config deployability.
     $all_ids = array();
     foreach ($default_value as $delta => $properties) {
-      $all_ids[$properties['target_type']][] = $properties['target_id'];
+      if (isset($properties['entity']) && $properties['entity']->isNew()) {
+        // This may be a newly created term.
+        $properties['entity']->save();
+        $default_value[$delta]['target_id'] = $properties['entity']->id();
+        $default_value[$delta]['target_type'] = $properties['entity']->getEntityTypeId();
+        unset($default_value[$delta]['entity']);
+      }
+      $all_ids[$default_value[$delta]['target_type']][] = $default_value[$delta]['target_id'];
     }
     $entities = array();
     foreach ($all_ids as $target_type => $ids) {
