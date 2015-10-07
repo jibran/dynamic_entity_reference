@@ -12,10 +12,12 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
@@ -77,7 +79,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties['target_id'] = DataDefinition::create('integer')
+    $properties['target_id'] = DataReferenceTargetDefinition::create('integer')
       ->setLabel(t('Entity ID'))
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE);
@@ -257,9 +259,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
 
     $form = array(
       '#type' => 'container',
-      '#process' => array(
-        '_entity_reference_field_field_settings_ajax_process',
-      ),
+      '#process' => array(array(get_class($this), 'fieldSettingsAjaxProcess')),
       '#element_validate' => array(array(get_class($this), 'fieldSettingsFormValidate')),
     );
     $form['handler'] = array(
@@ -267,7 +267,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       '#title' => t('Reference type'),
       '#open' => TRUE,
       '#tree' => TRUE,
-      '#process' => array('_entity_reference_form_process_merge_parent'),
+      '#process' => [[EntityReferenceItem::class, 'formProcessMergeParent']],
     );
 
     $form['handler']['handler'] = array(
@@ -371,7 +371,7 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
         $targetDefinition = $entity_property->getTargetDefinition();
         $entity_type = $targetDefinition->getEntityTypeId();
         if ((($entity_id != $values['target_id']) || ($entity_type != $values['target_type']))
-          && ($values['target_id'] != static::$NEW_ENTITY_MARKER || !$this->entity->isNew())) {
+          && $values['target_id'] !== NULL) {
           throw new \InvalidArgumentException('The target id, target type and entity passed to the dynamic entity reference item do not match.');
         }
       }
@@ -406,6 +406,9 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
       // react properly.
       $this->target_id = $this->entity->id();
       $this->target_type = $this->entity->getEntityTypeId();
+    }
+    if (!$this->isEmpty() && $this->target_id === NULL) {
+      $this->target_id = $this->entity->id();
     }
   }
 

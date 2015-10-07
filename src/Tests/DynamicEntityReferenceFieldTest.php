@@ -130,7 +130,7 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
     $entity->{$this->fieldName}->entity = $entity;
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $entity->getEntityTypeId(), '%id' => -1)));
+    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $entity->getEntityTypeId(), '%id' => '')));
 
     // @todo Implement a test case for invalid bundle references after
     // https://drupal.org/node/2064191 is fixed
