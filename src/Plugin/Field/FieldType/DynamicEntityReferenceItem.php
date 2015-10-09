@@ -19,7 +19,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
-use Drupal\entity_reference\ConfigurableEntityReferenceItem;
 
 /**
  * Defines the 'dynamic_entity_reference' entity field type.
@@ -44,7 +43,7 @@ use Drupal\entity_reference\ConfigurableEntityReferenceItem;
  *   constraints = {"ValidDynamicReference" = {}}
  * )
  */
-class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
+class DynamicEntityReferenceItem extends EntityReferenceItem {
 
   /**
    * {@inheritdoc}
@@ -433,11 +432,12 @@ class DynamicEntityReferenceItem extends ConfigurableEntityReferenceItem {
    * {@inheritdoc}
    */
   public static function calculateDependencies(FieldDefinitionInterface $field_definition) {
-    $dependencies = [];
+    $dependencies = FieldItemBase::calculateDependencies($field_definition);
+    $manager = \Drupal::entityManager();
     if ($default_value = $field_definition->getDefaultValueLiteral()) {
       foreach ($default_value as $value) {
         if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
-          $entity = \Drupal::entityManager()->loadEntityByUuid($value['target_type'], $value['target_uuid']);
+          $entity = $manager->loadEntityByUuid($value['target_type'], $value['target_uuid']);
           // If the entity does not exist do not create the dependency.
           // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
           if ($entity) {

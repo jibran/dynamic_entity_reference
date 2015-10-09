@@ -63,9 +63,10 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
    * {@inheritdoc}
    */
   public static function processDefaultValue($default_value, FieldableEntityInterface $entity, FieldDefinitionInterface $definition) {
-    // We want to bypass the EntityReferenceItem::processDefaultValue()
-    $default_value = FieldItemList::processDefaultValue($default_value, $entity, $definition);
-
+    $manager = \Drupal::entityManager();
+    // We want to bypass the EntityReferenceItem::processDefaultValue() so
+    // we duplicate FieldItemList::processDefaultValue() here which just returns
+    // $default_values.
     if ($default_value) {
       // Convert UUIDs to numeric IDs.
       $all_uuids = array();
@@ -78,7 +79,7 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
       $entity_uuids = array();
       foreach ($all_uuids as $target_type => $uuids) {
         if ($uuids) {
-          $entities = \Drupal::entityManager()
+          $entities = $manager
             ->getStorage($target_type)
             ->loadByProperties(array('uuid' => $uuids));
           $entity_uuids[$target_type] = array();
@@ -107,8 +108,15 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
    * {@inheritdoc}
    */
   public function defaultValuesFormSubmit(array $element, array &$form, FormStateInterface $form_state) {
-    // We want to bypass the EntityReferenceItem::defaultValuesFormSubmit()
-    $default_value = FieldItemList::defaultValuesFormSubmit($element, $form, $form_state);
+    $manager = \Drupal::entityManager();
+    $default_value = [];
+    // We want to bypass the EntityReferenceItem::defaultValuesFormSubmit() so
+    // we duplicate FieldItemList::defaultValuesFormSubmit() here.
+    // Extract the submitted value, and store it as an array.
+    if ($widget = $this->defaultValueWidget($form_state)) {
+      $widget->extractFormValues($this, $element, $form_state);
+      $default_value = $this->getValue();
+    }
 
     // Convert numeric IDs to UUIDs to ensure config deployability.
     $all_ids = array();
@@ -124,7 +132,7 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     }
     $entities = array();
     foreach ($all_ids as $target_type => $ids) {
-      $entities[$target_type] = \Drupal::entityManager()
+      $entities[$target_type] = $manager
         ->getStorage($target_type)
         ->loadMultiple($ids);
     }
