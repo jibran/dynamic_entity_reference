@@ -432,4 +432,94 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
   }
 
+ /**
+  * Tests node preview of dynamic entity reference field.
+  */
+  public function testNodePreview() {
+    \Drupal::service('module_installer')->install(array('taxonomy', 'node'));
+    $this->drupalCreateContentType(array('type' => 'article'));
+    $this->permissions = array(
+      'access content',
+      'administer nodes',
+      'administer node fields',
+      'create article content',
+    );
+    $this->adminUser = $this->drupalCreateUser($this->permissions);
+
+    $vocabulary = Vocabulary::create(array(
+      'name' => $this->randomMachineName(),
+      'vid' => Unicode::strtolower($this->randomMachineName()),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ));
+    $vocabulary->save();
+
+    $term = Term::create(array(
+      'name' => $this->randomMachineName(),
+      'vid' => $vocabulary->id(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ));
+    $term->save();
+
+    $this->drupalLogin($this->adminUser);
+
+    // Add a new dynamic entity reference field.
+    $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
+    $edit = array(
+      'label' => 'DER',
+      'field_name' => 'der',
+      'new_storage_type' => 'dynamic_entity_reference',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save and continue'));
+    $this->drupalPostForm(NULL, array(
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings[exclude_entity_types]' => FALSE,
+      'settings[entity_type_ids][]' => array('taxonomy_term'),
+    ), t('Save field settings'));
+    $edit = array(
+      'settings[taxonomy_term][handler_settings][target_bundles]['. $vocabulary->id() .']' => $vocabulary->id(),
+      'settings[taxonomy_term][handler_settings][auto_create]' => TRUE,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save settings'));
+
+    // Test the node preview for existing term.
+    $this->drupalGet('node/add/article');
+    $this->assertField('field_der[0][target_id]', 'Found field_der field target id');
+    $this->assertField('field_der[0][target_type]', 'Found field_der field target type');
+    $title = $this->randomMachineName();
+    $edit = array(
+      'field_der[0][target_id]' => $term->label() . ' (' . $term->id() . ')',
+      'field_der[0][target_type]' => 'taxonomy_term',
+      'title[0][value]' => $title,
+      'uid[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
+    );
+
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->assertText($title);
+    $this->assertText($term->label());
+    // Back to node add page.
+    $this->clickLink('Back to content editing');
+    $this->assertFieldByName('field_der[0][target_id]', $term->label() . ' (' . $term->id() . ')');
+
+    // Test the node preview for new term.
+    $this->drupalGet('node/add/article');
+    $this->assertField('field_der[0][target_id]', 'Found field_der field target id');
+    $this->assertField('field_der[0][target_type]', 'Found field_der field target type');
+
+    $new_term = $this->randomMachineName();
+    $edit = array(
+      'field_der[0][target_id]' => $new_term,
+      'field_der[0][target_type]' => 'taxonomy_term',
+      'title[0][value]' => $title,
+      'uid[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
+    );
+
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->assertText($title);
+    $this->assertText($new_term);
+    // Back to node add page.
+    $this->clickLink('Back to content editing');
+    $this->assertFieldByName('field_der[0][target_id]', $new_term);
+
+  }
+
 }
