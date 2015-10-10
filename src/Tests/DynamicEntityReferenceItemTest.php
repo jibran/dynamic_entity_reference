@@ -7,6 +7,7 @@
 
 namespace Drupal\dynamic_entity_reference\Tests;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -228,10 +229,40 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     // Now assign the unsaved term to the field.
     $entity->field_der->entity = $term;
     $entity->name->value = $this->randomMachineName();
+    // Now get the field value.
+    $value = $entity->get('field_der');
+    $this->assertTrue(empty($value['target_id']));
+    $this->assertNull($entity->field_der->target_id);
+    // And then set it.
+    $entity->field_der = $value;
     // Now save the term.
     $term->save();
     // And then the entity.
     $entity->save();
+    $this->assertEqual($entity->field_der->entity->id(), $term->id());
+  }
+
+  /**
+   * Tests entity auto create.
+   */
+  public function testEntityAutoCreate() {
+    // The term entity is unsaved here.
+    $term = Term::create(array(
+      'name' => $this->randomMachineName(),
+      'vid' => $this->term->bundle(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ));
+    $entity = EntityTest::create();
+    // Now assign the unsaved term to the field.
+    $entity->field_der->entity = $term;
+    $entity->name->value = $this->randomMachineName();
+    // This is equal to storing an entity to tempstore or cache and retrieving
+    // it back. An example for this is node preview.
+    $entity = serialize($entity);
+    $entity = unserialize($entity);
+    // And then the entity.
+    $entity->save();
+    $term = \Drupal::entityManager()->loadEntityByUuid($term->getEntityTypeId(), $term->uuid());
     $this->assertEqual($entity->field_der->entity->id(), $term->id());
   }
 
@@ -302,6 +333,45 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $field = FieldConfig::load($field->id());
     $field_settings = $field->getSettings();
     $this->assertTrue($field_settings['entity_test']['handler'] == 'views');
+  }
+
+  /**
+   * Tests validation constraint.
+   */
+  public function testValidation() {
+    // The term entity is unsaved here.
+    $term = Term::create([
+      'name' => $this->randomMachineName(),
+      'vid' => $this->term->bundle(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ]);
+    $entity = EntityTest::create([
+      'field_der' => [
+        'entity' => $term,
+        'target_id' => NULL,
+        'target_type' => $term->getEntityTypeId(),
+      ],
+    ]);
+    $errors = $entity->validate();
+    // Using target_id and target_type of NULL is valid with an unsaved entity.
+    $this->assertEqual(0, count($errors));
+    // Using target_id of NULL is not valid with a saved entity.
+    $term->save();
+    $entity = EntityTest::create([
+      'field_der' => [
+        'entity' => $term,
+        'target_id' => NULL,
+        'target_type' => $term->getEntityTypeId(),
+      ],
+    ]);
+    $errors = $entity->validate();
+    $this->assertEqual(1, count($errors));
+    $this->assertEqual($errors[0]->getMessage(), (string) new FormattableMarkup('%property should not be null.', ['%property' => 'target_id']));
+    $this->assertEqual($errors[0]->getPropertyPath(), 'field_der.0');
+    // This should rectify the issue, favoring the entity over the target_id.
+    $entity->save();
+    $errors = $entity->validate();
+    $this->assertEqual(0, count($errors));
   }
 
 }

@@ -8,6 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
@@ -16,7 +17,6 @@ use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
 
@@ -83,7 +83,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE);
 
-    $properties['target_type'] = DataDefinition::create('string')
+    $properties['target_type'] = DataReferenceTargetDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Target Entity Type'))
       ->setRequired(TRUE);
 
@@ -343,7 +343,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       $this->set('entity', $values, $notify);
     }
     else {
-      if (empty($values['target_type']) && !empty($values['target_id'])) {
+      if ((empty($values['target_type']) && !empty($values['target_id'])) && !(isset($values['entity']) && $values['entity'] instanceof EntityInterface)) {
         throw new \InvalidArgumentException('No entity type was provided, value is not a valid entity.');
       }
       // We have to bypass the EntityReferenceItem::setValue() here because we
@@ -351,26 +351,26 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       FieldItemBase::setValue($values, FALSE);
       // Support setting the field item with only one property, but make sure
       // values stay in sync if only property is passed.
-      if (isset($values['target_id']) && !isset($values['entity'])) {
+      // NULL is a valid value, so we use array_key_exists().
+      if (is_array($values) && array_key_exists('target_id', $values) && array_key_exists('target_type', $values) && !isset($values['entity'])) {
         $this->onChange('target_type', FALSE);
         $this->onChange('target_id', FALSE);
       }
-      elseif (!isset($values['target_id']) && isset($values['entity'])) {
+      elseif (is_array($values) && !array_key_exists('target_id', $values) && !array_key_exists('target_type', $values) && isset($values['entity'])) {
         $this->onChange('entity', FALSE);
       }
       // If both properties are passed, verify the passed values match. The
       // only exception we allow is when we have a new entity: in this case
       // its actual id and target_id will be different, due to the new entity
       // marker.
-      elseif (isset($values['target_id']) && isset($values['entity'])) {
+      elseif (is_array($values) && array_key_exists('target_id', $values) && array_key_exists('target_type', $values) && isset($values['entity'])) {
         /* @var \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference $entity_property */
         $entity_property = $this->get('entity');
         $entity_id = $entity_property->getTargetIdentifier();
         /* @var \Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface $targetDefinition */
         $targetDefinition = $entity_property->getTargetDefinition();
         $entity_type = $targetDefinition->getEntityTypeId();
-        if ((($entity_id != $values['target_id']) || ($entity_type != $values['target_type']))
-          && $values['target_id'] !== NULL) {
+        if (!$this->entity->isNew() && $values['target_id'] !== NULL && (($entity_id !== $values['target_id']) || ($entity_type !== $values['target_type']))) {
           throw new \InvalidArgumentException('The target id, target type and entity passed to the dynamic entity reference item do not match.');
         }
       }
@@ -384,12 +384,26 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public function getValue($include_computed = FALSE) {
-    $values = parent::getValue($include_computed);
+  public function getValue() {
+    $values = parent::getValue();
     if (!empty($values['target_type'])) {
       $this->get('entity')->getTargetDefinition()->setEntityTypeId($values['target_type']);
     }
-    return $this->values;
+    return $values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmpty() {
+    // Avoid loading the entity by first checking the 'target_id'.
+    if ($this->target_id !== NULL && $this->target_type !== NULL) {
+      return FALSE;
+    }
+    if ($this->entity && $this->entity instanceof EntityInterface) {
+      return FALSE;
+    }
+    return TRUE;
   }
 
   /**

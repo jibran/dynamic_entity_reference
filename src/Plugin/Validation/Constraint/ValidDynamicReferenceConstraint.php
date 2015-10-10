@@ -28,4 +28,11 @@ class ValidDynamicReferenceConstraint extends Constraint {
    */
   public $message = 'The referenced entity (%type: %id) does not exist.';
 
+  /**
+   * Validation message when the target_id or target_type is empty.
+   *
+   * @var string
+   */
+  public $nullMessage = '%property should not be null.';
+
 }

@@ -24,10 +24,24 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator {
     if (!isset($value)) {
       return;
     }
+    // We don't use a regular NotNull constraint for the target_id property as
+    // a NULL value is valid if the entity property contains an unsaved entity.
+    // @see \Drupal\Core\TypedData\DataReferenceTargetDefinition::getConstraints
+    if (!$value->isEmpty() && $value->target_id === NULL && !$value->entity->isNew()) {
+      $this->context->addViolation($constraint->nullMessage, ['%property' => 'target_id']);
+      return;
+    }
+    // We don't use a regular NotNull constraint for the target_id property as
+    // a NULL value is valid if the entity property contains an unsaved entity.
+    // @see \Drupal\Core\TypedData\DataReferenceTargetDefinition::getConstraints
+    if (!$value->isEmpty() && $value->target_type === NULL && !$value->entity->isNew()) {
+      $this->context->addViolation($constraint->nullMessage, ['%property' => 'target_type']);
+      return;
+    }
     $id = $value->get('target_id')->getValue();
     $type = $value->get('target_type')->getValue();
     $types = DynamicEntityReferenceItem::getTargetTypes($value->getFieldDefinition()->getSettings());
-    $valid_type = !empty($type) && in_array($type, $types);
+    $valid_type = empty($type) || (!empty($type) && in_array($type, $types));
     // '0' or NULL are considered valid empty references.
     if (empty($id) && $valid_type) {
       return;

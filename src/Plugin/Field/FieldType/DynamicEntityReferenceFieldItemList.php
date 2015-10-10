@@ -10,7 +10,6 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -32,11 +31,11 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     // "autocreate" entities that are already populated in $item->entity.
     $target_entities = $ids = array();
     foreach ($this->list as $delta => $item) {
-      if ($item->hasNewEntity()) {
-        $target_entities[$delta] = $item->entity;
-      }
-      elseif ($item->target_id !== NULL) {
+      if ($item->target_id !== NULL && $item->target_type !== NULL) {
         $ids[$item->target_type][$delta] = $item->target_id;
+      }
+     elseif ($item->hasNewEntity()) {
+        $target_entities[$delta] = $item->entity;
       }
     }
 
