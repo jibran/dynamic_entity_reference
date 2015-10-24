@@ -93,6 +93,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
+      'settings[entity_test_admin_routes][handler_settings][target_bundles][entity_test_admin_routes]' => TRUE,
       'settings[entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
       'settings[entity_test_mul_changed][handler_settings][target_bundles][entity_test_mul_changed]' => TRUE,
       'settings[entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
@@ -170,6 +171,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
+      'settings[entity_test_admin_routes][handler_settings][target_bundles][entity_test_admin_routes]' => TRUE,
       'settings[entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
       'settings[entity_test_mul_changed][handler_settings][target_bundles][entity_test_mul_changed]' => TRUE,
       'settings[entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
@@ -256,7 +258,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertEqual($entity->field_foobar[1]->entity->label(), 'item1');
     $this->assertEqual($entity->field_foobar[2]->entity->label(), 'item2');
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
     // Ensure that the autocomplete path is correct.
     foreach (array('0' => 'user', '1' => 'entity_test', '2' => 'entity_test') as $index => $expected_entity_type) {
@@ -297,7 +299,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     }
 
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'field_foobar[1][target_id]' => 'duplicate label',
     );
@@ -333,14 +335,14 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
     // Submit with a label that does not match anything.
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'field_foobar[1][target_id]' => 'does not exist',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'name[0][value]' => 'Bazbar',
       // Reference itself.

@@ -115,7 +115,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->assertEqual(count($entity->dynamic_references), 1, 'One item in field');
     $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'item1');
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
 
     $edit = array(
@@ -143,7 +143,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     }
 
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'dynamic_references[0][target_id]' => 'duplicate label',
     );
@@ -179,14 +179,14 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
 
     // Submit with a label that does not match anything.
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'dynamic_references[0][target_id]' => 'does not exist',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'name[0][value]' => 'Bazbar',
       // Reference itself.
@@ -268,7 +268,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'item1');
     $this->assertEqual($entity->dynamic_references[1]->entity->label(), 'item2');
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
 
     $edit = array(
@@ -296,7 +296,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     }
 
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'dynamic_references[1][target_id]' => 'duplicate label',
     );
@@ -332,14 +332,14 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
 
     // Submit with a label that does not match anything.
     // Now try to submit and just specify the label.
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'dynamic_references[1][target_id]' => 'does not exist',
     );
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
 
-    $this->drupalGet('entity_test/manage/' . $entity->id());
+    $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
       'name[0][value]' => 'Bazbar',
       // Reference itself.
