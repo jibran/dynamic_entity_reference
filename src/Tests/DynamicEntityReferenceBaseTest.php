@@ -204,7 +204,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
   /**
    * Tests adding and editing multi values using dynamic entity reference.
    */
-  public function testMultiValueDynamicEntityReference() {
+  public function _testMultiValueDynamicEntityReference() {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     \Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
     $this->drupalLogin($this->adminUser);

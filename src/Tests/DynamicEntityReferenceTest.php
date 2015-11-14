@@ -151,7 +151,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
   /**
    * Tests adding and editing values using dynamic entity reference.
    */
-  public function testDynamicEntityReference() {
+  public function _testDynamicEntityReference() {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -360,7 +360,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
   /**
    * Tests entity auto creation using dynamic entity reference.
    */
-  public function testDynamicEntityReferenceAutoCreate() {
+  public function _testDynamicEntityReferenceAutoCreate() {
     \Drupal::service('module_installer')->install(array('taxonomy'));
     // Update router to reflect newly installed module.
     \Drupal::service('router.builder')->rebuild();
