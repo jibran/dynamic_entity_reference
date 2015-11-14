@@ -8,6 +8,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Entity\Plugin\Validation\Constraint\ValidReferenceConstraint;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,6 +19,24 @@ use Drupal\Core\Form\FormStateInterface;
  * @property DynamicEntityReferenceItem[] list
  */
 class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConstraints() {
+    $constraints = parent::getConstraints();
+    // Remove the 'ValidReferenceConstraint' validation constraint because
+    // dynamic entity reference fields already use the 'ValidDynamicReference'
+    // constraint.
+    foreach ($constraints as $key => $constraint) {
+      if ($constraint instanceof ValidReferenceConstraint) {
+        unset($constraints[$key]);
+      }
+    }
+    $constraints = array_values($constraints);
+    $constraint_manager = $this->getTypedDataManager()->getValidationConstraintManager();
+    return $constraints;
+  }
 
   /**
    * {@inheritdoc}
