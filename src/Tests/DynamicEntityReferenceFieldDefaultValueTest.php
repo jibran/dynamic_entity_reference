@@ -54,6 +54,9 @@ class DynamicEntityReferenceFieldDefaultValueTest extends WebTestBase {
     'bypass node access',
   );
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -69,7 +72,7 @@ class DynamicEntityReferenceFieldDefaultValueTest extends WebTestBase {
   /**
    * Tests that default values are correctly translated to UUIDs in config.
    */
-  function testEntityReferenceDefaultValue() {
+  public function testEntityReferenceDefaultValue() {
     // Create a node to be referenced.
     $referenced_node = $this->drupalCreateNode(array('type' => 'referenced_content'));
 
@@ -103,14 +106,14 @@ class DynamicEntityReferenceFieldDefaultValueTest extends WebTestBase {
     // Set created node as default_value.
     $field_edit = array(
       'default_value_input[' . $field_name . '][0][target_type]' => $referenced_node->getEntityTypeId(),
-      'default_value_input[' . $field_name . '][0][target_id]' => $referenced_node->getTitle() . ' (' .$referenced_node->id() . ')',
+      'default_value_input[' . $field_name . '][0][target_id]' => $referenced_node->getTitle() . ' (' . $referenced_node->id() . ')',
     );
     $this->drupalPostForm('admin/structure/types/manage/reference_content/fields/node.reference_content.' . $field_name, $field_edit, t('Save settings'));
 
     // Check that default value is selected in default value form.
     $this->drupalGet('admin/structure/types/manage/reference_content/fields/node.reference_content.' . $field_name);
-    $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[' . $field_name . '][0][target_type]"] > option[value='. $referenced_node->getEntityTypeId() .']'), 'Content', 'The default target type value is selected in instance settings page');
-    $this->assertRaw('name="default_value_input[' . $field_name . '][0][target_id]" value="' . $referenced_node->getTitle() .' (' . $referenced_node->id() . ')', 'The default value is selected in instance settings page');
+    $this->assertFieldByXPath(CssSelector::toXPath('select[name="default_value_input[' . $field_name . '][0][target_type]"] > option[value=' . $referenced_node->getEntityTypeId() . ']'), 'Content', 'The default target type value is selected in instance settings page');
+    $this->assertRaw('name="default_value_input[' . $field_name . '][0][target_id]" value="' . $referenced_node->getTitle() . ' (' . $referenced_node->id() . ')', 'The default value is selected in instance settings page');
 
     // Check if the ID has been converted to UUID in config entity.
     $config_entity = $this->config('field.field.node.reference_content.' . $field_name)->get();

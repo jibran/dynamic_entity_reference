@@ -367,9 +367,9 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
         /* @var \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference $entity_property */
         $entity_property = $this->get('entity');
         $entity_id = $entity_property->getTargetIdentifier();
-        /* @var \Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface $targetDefinition */
-        $targetDefinition = $entity_property->getTargetDefinition();
-        $entity_type = $targetDefinition->getEntityTypeId();
+        /* @var \Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface $target_definition */
+        $target_definition = $entity_property->getTargetDefinition();
+        $entity_type = $target_definition->getEntityTypeId();
         if (!$this->entity->isNew() && $values['target_id'] !== NULL && (($entity_id !== $values['target_id']) || ($entity_type !== $values['target_type']))) {
           throw new \InvalidArgumentException('The target id, target type and entity passed to the dynamic entity reference item do not match.');
         }

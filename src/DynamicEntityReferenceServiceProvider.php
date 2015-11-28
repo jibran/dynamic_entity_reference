@@ -30,10 +30,11 @@ class DynamicEntityReferenceServiceProvider extends ServiceProviderBase {
         new Reference('module_handler'),
       ));
       // The priority must be higher than that of
-      // serializer.normalizer.entity_reference.hal in hal.services.yml
+      // serializer.normalizer.entity_reference.hal in hal.services.yml.
       $service_definition->addTag('normalizer', array('priority' => 20));
       $container->setDefinition('serializer.normalizer.entity.dynamic_entity_reference_item.hal', $service_definition);
 
     }
   }
+
 }

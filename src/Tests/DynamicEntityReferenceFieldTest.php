@@ -203,7 +203,8 @@ class DynamicEntityReferenceFieldTest extends EntityUnitTestBase {
     // Set the field value.
     $entity->{$this->fieldName}->setValue($reference_field);
 
-    // Load the target entities using EntityReferenceField::referencedEntities().
+    // Load the target entities using
+    // DynamicEntityReferenceField::referencedEntities().
     $entities = $entity->{$this->fieldName}->referencedEntities();
 
     // Test returned entities:

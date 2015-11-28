@@ -8,12 +8,12 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
 /**
- * Trait to override \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase::prepareView().
+ * Trait to override EntityReferenceFormatterBase::prepareView().
  */
 trait DynamicEntityReferenceFormatterTrait {
 
   /**
-   * Overrides \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase::prepareView().
+   * Overrides EntityReferenceFormatterBase::prepareView().
    *
    * Loads the entities referenced in that field across all the entities being
    * viewed.
@@ -42,7 +42,7 @@ trait DynamicEntityReferenceFormatterTrait {
       }
     }
     if ($ids) {
-      foreach (array_keys($ids) as $target_type ) {
+      foreach (array_keys($ids) as $target_type) {
         $target_entities[$target_type] = \Drupal::entityManager()->getStorage($target_type)->loadMultiple($ids[$target_type]);
       }
     }

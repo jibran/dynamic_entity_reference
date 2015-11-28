@@ -7,7 +7,6 @@
 
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\field\FieldStorageConfigInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 
@@ -46,7 +45,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
         'title' => t('@label referenced from @field_name', $args),
         'label' => t('@field_name: @label', $args),
         'group' => $entity_type->getLabel(),
-        'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $field_storage->getBundles()))),
+        'help' => t('Appears in: @bundles.', array('@bundles' => implode(', ', $field_storage->getBundles()))),
         'id' => 'standard',
         'base' => $target_base_table,
         'entity type' => $target_entity_type_id,
@@ -107,9 +106,8 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
  * Implements hook_views_data().
  *
  * Adds relationships for dynamic_entity_reference base fields.
- * @todo remove this when https://www.drupal.org/node/2337515 is in.
  *
- * @return array
+ * @todo remove this when https://www.drupal.org/node/2337515 is in.
  */
 function dynamic_entity_reference_views_data() {
   $entity_manager = \Drupal::entityManager();
@@ -144,7 +142,7 @@ function dynamic_entity_reference_views_data() {
     $entity_type = $entity_types[$entity_type_id];
     $base_table = $entity_type->getDataTable() ?: $entity_type->getBaseTable();
 
-    /** @var BaseFieldDefinition[] $fields */
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
     foreach ($fields as $field) {
       $field_name = $field->getName();
       $columns = $table_mapping->getColumnNames($field_name);
@@ -152,7 +150,7 @@ function dynamic_entity_reference_views_data() {
       $column_type = $columns['target_type'];
 
       // Unlimited (-1) or > 1 store field data in a dedicated table.
-      $table = $field->getCardinality() == 1 ? $base_table :  $entity_type->getBaseTable() . '__' . $field_name;
+      $table = $field->getCardinality() == 1 ? $base_table : $entity_type->getBaseTable() . '__' . $field_name;
       // Filter out non SQL entity types because \Drupal\views\EntityViewsData
       // class only allows entities with
       // \Drupal\Core\Entity\Sql\SqlEntityStorageInterface.
@@ -168,7 +166,7 @@ function dynamic_entity_reference_views_data() {
           '@type' => 'base field',
         ];
 
-        // Relationship (Origin -> Target)
+        // Relationship (Origin -> Target).
         $psuedo_field = $target_entity_type_id . '__' . $field_name;
         $data[$table][$psuedo_field]['relationship'] = [
           'title' => t('@field_name to @target_label entities', $t_args),
@@ -191,13 +189,13 @@ function dynamic_entity_reference_views_data() {
           ],
         ];
 
-        // Reverse Relationship (Target -> Origin)
-        $psuedo_field = 'reverse__' . $entity_type_id . '__'. $field_name;
+        // Reverse Relationship (Target -> Origin).
+        $psuedo_field = 'reverse__' . $entity_type_id . '__' . $field_name;
         $data[$target_table][$psuedo_field]['relationship'] = [
           'title' => t('Reverse reference to @field_name @type on @origin_label', $t_args),
           'label' => t('Reverse reference to @field_name @type on @origin_label', $t_args),
           'group' => $target_entity_type->getLabel(),
-          'help' =>  t('Reverse reference from @target_label entities referenced by @field_name @type on @origin_label entities.', $t_args),
+          'help' => t('Reverse reference from @target_label entities referenced by @field_name @type on @origin_label entities.', $t_args),
         ];
         // When base field cardinality is 1 then the 'base' and 'field table'
         // are same because field column(s) exist in entity base table therefore
@@ -211,9 +209,9 @@ function dynamic_entity_reference_views_data() {
             'field' => $target_entity_type->getKey('id'),
             'extra' => [
               [
-                // Entity reference field only has one target type whereas dynamic
-                // entity reference field can have multiple target types that is
-                // why we need extra join condition on target types.
+                // Entity reference field only has one target type whereas
+                // dynamic entity reference field can have multiple target types
+                // that is why we need extra join condition on target types.
                 'field' => $column_type,
                 'value' => $target_entity_type_id,
               ],

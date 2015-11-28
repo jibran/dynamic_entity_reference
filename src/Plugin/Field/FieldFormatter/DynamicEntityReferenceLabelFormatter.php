@@ -22,6 +22,7 @@ use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
  * )
  */
 class DynamicEntityReferenceLabelFormatter extends EntityReferenceLabelFormatter {
+
   use DynamicEntityReferenceFormatterTrait;
 
 }

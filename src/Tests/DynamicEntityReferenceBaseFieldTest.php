@@ -17,6 +17,7 @@ use Drupal\system\Tests\Entity\EntityUnitTestBase;
  * @group dynamic_entity_reference
  */
 class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
+
   use SchemaCheckTestTrait;
 
   /**
@@ -179,7 +180,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
     // Set the field value.
     $entity->{$this->fieldName}->setValue($reference_field);
 
-    // Load the target entities using EntityReferenceField::referencedEntities().
+    // Load target entities using EntityReferenceField::referencedEntities().
     $entities = $entity->{$this->fieldName}->referencedEntities();
 
     // Test returned entities:

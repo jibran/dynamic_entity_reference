@@ -146,10 +146,10 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       $element['#selection_settings'] = $settings[$values['target_type']]['handler_settings'];
       if ($this->getSelectionHandlerSetting('auto_create', $values['target_type'])) {
         $form_object = $form_state->getFormObject();
-        $entity =  $form_object instanceof EntityFormInterface ? $form_object->getEntity() : '';
+        $entity = $form_object instanceof EntityFormInterface ? $form_object->getEntity() : '';
         $element['#autocreate'] = array(
           'bundle' => $this->getAutocreateBundle($values['target_type']),
-          'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id()
+          'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
         );
       }
       else {
@@ -178,7 +178,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     return isset($settings[$target_type]['handler_settings'][$setting_name]) ? $settings[$target_type]['handler_settings'][$setting_name] : NULL;
   }
 
-  /*
+  /**
    * {@inheritdoc}
    */
   protected function getAutocreateBundle($target_type = NULL) {
@@ -204,8 +204,8 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     return $bundle;
   }
 
-  /*
-   * Creates auto complete path for all the given target types
+  /**
+   * Creates auto complete path for all the given target types.
    *
    * @param string[] $target_types
    *   All the referenceable target types.

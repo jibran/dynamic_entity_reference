@@ -53,7 +53,7 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
       if ($item->target_id !== NULL && $item->target_type !== NULL) {
         $ids[$item->target_type][$delta] = $item->target_id;
       }
-     elseif ($item->hasNewEntity()) {
+      elseif ($item->hasNewEntity()) {
         $target_entities[$delta] = $item->entity;
       }
     }

@@ -80,10 +80,12 @@ class DynamicEntityReferenceSchemaTest extends EntityUnitTestBase {
     $entity_storage = \Drupal::entityManager()->getStorage('entity_test');
     $referenced_entity = $entity_storage->create(array());
     $referenced_entity->save();
-    $field->setDefaultValue(array( array(
-      'target_type' => $referenced_entity->getEntityTypeId(),
-      'target_id' => $referenced_entity->id(),
-    )));
+    $field->setDefaultValue(array(
+      array(
+        'target_type' => $referenced_entity->getEntityTypeId(),
+        'target_id' => $referenced_entity->id(),
+      ),
+    ));
     $field->save();
 
     $this->assertConfigSchema($typed_config, 'field.field.' . $field->id(), $field->toArray());

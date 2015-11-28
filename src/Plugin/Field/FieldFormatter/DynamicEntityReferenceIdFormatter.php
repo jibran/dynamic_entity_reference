@@ -22,5 +22,7 @@ use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceIdFormatter;
  * )
  */
 class DynamicEntityReferenceIdFormatter extends EntityReferenceIdFormatter {
+
   use DynamicEntityReferenceFormatterTrait;
+
 }

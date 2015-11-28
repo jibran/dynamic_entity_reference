@@ -28,7 +28,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
   protected $adminUser;
 
   /**
-   * The field name
+   * The field name.
    *
    * @var string
    */
@@ -58,6 +58,9 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
     'bypass node access',
   );
 
+  /**
+   * Sets up a Drupal site for running functional and integration tests.
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -100,7 +103,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
   /**
    * Tests default autocomplete widget.
    */
-  function testEntityReferenceDefaultWidget() {
+  public function testEntityReferenceDefaultWidget() {
     $field_name = $this->fieldName;
     entity_get_form_display('node', 'reference_content', 'default')
       ->setComponent($field_name, array(
@@ -114,7 +117,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
     $edit = array(
       'title[0][value]' => $title,
       $field_name . '[0][target_type]' => $referenced_node->getEntityTypeId(),
-      $field_name . '[0][target_id]' => $referenced_node->getTitle() . ' (' .$referenced_node->id() . ')',
+      $field_name . '[0][target_id]' => $referenced_node->getTitle() . ' (' . $referenced_node->id() . ')',
     );
     $this->drupalPostForm(Url::fromRoute('node.add', array('node_type' => 'reference_content')), $edit, t('Save'));
     $this->assertRaw(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));
@@ -127,7 +130,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
   /**
    * Tests option button widget.
    */
-  function testEntityReferenceOptionsButtonsWidget() {
+  public function testEntityReferenceOptionsButtonsWidget() {
     $field_name = $this->fieldName;
     entity_get_form_display('node', 'reference_content', 'default')
       ->setComponent($field_name, array(
@@ -140,7 +143,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
     $title = $this->randomMachineName();
     $edit = array(
       'title[0][value]' => $title,
-      $field_name => $referenced_node->getEntityTypeId() . '-' .$referenced_node->id(),
+      $field_name => $referenced_node->getEntityTypeId() . '-' . $referenced_node->id(),
     );
     $this->drupalPostForm(Url::fromRoute('node.add', array('node_type' => 'reference_content')), $edit, t('Save'));
     $this->assertRaw(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));
@@ -153,7 +156,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
   /**
    * Tests option select widget.
    */
-  function testEntityReferenceOptionsSelectWidget() {
+  public function testEntityReferenceOptionsSelectWidget() {
     $field_name = $this->fieldName;
     entity_get_form_display('node', 'reference_content', 'default')
       ->setComponent($field_name, array(
@@ -166,7 +169,7 @@ class DynamicEntityReferenceWidgetTest extends WebTestBase {
     $title = $this->randomMachineName();
     $edit = array(
       'title[0][value]' => $title,
-      $field_name => $referenced_node->getEntityTypeId() . '-' .$referenced_node->id(),
+      $field_name => $referenced_node->getEntityTypeId() . '-' . $referenced_node->id(),
     );
     $this->drupalPostForm(Url::fromRoute('node.add', array('node_type' => 'reference_content')), $edit, t('Save'));
     $this->assertRaw(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));

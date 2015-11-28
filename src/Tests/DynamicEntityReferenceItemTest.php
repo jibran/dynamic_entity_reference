@@ -33,7 +33,13 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('dynamic_entity_reference', 'taxonomy', 'text', 'filter', 'views');
+  public static $modules = [
+    'dynamic_entity_reference',
+    'taxonomy',
+    'text',
+    'filter',
+    'views',
+  ];
 
   /**
    * The taxonomy vocabulary to test with.
@@ -95,7 +101,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
   }
 
   /**
-   * Tests the dynamic entity reference field type for referencing content entities.
+   * Tests the der field type for referencing content entities.
    */
   public function testContentEntityReferenceItem() {
     $tid = $this->term->id();
@@ -176,7 +182,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
       $entity->field_der = [
         'target_id' => 'invalid',
         'target_type' => $entity_type_id,
-        'entity' => $term2
+        'entity' => $term2,
       ];
       $this->fail('Assigning an invalid item throws an exception.');
     }
@@ -189,7 +195,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
       $entity->field_der = [
         'target_id' => $term2->id(),
         'target_type' => 'invalid',
-        'entity' => $term2
+        'entity' => $term2,
       ];
       $this->fail('Assigning an invalid item throws an exception.');
     }
@@ -202,7 +208,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
     $this->assertEqual($entity->field_der->entity->id(), $term2->id());
     $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
 
-    // Delete terms so we have nothing to reference and try again
+    // Delete terms so we have nothing to reference and try again.
     $term->delete();
     $term2->delete();
     $entity = EntityTest::create(array('name' => $this->randomMachineName()));
@@ -267,7 +273,7 @@ class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
   }
 
   /**
-   * Tests the dynamic entity reference field type for referencing multiple content entities.
+   * Tests the der field type for referencing multiple content entities.
    */
   public function testMultipleEntityReferenceItem() {
     // Allow to reference multiple entities.

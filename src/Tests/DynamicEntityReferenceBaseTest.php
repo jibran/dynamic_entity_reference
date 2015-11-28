@@ -22,7 +22,7 @@ use Drupal\simpletest\WebTestBase;
 class DynamicEntityReferenceBaseTest extends WebTestBase {
 
   /**
-   * Admin user
+   * The admin user.
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
@@ -117,7 +117,6 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
-
     $edit = array(
       'name[0][value]' => 'Bazbar',
       // Remove one child.
@@ -129,7 +128,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     // Reload entity.
     \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
-    $this->assertTrue($entity->dynamic_references->isEmpty() , 'No value in field');
+    $this->assertTrue($entity->dynamic_references->isEmpty(), 'No value in field');
 
     // Create two entities with the same label.
     $labels = array();
@@ -254,9 +253,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $entities = \Drupal::entityManager()
       ->getStorage('entity_test')
-      ->loadByProperties(array(
-      'name' => 'Barfoo',
-    ));
+      ->loadByProperties(array('name' => 'Barfoo'));
     $this->assertEqual(1, count($entities), 'Entity was saved');
     $entity = reset($entities);
     $this->drupalGet('entity_test/' . $entity->id());
@@ -269,7 +266,6 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->assertEqual($entity->dynamic_references[1]->entity->label(), 'item2');
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
-
 
     $edit = array(
       'name[0][value]' => 'Bazbar',

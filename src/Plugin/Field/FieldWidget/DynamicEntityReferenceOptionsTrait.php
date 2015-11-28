@@ -7,7 +7,6 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;

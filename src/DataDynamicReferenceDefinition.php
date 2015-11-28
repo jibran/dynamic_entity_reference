@@ -15,6 +15,8 @@ use Drupal\Core\TypedData\DataReferenceDefinition;
 class DataDynamicReferenceDefinition extends DataReferenceDefinition {
 
   /**
+   * The data definition of target.
+   *
    * @var \Drupal\Core\TypedData\DataDefinitionInterface
    */
   protected $targetDefinition;
@@ -29,7 +31,7 @@ class DataDynamicReferenceDefinition extends DataReferenceDefinition {
    */
   public static function create($target_data_type) {
     $definition['type'] = 'dynamic_' . $target_data_type . '_reference';
-    /* @var $definition \Drupal\Core\TypedData\DataReferenceDefinition; */
+    /* @var $definition \Drupal\Core\TypedData\DataReferenceDefinition */
     $definition = new static($definition);
     return $definition->setTargetDefinition(\Drupal::typedDataManager()->createDataDefinition($target_data_type));
   }

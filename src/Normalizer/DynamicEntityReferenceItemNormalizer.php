@@ -7,10 +7,8 @@
 
 namespace Drupal\dynamic_entity_reference\Normalizer;
 
-use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\hal\Normalizer\EntityReferenceItemNormalizer;
-use Drupal\rest\LinkManager\LinkManagerInterface;
-use Drupal\serialization\EntityResolver\EntityResolverInterface;
 
 /**
  * Dynamic entity reference normalizer.
@@ -22,7 +20,7 @@ class DynamicEntityReferenceItemNormalizer extends EntityReferenceItemNormalizer
    *
    * @var string
    */
-  protected $supportedInterfaceOrClass = 'Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem';
+  protected $supportedInterfaceOrClass = DynamicEntityReferenceItem::class;
 
   /**
    * {@inheritdoc}

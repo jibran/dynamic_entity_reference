@@ -29,7 +29,7 @@ use Symfony\Component\CssSelector\CssSelector;
 class DynamicEntityReferenceTest extends WebTestBase {
 
   /**
-   * Admin user
+   * The admin user.
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
@@ -242,9 +242,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $entities = \Drupal::entityManager()
       ->getStorage('entity_test')
-      ->loadByProperties(array(
-      'name' => 'Barfoo',
-    ));
+      ->loadByProperties(array('name' => 'Barfoo'));
     $this->assertEqual(1, count($entities), 'Entity was saved');
     $entity = reset($entities);
     $this->drupalGet('entity_test/' . $entity->id());
@@ -391,7 +389,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_type_ids][]' => array('taxonomy_term', 'user'),
     ), t('Save field settings'));
     $edit = array(
-      'settings[taxonomy_term][handler_settings][target_bundles]['. $vocabulary->id() .']' => $vocabulary->id(),
+      'settings[taxonomy_term][handler_settings][target_bundles][' . $vocabulary->id() . ']' => $vocabulary->id(),
       'settings[taxonomy_term][handler_settings][auto_create]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
@@ -415,9 +413,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $entities = \Drupal::entityManager()
       ->getStorage('entity_test')
-      ->loadByProperties(array(
-      'name' => 'Barfoo',
-    ));
+      ->loadByProperties(array('name' => 'Barfoo'));
     $this->assertEqual(1, count($entities), 'Entity was saved');
     $entity = reset($entities);
 
@@ -434,9 +430,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
   }
 
- /**
-  * Tests node preview of dynamic entity reference field.
-  */
+  /**
+   * Tests node preview of dynamic entity reference field.
+   */
   public function testNodePreview() {
     \Drupal::service('module_installer')->install(array('taxonomy', 'node'));
     $this->drupalCreateContentType(array('type' => 'article'));
@@ -478,7 +474,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[entity_type_ids][]' => array('taxonomy_term'),
     ), t('Save field settings'));
     $edit = array(
-      'settings[taxonomy_term][handler_settings][target_bundles]['. $vocabulary->id() .']' => $vocabulary->id(),
+      'settings[taxonomy_term][handler_settings][target_bundles][' . $vocabulary->id() . ']' => $vocabulary->id(),
       'settings[taxonomy_term][handler_settings][auto_create]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));

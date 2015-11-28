@@ -18,6 +18,7 @@ use Drupal\views\Views;
  * Tests dynamic entity reference relationship data for base fields.
  *
  * @group dynamic_entity_reference
+ *
  * @see dynamic_entity_reference_views_data()
  */
 class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewKernelTestBase {
@@ -34,7 +35,12 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewKernelTestBase
    *
    * @var array
    */
-  public static $modules = ['user', 'field', 'entity_test', 'dynamic_entity_reference'];
+  public static $modules = [
+    'user',
+    'field',
+    'entity_test',
+    'dynamic_entity_reference',
+  ];
 
   /**
    * The entity_test entities used by the test.
@@ -52,7 +58,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewKernelTestBase
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     static::$testViews = [
       'test_dynamic_entity_reference_entity_test_view',
-      'test_dynamic_entity_reference_entity_test_mul_view'
+      'test_dynamic_entity_reference_entity_test_mul_view',
     ];
     $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');
@@ -367,7 +373,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewKernelTestBase
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     static::$testViews = [
       'test_dynamic_entity_reference_mul_entity_test_view',
-      'test_dynamic_entity_reference_mul_entity_test_mul_view'
+      'test_dynamic_entity_reference_mul_entity_test_mul_view',
     ];
     $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');

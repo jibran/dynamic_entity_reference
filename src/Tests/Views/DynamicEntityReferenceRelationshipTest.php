@@ -20,6 +20,7 @@ use Drupal\views\Views;
  * Tests dynamic entity reference relationship data.
  *
  * @group dynamic_entity_reference
+ *
  * @see dynamic_entity_reference_field_views_data()
  */
 class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
@@ -40,7 +41,13 @@ class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
    *
    * @var array
    */
-  public static $modules = array('user', 'field', 'entity_test', 'entity_reference', 'dynamic_entity_reference', 'dynamic_entity_reference_test_views');
+  public static $modules = [
+    'user',
+    'field',
+    'entity_test',
+    'dynamic_entity_reference',
+    'dynamic_entity_reference_test_views',
+  ];
 
   /**
    * The entity_test entities used by the test.
@@ -190,7 +197,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
 
     foreach ($view->result as $index => $row) {
       // Just check that the actual ID of the entity is the expected one.
-      $this->assertEqual($row->id, $this->entities[$index ]->id());
+      $this->assertEqual($row->id, $this->entities[$index]->id());
       // Also check that we have the correct result entity.
       $this->assertEqual($row->_entity->id(), $this->entities[$index]->id());
       $this->assertEqual($row->_entity->bundle(), $this->entities[$index]->bundle());

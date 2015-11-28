@@ -52,4 +52,5 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator {
       $this->context->addViolation($constraint->message, array('%type' => $type, '%id' => $id));
     }
   }
+
 }
