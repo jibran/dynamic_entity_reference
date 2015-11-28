@@ -308,7 +308,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_1:
     display_plugin: embed
     id: embed_1
@@ -485,7 +486,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_2:
     display_plugin: embed
     id: embed_2
@@ -629,6 +631,7 @@ display:
       defaults:
         fields: false
         relationships: false
+        sorts: false
       relationships:
         reverse__entity_test__dynamic_references:
           id: reverse__entity_test__dynamic_references
@@ -636,13 +639,29 @@ display:
           field: reverse__entity_test__dynamic_references
           entity_type: entity_test
           plugin_id: entity_reverse
+      sorts:
+        id:
+          id: id
+          table: entity_test
+          field: id
+          relationship: reverse__entity_test__dynamic_references
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          entity_type: entity_test
+          entity_field: id
+          plugin_id: standard
     cache_metadata:
       contexts:
         - entity_test_view_grants
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_3:
     display_plugin: embed
     id: embed_3
@@ -788,6 +807,7 @@ display:
         filters: false
         filter_groups: false
         relationships: false
+        sorts: false
       filters:
         dynamic_references_target_type:
           id: dynamic_references_target_type
@@ -872,10 +892,26 @@ display:
           entity_type: entity_test
           plugin_id: entity_reverse
       display_description: ''
+      sorts:
+        id:
+          id: id
+          table: entity_test_mul_property_data
+          field: id
+          relationship: reverse__entity_test_mul__dynamic_references
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          entity_type: entity_test_mul
+          entity_field: id
+          plugin_id: standard
     cache_metadata:
       contexts:
         - entity_test_view_grants
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }

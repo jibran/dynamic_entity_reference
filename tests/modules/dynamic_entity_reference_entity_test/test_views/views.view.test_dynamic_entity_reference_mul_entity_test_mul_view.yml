@@ -251,7 +251,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_1:
     display_plugin: embed
     id: embed_1
@@ -367,7 +368,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_2:
     display_plugin: embed
     id: embed_2
@@ -385,6 +387,7 @@ display:
       defaults:
         relationships: false
         fields: false
+        sorts: false
       fields:
         id:
           id: id
@@ -459,12 +462,28 @@ display:
           entity_type: entity_test_mul
           entity_field: id
           plugin_id: field
+      sorts:
+        id:
+          id: id
+          table: entity_test_mul_property_data
+          field: id
+          relationship: reverse__entity_test_mul__dynamic_references
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          entity_type: entity_test_mul
+          entity_field: id
+          plugin_id: standard
     cache_metadata:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_3:
     display_plugin: embed
     id: embed_3
@@ -550,6 +569,7 @@ display:
         filter_groups: false
         relationships: false
         fields: false
+        sorts: false
       filter_groups:
         operator: AND
         groups: {  }
@@ -576,9 +596,25 @@ display:
           entity_field: id
           plugin_id: field
           relationship: reverse__entity_test__dynamic_references
+      sorts:
+        id:
+          id: id
+          table: entity_test
+          field: id
+          relationship: reverse__entity_test__dynamic_references
+          group_type: group
+          admin_label: ''
+          order: ASC
+          exposed: false
+          expose:
+            label: ''
+          entity_type: entity_test
+          entity_field: id
+          plugin_id: standard
     cache_metadata:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }

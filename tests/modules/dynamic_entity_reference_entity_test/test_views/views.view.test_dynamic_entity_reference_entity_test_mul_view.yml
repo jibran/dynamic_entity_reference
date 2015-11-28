@@ -215,7 +215,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_1:
     display_plugin: embed
     id: embed_1
@@ -254,7 +255,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_2:
     display_plugin: embed
     id: embed_2
@@ -396,7 +398,8 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
   embed_3:
     display_plugin: embed
     id: embed_3
@@ -539,4 +542,5 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url.query_args
-      cacheable: false
+      max-age: -1
+      tags: {  }
