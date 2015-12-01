@@ -22,7 +22,7 @@ function dynamic_entity_reference_field_info(){
       'handler' => 'default',
     ),
     'default_widget' => 'dynamic_entity_reference_default',
-    'default_formatter' => 'dynamic_entity_reference_label',
+    'default_formatter' => 'dynamic_entity_reference_default',
     'property_callbacks' => array('dynamic_entity_reference_field_property_callback'),
   );
 
