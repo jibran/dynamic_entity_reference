@@ -151,7 +151,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
   /**
    * Tests adding and editing values using dynamic entity reference.
    */
-  public function _testDynamicEntityReference() {
+  public function testDynamicEntityReference() {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -194,6 +194,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
     // Create some items to reference.
     $item1 = EntityTest::create([
@@ -240,7 +241,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = \Drupal::entityManager()
+    $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties(array('name' => 'Barfoo'));
     $this->assertEqual(1, count($entities), 'Entity was saved');
@@ -281,8 +282,10 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
-    $entity = entity_load('entity_test', $entity->id());
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
+    $entity = EntityTest::load($entity->id());
     $this->assertEqual(count($entity->field_foobar), 2, 'Two values in field');
 
     // Create two entities with the same label.
@@ -350,7 +353,9 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
     $this->assertEqual($entity->field_foobar[1]->entity->label(), 'Bazbar');
   }
@@ -358,7 +363,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
   /**
    * Tests entity auto creation using dynamic entity reference.
    */
-  public function _testDynamicEntityReferenceAutoCreate() {
+  public function testDynamicEntityReferenceAutoCreate() {
     \Drupal::service('module_installer')->install(array('taxonomy'));
     // Update router to reflect newly installed module.
     \Drupal::service('router.builder')->rebuild();
@@ -393,6 +398,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
       'settings[taxonomy_term][handler_settings][auto_create]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
     $this->drupalGet('entity_test/add');
 
     // Add some extra dynamic entity reference fields.
@@ -411,9 +417,10 @@ class DynamicEntityReferenceTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = \Drupal::entityManager()
+
+    $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
-      ->loadByProperties(array('name' => 'Barfoo'));
+      ->loadByProperties(['name' => 'Barfoo']);
     $this->assertEqual(1, count($entities), 'Entity was saved');
     $entity = reset($entities);
 

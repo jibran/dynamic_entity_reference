@@ -81,7 +81,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
     ;
-    $settings = \Drupal::entityManager()->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
+    $settings = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
     $selection_settings = $settings['entity_test']['handler_settings'] ?: [];
     $data = serialize($selection_settings) . 'entity_test' . $settings['entity_test']['handler'];
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
@@ -101,7 +101,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = \Drupal::entityManager()
+    $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties(array(
         'name' => 'Barfoo',
@@ -126,7 +126,9 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
     $this->assertTrue($entity->dynamic_references->isEmpty(), 'No value in field');
 
@@ -195,7 +197,9 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
     $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'Bazbar');
   }
@@ -203,7 +207,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
   /**
    * Tests adding and editing multi values using dynamic entity reference.
    */
-  public function _testMultiValueDynamicEntityReference() {
+  public function testMultiValueDynamicEntityReference() {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     \Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
     $this->drupalLogin($this->adminUser);
@@ -226,7 +230,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
     ;
-    $settings = \Drupal::entityManager()->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
+    $settings = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
     $selection_settings = $settings['entity_test']['handler_settings'] ?: [];
     $data = serialize($selection_settings) . 'entity_test' . $settings['entity_test']['handler'];
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
@@ -251,7 +255,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     );
 
     $this->drupalPostForm(NULL, $edit, t('Save'));
-    $entities = \Drupal::entityManager()
+    $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties(array('name' => 'Barfoo'));
     $this->assertEqual(1, count($entities), 'Entity was saved');
@@ -276,7 +280,9 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
     $this->assertEqual(count($entity->dynamic_references), 1, 'One value in field');
 
@@ -345,7 +351,9 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Bazbar');
     // Reload entity.
-    \Drupal::entityManager()->getStorage('entity_test')->resetCache(array($entity->id()));
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
     $this->assertEqual($entity->dynamic_references[1]->entity->label(), 'Bazbar');
   }
