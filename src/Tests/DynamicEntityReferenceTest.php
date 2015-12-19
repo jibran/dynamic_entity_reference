@@ -31,9 +31,16 @@ class DynamicEntityReferenceTest extends WebTestBase {
   /**
    * The admin user.
    *
-   * @var \Drupal\Core\Session\AccountInterface
+   * @var \Drupal\user\Entity\User
    */
   protected $adminUser;
+
+  /**
+   * The another user.
+   *
+   * @var \Drupal\user\Entity\User
+   */
+  protected $anotherUser;
 
   /**
    * Modules to enable.
@@ -57,6 +64,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     'view test entity',
     'administer entity_test fields',
     'administer entity_test content',
+    'access user profiles',
   );
 
   /**
@@ -65,6 +73,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser($this->permissions);
+    $this->anotherUser = $this->drupalCreateUser();
   }
 
   /**
@@ -229,7 +238,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->drupalPostAjaxForm(NULL, array(), array('field_foobar_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
 
     $edit = array(
-      'field_foobar[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
+      'field_foobar[0][target_id]' => $this->anotherUser->label() . ' (' . $this->anotherUser->id() . ')',
       'field_foobar[0][target_type]' => 'user',
       // Ensure that an exact match on a unique label is accepted.
       'field_foobar[1][target_id]' => 'item1',
@@ -248,12 +257,12 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $entity = reset($entities);
     $this->drupalGet('entity_test/' . $entity->id());
     $this->assertText('Barfoo');
-    $this->assertText($this->adminUser->label());
+    $this->assertText($this->anotherUser->label());
     $this->assertText('item1');
     $this->assertText('item2');
 
     $this->assertEqual(count($entity->field_foobar), 3, 'Three items in field');
-    $this->assertEqual($entity->field_foobar[0]->entity->label(), $this->adminUser->label());
+    $this->assertEqual($entity->field_foobar[0]->entity->label(), $this->anotherUser->label());
     $this->assertEqual($entity->field_foobar[1]->entity->label(), 'item1');
     $this->assertEqual($entity->field_foobar[2]->entity->label(), 'item2');
 
