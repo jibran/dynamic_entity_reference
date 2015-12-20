@@ -270,9 +270,9 @@ function dynamic_entity_reference_field_formatter_prepare_view($entity_type, $en
 
     if ($target_ids) {
       foreach ($target_ids as $target_type => $ids) {
-        $target_entities = entity_load($target_type, $ids);
-        foreach ($target_entities as $id => $target_entity) {
-          $target_entities[$target_type][$id] = entity_metadata_wrapper($entity_type, $target_entity);
+        $target_entities_for_type = entity_load($target_type, $ids);
+        foreach ($target_entities_for_type as $id => $target_entity) {
+          $target_entities[$target_type][$id] = entity_metadata_wrapper($target_type, $target_entity);
         }
       }
     }
@@ -282,7 +282,7 @@ function dynamic_entity_reference_field_formatter_prepare_view($entity_type, $en
       foreach ($revision_ids as $target_type => $rev_ids) {
         foreach ($rev_ids as $revision_id) {
           $target_entity = entity_revision_load($target_type, $revision_id);
-          $target_entity_wrapper = entity_metadata_wrapper($entity_type, $target_entity);
+          $target_entity_wrapper = entity_metadata_wrapper($target_type, $target_entity);
           // Use the revision ID in the key.
           $identifier = $target_entity_wrapper->getIdentifier() . ':' . $revision_id;
           $target_entities[$target_type][$identifier] = $target_entity_wrapper;

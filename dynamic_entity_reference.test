@@ -54,6 +54,7 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     'administer content types',
     'create ponies content',
     'edit any ponies content',
+    'access user profiles',
     'administer nodes',
   );
 
@@ -64,6 +65,7 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     parent::setUp(self::$modules);
     $this->drupalCreateContentType(array('type' => 'ponies'));
     $this->adminUser = $this->drupalCreateUser($this->permissions);
+    $this->anotherUser = $this->drupalCreateUser();
   }
 
   /**
@@ -160,7 +162,11 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     $this->drupalPostAjax(NULL, array(), array('field_foobar_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'ponies-node-form');
 
     $edit = array(
-      'field_foobar[und][0][target_id]' => $this->adminUser->name . ' (' . $this->adminUser->uid . ')',
+      // Use a different user account (not the administrator) for this field
+      // value so that its presence can be reliably asserted in the HTML output
+      // (otherwise the assertion could pick up "Submitted by [admin]" text on
+      // the node).
+      'field_foobar[und][0][target_id]' => $this->anotherUser->name . ' (' . $this->anotherUser->uid . ')',
       'field_foobar[und][0][target_type]' => 'user',
       'field_foobar[und][1][target_id]' => 'item1 (' . $item1->nid . ')',
       'field_foobar[und][1][target_type]' => 'node',
@@ -177,13 +183,13 @@ class DynamicEntityReferenceTest extends DrupalWebTestCase {
     $node = reset($entities);
     $this->drupalGet('node/' . $node->nid);
     $this->assertText('Barfoo');
-    $this->assertText($this->adminUser->name);
+    $this->assertText($this->anotherUser->name);
     $this->assertText('item1');
     $this->assertText('item2');
 
     $this->assertEqual(count($node->field_foobar[LANGUAGE_NONE]), 3, 'Three items in field');
     $this->assertEqual($node->field_foobar[LANGUAGE_NONE][0]['target_type'], 'user');
-    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][0]['target_id'], $this->adminUser->uid);
+    $this->assertEqual($node->field_foobar[LANGUAGE_NONE][0]['target_id'], $this->anotherUser->uid);
     $this->assertEqual($node->field_foobar[LANGUAGE_NONE][1]['target_type'], 'node');
     $this->assertEqual($node->field_foobar[LANGUAGE_NONE][1]['target_id'], $item1->nid);
     $this->assertEqual($node->field_foobar[LANGUAGE_NONE][2]['target_type'], 'node');
