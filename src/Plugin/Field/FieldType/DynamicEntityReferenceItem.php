@@ -496,8 +496,8 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    *   All the target entity type ids that can be referenced.
    */
   public static function getTargetTypes($settings) {
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = array_keys($labels['Content']);
+    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
+    $options = array_keys($labels[(string) t('Content')]);
 
     if (!empty($settings['exclude_entity_types'])) {
       return array_diff($options, $settings['entity_type_ids'] ?: []);
