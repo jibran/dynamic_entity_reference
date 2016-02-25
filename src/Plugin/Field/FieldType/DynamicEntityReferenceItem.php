@@ -61,7 +61,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
   public static function defaultFieldSettings() {
     $default_settings = array();
     $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
-    $options = $labels['Content'];
+    $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
     // Field storage settings are not accessible here so we are assuming that
     // all the entity types are referenceable by default.
     // See https://www.drupal.org/node/2346273#comment-9385179 for more details.
@@ -192,7 +192,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $element['entity_type_ids'] = array(
       '#type' => 'select',
       '#title' => t('Select items'),
-      '#options' => $labels['Content'],
+      '#options' => $labels[(string) t('Content', [], ['context' => 'Entity type group'])],
       '#default_value' => $this->getSetting('entity_type_ids'),
       '#disabled' => $has_data,
       '#multiple' => TRUE,
@@ -497,7 +497,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function getTargetTypes($settings) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    $options = array_keys($labels[(string) t('Content')]);
+    $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
 
     if (!empty($settings['exclude_entity_types'])) {
       return array_diff($options, $settings['entity_type_ids'] ?: []);

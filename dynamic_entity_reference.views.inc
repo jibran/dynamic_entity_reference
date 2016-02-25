@@ -17,7 +17,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
   $data = views_field_default_views_data($field_storage);
   $entity_manager = \Drupal::entityManager();
   $labels = $entity_manager->getEntityTypeLabels(TRUE);
-  $options = array_keys($labels['Content']);
+  $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
   $settings = $field_storage->getSettings();
   // Identify all the target entity type ids that can be referenced.
   if ($settings['exclude_entity_types']) {
