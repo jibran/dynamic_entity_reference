@@ -14,6 +14,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\simpletest\WebTestBase;
@@ -80,6 +81,12 @@ class DynamicEntityReferenceTest extends WebTestBase {
    * Tests field settings of dynamic entity reference field.
    */
   public function testFieldSettings() {
+    // Add EntityTestBundle for EntityTestWithBundle.
+    EntityTestBundle::create([
+      'id' => 'test',
+      'label' => 'Test label',
+      'description' => 'My test description',
+    ])->save();
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -98,29 +105,31 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $this->assertNoFieldByXPath(CssSelector::toXPath('select[name="default_value_input[field_foobar][0][target_type]"] > option[value=user]'), 'user');
     $edit = array(
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
+      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
       'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
       'settings[entity_test_admin_routes][handler_settings][target_bundles][entity_test_admin_routes]' => TRUE,
       'settings[entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
+      'settings[entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
       'settings[entity_test_mul_changed][handler_settings][target_bundles][entity_test_mul_changed]' => TRUE,
       'settings[entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
-      'settings[entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
       'settings[entity_test_mul_langcode_key][handler_settings][target_bundles][entity_test_mul_langcode_key]' => TRUE,
       'settings[entity_test_rev][handler_settings][target_bundles][entity_test_rev]' => TRUE,
-      'settings[entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
       'settings[entity_test_mulrev_changed][handler_settings][target_bundles][entity_test_mulrev_changed]' => TRUE,
+      'settings[entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
+      'settings[entity_test_revlog][handler_settings][target_bundles][entity_test_revlog]' => TRUE,
       'settings[entity_test_constraints][handler_settings][target_bundles][entity_test_constraints]' => TRUE,
       'settings[entity_test_composite_constraint][handler_settings][target_bundles][entity_test_composite_constraint]' => TRUE,
       'settings[entity_test_constraint_violation][handler_settings][target_bundles][entity_test_constraint_violation]' => TRUE,
       'settings[entity_test_field_override][handler_settings][target_bundles][entity_test_field_override]' => TRUE,
       'settings[entity_test_default_value][handler_settings][target_bundles][entity_test_default_value]' => TRUE,
       'settings[entity_test_update][handler_settings][target_bundles][entity_test_update]' => TRUE,
+      'settings[entity_test_with_bundle][handler_settings][target_bundles][test]' => TRUE,
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
-      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
     $this->assertRaw(t('Saved %name configuration', array('%name' => 'Foobar')));
@@ -161,6 +170,12 @@ class DynamicEntityReferenceTest extends WebTestBase {
    * Tests adding and editing values using dynamic entity reference.
    */
   public function testDynamicEntityReference() {
+    // Add EntityTestBundle for EntityTestWithBundle.
+    EntityTestBundle::create([
+      'id' => 'test',
+      'label' => 'Test label',
+      'description' => 'My test description',
+    ])->save();
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -176,29 +191,31 @@ class DynamicEntityReferenceTest extends WebTestBase {
 
     $edit = array(
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
+      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
       'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
       'settings[entity_test_admin_routes][handler_settings][target_bundles][entity_test_admin_routes]' => TRUE,
       'settings[entity_test_base_field_display][handler_settings][target_bundles][entity_test_base_field_display]' => TRUE,
+      'settings[entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
       'settings[entity_test_mul_changed][handler_settings][target_bundles][entity_test_mul_changed]' => TRUE,
       'settings[entity_test_mul_default_value][handler_settings][target_bundles][entity_test_mul_default_value]' => TRUE,
-      'settings[entity_test_mul][handler_settings][target_bundles][entity_test_mul]' => TRUE,
       'settings[entity_test_mul_langcode_key][handler_settings][target_bundles][entity_test_mul_langcode_key]' => TRUE,
       'settings[entity_test_rev][handler_settings][target_bundles][entity_test_rev]' => TRUE,
-      'settings[entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
       'settings[entity_test_mulrev_changed][handler_settings][target_bundles][entity_test_mulrev_changed]' => TRUE,
+      'settings[entity_test_mulrev][handler_settings][target_bundles][entity_test_mulrev]' => TRUE,
+      'settings[entity_test_revlog][handler_settings][target_bundles][entity_test_revlog]' => TRUE,
       'settings[entity_test_constraints][handler_settings][target_bundles][entity_test_constraints]' => TRUE,
       'settings[entity_test_composite_constraint][handler_settings][target_bundles][entity_test_composite_constraint]' => TRUE,
       'settings[entity_test_constraint_violation][handler_settings][target_bundles][entity_test_constraint_violation]' => TRUE,
       'settings[entity_test_field_override][handler_settings][target_bundles][entity_test_field_override]' => TRUE,
       'settings[entity_test_default_value][handler_settings][target_bundles][entity_test_default_value]' => TRUE,
       'settings[entity_test_update][handler_settings][target_bundles][entity_test_update]' => TRUE,
+      'settings[entity_test_with_bundle][handler_settings][target_bundles][test]' => TRUE,
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
-      'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
 
     );
     $this->drupalPostForm(NULL, $edit, t('Save settings'));
