@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\Views\DynamicEntityReferenceBaseFieldRelationshipTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\Views\DynamicEntityReferenceBaseFieldRelationshipTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests\Views;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel\Views;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
-use Drupal\views\Tests\ViewKernelTestBase;
+use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
 
@@ -21,7 +21,7 @@ use Drupal\views\Views;
  *
  * @see dynamic_entity_reference_views_data()
  */
-class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewKernelTestBase {
+class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBase {
 
   /**
    * Views used by this test.

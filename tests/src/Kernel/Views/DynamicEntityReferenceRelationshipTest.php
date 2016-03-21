@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\Views\DynamicEntityReferenceRelationshipTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\Views\DynamicEntityReferenceRelationshipTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests\Views;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel\Views;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\views\Tests\ViewKernelTestBase;
+use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
 
@@ -23,7 +23,7 @@ use Drupal\views\Views;
  *
  * @see dynamic_entity_reference_field_views_data()
  */
-class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
+class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
 
   /**
    * Views used by this test.
@@ -59,8 +59,8 @@ class DynamicEntityReferenceRelationshipTest extends ViewKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
-    parent::setUp();
+  protected function setUp($import_test_views = TRUE) {
+    parent::setUp($import_test_views);
 
     $this->installEntitySchema('user');
     $this->installEntitySchema('entity_test');

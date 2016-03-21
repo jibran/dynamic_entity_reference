@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceFormatterTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\DynamicEntityReferenceFormatterTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -16,7 +16,7 @@ use Drupal\entity_test\Entity\EntityTestLabel;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
@@ -25,7 +25,7 @@ use Drupal\user\RoleInterface;
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceFormatterTest extends EntityUnitTestBase {
+class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
 
   /**
    * The entity type used in this test.

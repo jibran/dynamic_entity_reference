@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceItemTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\DynamicEntityReferenceItemTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -15,10 +15,10 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\Tests\FieldUnitTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Component\Utility\Unicode;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\field\Kernel\FieldKernelTestBase;
 use Drupal\user\Entity\User;
 
 /**
@@ -26,7 +26,7 @@ use Drupal\user\Entity\User;
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceItemTest extends FieldUnitTestBase {
+class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
 
   /**
    * Modules to install.

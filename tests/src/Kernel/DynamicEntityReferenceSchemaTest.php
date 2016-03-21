@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceSchemaTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\DynamicEntityReferenceSchemaTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
@@ -13,14 +13,14 @@ use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
  * Ensures that Dynamic Entity References schema is correct.
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceSchemaTest extends EntityUnitTestBase {
+class DynamicEntityReferenceSchemaTest extends EntityKernelTestBase {
 
   use SchemaCheckTestTrait;
 

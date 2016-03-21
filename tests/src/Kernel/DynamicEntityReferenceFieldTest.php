@@ -2,22 +2,23 @@
 
 /**
  * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceBaseFieldTest.
+ * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\DynamicEntityReferenceFieldTest.
  */
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\system\Tests\Entity\EntityUnitTestBase;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
  * Tests for the dynamic entity reference field.
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
-
+class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
   use SchemaCheckTestTrait;
 
   /**
@@ -32,7 +33,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
    *
    * @var string
    */
-  protected $referencedEntityType = 'entity_test_mul';
+  protected $referencedEntityType = 'entity_test_rev';
 
   /**
    * The bundle used in this test.
@@ -46,24 +47,51 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
    *
    * @var string
    */
-  protected $fieldName = 'dynamic_references';
+  protected $fieldName = 'field_test';
 
   /**
    * Modules to install.
    *
    * @var array
    */
-  public static $modules = ['dynamic_entity_reference'];
+  public static $modules = array('dynamic_entity_reference');
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->installEntitySchema('entity_test_rev');
+
+    // Create a field.
+    FieldStorageConfig::create(array(
+      'field_name' => $this->fieldName,
+      'type' => 'dynamic_entity_reference',
+      'entity_type' => $this->entityType,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'exclude_entity_types' => FALSE,
+        'entity_type_ids' => [
+          $this->referencedEntityType,
+        ],
+      ),
+    ))->save();
+
+    FieldConfig::create(array(
+      'field_name' => $this->fieldName,
+      'entity_type' => $this->entityType,
+      'bundle' => $this->bundle,
+      'label' => 'Field test',
+      'settings' => array(),
+    ))->save();
+
+  }
 
   /**
    * Tests reference field validation.
    */
   public function testEntityReferenceFieldValidation() {
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', 'entity_test');
-    $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
-    $this->installEntitySchema('entity_test_mul');
     $entity_manager = \Drupal::entityManager();
     // Test a valid reference.
     $referenced_entity = $entity_manager
@@ -123,11 +151,6 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
    * Tests the multiple target entities loader.
    */
   public function testReferencedEntitiesMultipleLoad() {
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', 'entity_test');
-    $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
-    $this->installEntitySchema('entity_test_mul');
     $entity_manager = \Drupal::entityManager();
     // Create the parent entity.
     $entity = $entity_manager
@@ -162,10 +185,10 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
     $reference_field[6]['target_type'] = NULL;
     $target_entities[6] = NULL;
 
-    // Attach the first created target entity as the sixth item ($delta == 5) of
-    // the parent entity field. We want to test the case when the same target
-    // entity is referenced twice (or more times) in the same entity reference
-    // field.
+    // Attach the first created target entity as the eighth item ($delta == 7)
+    // of the parent entity field. We want to test the case when the same target
+    // entity is referenced twice (or more times) in the same dynamic entity
+    // reference field.
     $reference_field[7] = $reference_field[0];
     $target_entities[7] = $target_entities[0];
 
@@ -180,7 +203,8 @@ class DynamicEntityReferenceBaseFieldTest extends EntityUnitTestBase {
     // Set the field value.
     $entity->{$this->fieldName}->setValue($reference_field);
 
-    // Load target entities using EntityReferenceField::referencedEntities().
+    // Load the target entities using
+    // DynamicEntityReferenceField::referencedEntities().
     $entities = $entity->{$this->fieldName}->referencedEntities();
 
     // Test returned entities:
