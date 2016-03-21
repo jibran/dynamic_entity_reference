@@ -116,11 +116,11 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $entity = EntityTest::load($entity->id());
     $this->assertTrue($entity->field_der instanceof FieldItemListInterface, 'Field implements interface.');
     $this->assertTrue($entity->field_der[0] instanceof FieldItemInterface, 'Field item implements interface.');
-    $this->assertEqual($entity->field_der->target_id, $tid);
-    $this->assertEqual($entity->field_der->target_type, $entity_type_id);
-    $this->assertEqual($entity->field_der->entity->getName(), $this->term->getName());
-    $this->assertEqual($entity->field_der->entity->id(), $tid);
-    $this->assertEqual($entity->field_der->entity->uuid(), $this->term->uuid());
+    $this->assertEquals($entity->field_der->target_id, $tid);
+    $this->assertEquals($entity->field_der->target_type, $entity_type_id);
+    $this->assertEquals($entity->field_der->entity->getName(), $this->term->getName());
+    $this->assertEquals($entity->field_der->entity->id(), $tid);
+    $this->assertEquals($entity->field_der->entity->uuid(), $this->term->uuid());
 
     // Change the name of the term via the reference.
     $new_name = $this->randomMachineName();
@@ -128,7 +128,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $entity->field_der->entity->save();
     // Verify it is the correct name.
     $term = Term::load($tid);
-    $this->assertEqual($term->getName(), $new_name);
+    $this->assertEquals($term->getName(), $new_name);
 
     // Make sure the computed term reflects updates to the term id.
     $term2 = Term::create(array(
@@ -141,29 +141,29 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     // Test all the possible ways of assigning a value.
     $entity->field_der->target_type = $entity_type_id;
     $entity->field_der->target_id = $term->id();
-    $this->assertEqual($entity->field_der->entity->id(), $term->id());
-    $this->assertEqual($entity->field_der->entity->getName(), $term->getName());
+    $this->assertEquals($entity->field_der->entity->id(), $term->id());
+    $this->assertEquals($entity->field_der->entity->getName(), $term->getName());
 
     $entity->field_der = ['target_id' => $term2->id(), 'target_type' => $entity_type_id];
-    $this->assertEqual($entity->field_der->entity->id(), $term2->id());
-    $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
+    $this->assertEquals($entity->field_der->entity->id(), $term2->id());
+    $this->assertEquals($entity->field_der->entity->getName(), $term2->getName());
 
     // Test value assignment via the computed 'entity' property.
     $entity->field_der->entity = $term;
-    $this->assertEqual($entity->field_der->target_id, $term->id());
-    $this->assertEqual($entity->field_der->entity->getName(), $term->getName());
+    $this->assertEquals($entity->field_der->target_id, $term->id());
+    $this->assertEquals($entity->field_der->entity->getName(), $term->getName());
 
     $entity->field_der->appendItem($term2);
-    $this->assertEqual($entity->field_der[1]->target_id, $term2->id());
-    $this->assertEqual($entity->field_der[1]->entity->getName(), $term2->getName());
+    $this->assertEquals($entity->field_der[1]->target_id, $term2->id());
+    $this->assertEquals($entity->field_der[1]->entity->getName(), $term2->getName());
 
     $entity->field_der = ['entity' => $term2];
-    $this->assertEqual($entity->field_der->target_id, $term2->id());
-    $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
+    $this->assertEquals($entity->field_der->target_id, $term2->id());
+    $this->assertEquals($entity->field_der->entity->getName(), $term2->getName());
 
     $entity->field_der->appendItem(['entity' => $term]);
-    $this->assertEqual($entity->field_der[1]->target_id, $term->id());
-    $this->assertEqual($entity->field_der[1]->entity->getName(), $term->getName());
+    $this->assertEquals($entity->field_der[1]->target_id, $term->id());
+    $this->assertEquals($entity->field_der[1]->entity->getName(), $term->getName());
 
     // Test assigning an invalid item throws an exception.
     try {
@@ -171,10 +171,10 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
         'target_id' => $term->id(),
         'target_type' => '',
       ];
-      $this->fail('Assigning an item without target type throws an exception.');
+      $this->assertTrue(FALSE, 'Assigning an item without target type throws an exception.');
     }
     catch (\InvalidArgumentException $e) {
-      $this->pass('Assigning an item without target type throws an exception.');
+      $this->assertTrue(TRUE, 'Assigning an item without target type throws an exception.');
     }
 
     // Test assigning an invalid item throws an exception.
@@ -184,10 +184,10 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
         'target_type' => $entity_type_id,
         'entity' => $term2,
       ];
-      $this->fail('Assigning an invalid item throws an exception.');
+      $this->assertTrue(FALSE, 'Assigning an invalid item throws an exception.');
     }
     catch (\InvalidArgumentException $e) {
-      $this->pass('Assigning an invalid item throws an exception.');
+      $this->assertTrue(TRUE, 'Assigning an invalid item throws an exception.');
     }
 
     // Test assigning an invalid item throws an exception.
@@ -205,8 +205,8 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
 
     $entity->field_der->target_type = $entity_type_id;
     $entity->field_der->target_id = $term2->id();
-    $this->assertEqual($entity->field_der->entity->id(), $term2->id());
-    $this->assertEqual($entity->field_der->entity->getName(), $term2->getName());
+    $this->assertEquals($entity->field_der->entity->id(), $term2->id());
+    $this->assertEquals($entity->field_der->entity->getName(), $term2->getName());
 
     // Delete terms so we have nothing to reference and try again.
     $term->delete();
@@ -238,14 +238,14 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     // Now get the field value.
     $value = $entity->get('field_der');
     $this->assertTrue(empty($value['target_id']));
-    $this->assertNull($entity->field_der->target_id);
+    $this->assertTrue(!isset($entity->field_der->target_id));
     // And then set it.
     $entity->field_der = $value;
     // Now save the term.
     $term->save();
     // And then the entity.
     $entity->save();
-    $this->assertEqual($entity->field_der->entity->id(), $term->id());
+    $this->assertEquals($entity->field_der->entity->id(), $term->id());
   }
 
   /**
@@ -268,8 +268,8 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $entity = unserialize($entity);
     // And then the entity.
     $entity->save();
-    $term = \Drupal::entityManager()->loadEntityByUuid($term->getEntityTypeId(), $term->uuid());
-    $this->assertEqual($entity->field_der->entity->id(), $term->id());
+    $term = $this->container->get('entity.repository')->loadEntityByUuid($term->getEntityTypeId(), $term->uuid());
+    $this->assertEquals($entity->field_der->entity->id(), $term->id());
   }
 
   /**
@@ -292,16 +292,16 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $entity->field_der[] = array('entity' => $account);
     $entity->save();
     // Check term reference correctly.
-    $this->assertEqual($entity->field_der[0]->target_id, $this->term->id());
-    $this->assertEqual($entity->field_der[0]->target_type, $this->term->getEntityTypeId());
-    $this->assertEqual($entity->field_der[0]->entity->getName(), $this->term->getName());
-    $this->assertEqual($entity->field_der[0]->entity->id(), $this->term->id());
-    $this->assertEqual($entity->field_der[0]->entity->uuid(), $this->term->uuid());
+    $this->assertEquals($entity->field_der[0]->target_id, $this->term->id());
+    $this->assertEquals($entity->field_der[0]->target_type, $this->term->getEntityTypeId());
+    $this->assertEquals($entity->field_der[0]->entity->getName(), $this->term->getName());
+    $this->assertEquals($entity->field_der[0]->entity->id(), $this->term->id());
+    $this->assertEquals($entity->field_der[0]->entity->uuid(), $this->term->uuid());
     // Check user reference correctly.
-    $this->assertEqual($entity->field_der[1]->target_id, $account->id());
-    $this->assertEqual($entity->field_der[1]->target_type, $account->getEntityTypeId());
-    $this->assertEqual($entity->field_der[1]->entity->id(), $account->id());
-    $this->assertEqual($entity->field_der[1]->entity->uuid(), $account->uuid());
+    $this->assertEquals($entity->field_der[1]->target_id, $account->id());
+    $this->assertEquals($entity->field_der[1]->target_type, $account->getEntityTypeId());
+    $this->assertEquals($entity->field_der[1]->entity->id(), $account->id());
+    $this->assertEquals($entity->field_der[1]->entity->uuid(), $account->uuid());
   }
 
   /**
@@ -360,7 +360,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     ]);
     $errors = $entity->validate();
     // Using target_id and target_type of NULL is valid with an unsaved entity.
-    $this->assertEqual(0, count($errors));
+    $this->assertEquals(0, count($errors));
     // Using target_id of NULL is not valid with a saved entity.
     $term->save();
     $entity = EntityTest::create([
@@ -371,13 +371,13 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
       ],
     ]);
     $errors = $entity->validate();
-    $this->assertEqual(1, count($errors));
-    $this->assertEqual($errors[0]->getMessage(), (string) new FormattableMarkup('%property should not be null.', ['%property' => 'target_id']));
-    $this->assertEqual($errors[0]->getPropertyPath(), 'field_der.0');
+    $this->assertEquals(1, count($errors));
+    $this->assertEquals($errors[0]->getMessage(), (string) new FormattableMarkup('%property should not be null.', ['%property' => 'target_id']));
+    $this->assertEquals($errors[0]->getPropertyPath(), 'field_der.0');
     // This should rectify the issue, favoring the entity over the target_id.
     $entity->save();
     $errors = $entity->validate();
-    $this->assertEqual(0, count($errors));
+    $this->assertEquals(0, count($errors));
   }
 
 }

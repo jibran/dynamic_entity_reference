@@ -92,56 +92,56 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
    * Tests reference field validation.
    */
   public function testEntityReferenceFieldValidation() {
-    $entity_manager = \Drupal::entityManager();
+    $entity_type_manager = \Drupal::entityTypeManager();
     // Test a valid reference.
-    $referenced_entity = $entity_manager
+    $referenced_entity = $entity_type_manager
       ->getStorage($this->referencedEntityType)
       ->create(['type' => $this->bundle]);
     $referenced_entity->save();
 
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(['type' => $this->bundle]);
     $entity->{$this->fieldName}->target_type = $referenced_entity->getEntityTypeId();
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
-    $this->assertEqual($violations->count(), 0, 'Validation passes.');
+    $this->assertEquals($violations->count(), 0, 'Validation passes.');
 
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(array('type' => $this->bundle));
     $entity->{$this->fieldName}->entity = $referenced_entity;
     $violations = $entity->{$this->fieldName}->validate();
-    $this->assertEqual($violations->count(), 0, 'Validation passes.');
+    $this->assertEquals($violations->count(), 0, 'Validation passes.');
 
     // Test an invalid reference.
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(array('type' => $this->bundle));
     $entity->{$this->fieldName}->target_type = $referenced_entity->getEntityTypeId();
     $entity->{$this->fieldName}->target_id = 9999;
     $violations = $entity->{$this->fieldName}->validate();
-    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->referencedEntityType, '%id' => 9999)));
+    $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->referencedEntityType, '%id' => 9999)));
 
     // Test an invalid target_type.
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(array('type' => $this->bundle));
     $entity->{$this->fieldName}->target_type = $entity->getEntityTypeId();
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
-    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->entityType, '%id' => $referenced_entity->id())));
+    $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $this->entityType, '%id' => $referenced_entity->id())));
 
     // Test an invalid entity.
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(array('type' => $this->bundle));
     $entity->{$this->fieldName}->entity = $entity;
     $violations = $entity->{$this->fieldName}->validate();
-    $this->assertEqual($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEqual($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $entity->getEntityTypeId(), '%id' => NULL)));
+    $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', array('%type' => $entity->getEntityTypeId(), '%id' => NULL)));
 
     // @todo Implement a test case for invalid bundle references after
     // https://drupal.org/node/2064191 is fixed
@@ -151,9 +151,9 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
    * Tests the multiple target entities loader.
    */
   public function testReferencedEntitiesMultipleLoad() {
-    $entity_manager = \Drupal::entityManager();
+    $entity_type_manager = \Drupal::entityTypeManager();
     // Create the parent entity.
-    $entity = $entity_manager
+    $entity = $entity_type_manager
       ->getStorage($this->entityType)
       ->create(['type' => $this->bundle]);
 
@@ -161,7 +161,7 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
     $target_entities = array();
     $reference_field = array();
     for ($i = 0; $i < 3; $i++) {
-      $target_entity = $entity_manager
+      $target_entity = $entity_type_manager
         ->getStorage($this->referencedEntityType)
         ->create(['type' => $this->bundle]);
       $target_entity->save();
@@ -194,7 +194,7 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
 
     // Create a new target entity that is not saved, thus testing the
     // "autocreate" feature.
-    $target_entity_unsaved = $entity_manager
+    $target_entity_unsaved = $entity_type_manager
       ->getStorage($this->referencedEntityType)
       ->create(array('type' => $this->bundle, 'name' => $this->randomString()));
     $reference_field[8]['entity'] = $target_entity_unsaved;
@@ -215,12 +215,12 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
         if (!$target_entity->isNew()) {
           // There must be an entity in the loaded set having the same id for
           // the same delta.
-          $this->assertEqual($target_entity->id(), $entities[$delta]->id());
+          $this->assertEquals($target_entity->id(), $entities[$delta]->id());
         }
         else {
           // For entities that were not yet saved, there must an entity in the
           // loaded set having the same label for the same delta.
-          $this->assertEqual($target_entity->label(), $entities[$delta]->label());
+          $this->assertEquals($target_entity->label(), $entities[$delta]->label());
         }
       }
       else {
