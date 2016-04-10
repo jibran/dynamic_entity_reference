@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceLocaleTest.
- */
 
 namespace Drupal\dynamic_entity_reference\Tests;
 

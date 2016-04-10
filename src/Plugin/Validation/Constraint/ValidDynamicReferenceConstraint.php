@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\Validation\Constraint\ValidDynamicReferenceConstraint.
- */
-
 namespace Drupal\dynamic_entity_reference\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;

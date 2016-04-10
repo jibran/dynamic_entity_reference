@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Normalizer\EntityReferenceItemNormalizer.
- */
-
 namespace Drupal\dynamic_entity_reference\Normalizer;
 
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;

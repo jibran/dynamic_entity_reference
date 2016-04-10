@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\SelectionPluginManager.
- */
-
 namespace Drupal\dynamic_entity_reference;
 
 use Drupal\Core\Entity\EntityInterface;

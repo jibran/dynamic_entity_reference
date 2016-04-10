@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\Views\DynamicEntityReferenceRelationshipTest.
- */
-
 namespace Drupal\Tests\dynamic_entity_reference\Kernel\Views;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;

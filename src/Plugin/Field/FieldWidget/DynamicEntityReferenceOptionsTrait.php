@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget\DynamicEntityReferenceOptionsTrait.
- */
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Tests\DynamicEntityReferenceBaseTest.
- */
-
 namespace Drupal\dynamic_entity_reference\Tests;
 
 use Drupal\Component\Utility\Crypt;

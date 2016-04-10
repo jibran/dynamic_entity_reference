@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\dynamic_entity_reference\Kernel\DynamicEntityReferenceFormatterTest.
- */
-
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\Component\Render\FormattableMarkup;

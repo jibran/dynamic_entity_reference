@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter\DynamicEntityReferenceFormatterTrait.
- */
-
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldFormatter;
 
 /**

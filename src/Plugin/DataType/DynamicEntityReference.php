@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\Plugin\DataType\DynamicEntityReference.
- */
-
 namespace Drupal\dynamic_entity_reference\Plugin\DataType;
 
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;

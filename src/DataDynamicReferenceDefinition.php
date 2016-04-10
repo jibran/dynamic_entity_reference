@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition.
- */
-
 namespace Drupal\dynamic_entity_reference;
 
 use Drupal\Core\TypedData\DataReferenceDefinition;
