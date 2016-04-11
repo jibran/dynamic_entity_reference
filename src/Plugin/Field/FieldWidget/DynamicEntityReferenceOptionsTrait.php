@@ -9,6 +9,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\OptGroup;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 
+/**
+ * The common functionality between DynamicEntityReferenceOptionsWidgets.
+ */
 trait DynamicEntityReferenceOptionsTrait {
 
   /**
