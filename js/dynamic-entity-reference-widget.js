@@ -5,7 +5,7 @@
 
 (function ($) {
 
-  "use strict";
+  'use strict';
 
   Drupal.behaviors.dynamicEntityReferenceWidget = {
     attach: function (context, settings) {
@@ -16,7 +16,7 @@
         var entityTypeId = $select.val();
         $autocomplete.attr('data-autocomplete-path', settings.dynamic_entity_reference[$select[0].name][entityTypeId]);
       }
-      Object.keys(settings.dynamic_entity_reference).forEach(function(fieldName){
+      Object.keys(settings.dynamic_entity_reference).forEach(function (fieldName) {
         var select = 'select[name="' + fieldName + '"]';
         $(select)
           .once('dynamic-entity-reference')
