@@ -87,7 +87,8 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#default_value' => $target_type,
       '#weight' => -50,
       '#attributes' => array(
-        'class' => ['dynamic-entity-reference-entity-type',
+        'class' => [
+          'dynamic-entity-reference-entity-type',
           $js_class,
         ],
       ),

@@ -2,6 +2,7 @@
  * @file
  * Attaches entity-type selection behaviors to the widget form.
  */
+
 (function ($, Drupal, drupalSettings) {
 
   'use strict';

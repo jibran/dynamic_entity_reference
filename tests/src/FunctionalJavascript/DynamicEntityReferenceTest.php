@@ -2,9 +2,7 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\FunctionalJavascript;
 
-use Behat\Mink\Exception\ElementNotFoundException;
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
