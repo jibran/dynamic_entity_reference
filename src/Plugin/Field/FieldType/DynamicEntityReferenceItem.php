@@ -55,7 +55,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function defaultFieldSettings() {
     $default_settings = array();
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
+    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
     $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
     // Field storage settings are not accessible here so we are assuming that
     // all the entity types are referenceable by default.
@@ -175,7 +175,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
     // @todo inject this.
-    $labels = \Drupal::entityManager()->getEntityTypeLabels(TRUE);
+    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
 
     $element['exclude_entity_types'] = array(
       '#type' => 'checkbox',
@@ -204,7 +204,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $settings_form = array();
     $settings = $this->getSettings();
     foreach (static::getTargetTypes($settings) as $target_type) {
-      $entity_type = \Drupal::entityManager()->getDefinition($target_type);
+      $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
       $settings_form[$target_type] = $this->targetTypeFieldSettingsForm($form, $form_state, $target_type);
       $settings_form[$target_type]['handler']['#title'] = t('Reference type for @target_type', ['@target_type' => $entity_type->getLabel()]);
     }
@@ -215,7 +215,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    * Returns a form for single target type settings.
    *
    * This is same as
-   * \Drupal\entity_reference\ConfigurableEntityReferenceItem::fieldSettingsForm()
+   * \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::fieldSettingsForm()
    * but it uses dynamic_entity_reference_selection plugin manager instead of
    * entity_reference_selection plugin manager.
    *
@@ -253,8 +253,8 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
 
     $form = array(
       '#type' => 'container',
-      '#process' => array(array(get_class($this), 'fieldSettingsAjaxProcess')),
-      '#element_validate' => array(array(get_class($this), 'fieldSettingsFormValidate')),
+      '#process' => [[EntityReferenceItem::class, 'fieldSettingsAjaxProcess']],
+      '#element_validate' => [[DynamicEntityReferenceItem::class, 'fieldSettingsFormValidate']],
     );
     $form['handler'] = array(
       '#type' => 'details',
@@ -303,20 +303,40 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    *   The form state of the (entire) configuration form.
    */
   public static function fieldSettingsFormValidate(array $form, FormStateInterface $form_state) {
-    if ($form_state->hasValue('field')) {
-      $settings = $form_state->getValue(array('field', 'settings'));
-      foreach (array_keys($settings) as $target_type) {
-        $form_state->unsetValue(array(
-          'field',
+    /** @var \Drupal\field\Entity\FieldConfig $field */
+    $field = $form_state->getFormObject()->getEntity();
+    foreach (static::getTargetTypes($field->getSettings()) as $target_type) {
+      // If no checkboxes were checked for 'target_bundles', store NULL ("all
+      // bundles are referenceable") rather than empty array ("no bundle is
+      // referenceable" - typically happens when all referenceable bundles have
+      // been deleted).
+      if ($form_state->getValue([
+        'settings',
+        $target_type,
+        'handler_settings',
+        'target_bundles',
+      ]) === []) {
+        $form_state->setValue([
           'settings',
           $target_type,
-          'handler_submit',
-        ));
-        /** @var \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
-        $handler = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($form_state->get('field'), NULL, $target_type);
-        $handler->validateConfigurationForm($form, $form_state);
+          'handler_settings',
+          'target_bundles',
+        ], NULL);
       }
-      $form_state->get('field')->settings = $form_state->getValue(array('field', 'settings'));
+      // Don't store the 'target_bundles_update' button value into the field
+      // config settings.
+      $form_state->unsetValue([
+        'settings',
+        $target_type,
+        'handler_settings',
+        'target_bundles_update',
+      ]);
+      $form_state->unsetValue([
+        'settings',
+        $target_type,
+        'handler_submit',
+      ]);
+
     }
   }
 
@@ -442,7 +462,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function calculateDependencies(FieldDefinitionInterface $field_definition) {
     $dependencies = FieldItemBase::calculateDependencies($field_definition);
-    $manager = \Drupal::entityManager();
+    $manager = \Drupal::service('entity.repository');
     if ($default_value = $field_definition->getDefaultValueLiteral()) {
       foreach ($default_value as $value) {
         if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
@@ -466,7 +486,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     if ($default_value = $field_definition->getDefaultValueLiteral()) {
       foreach ($default_value as $key => $value) {
         if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
-          $entity = \Drupal::entityManager()->loadEntityByUuid($value['target_type'], $value['target_uuid']);
+          $entity = \Drupal::service('entity.repository')->loadEntityByUuid($value['target_type'], $value['target_uuid']);
           // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
           if ($entity && isset($dependencies[$entity->getConfigDependencyKey()][$entity->getConfigDependencyName()])) {
             unset($default_value[$key]);
@@ -507,7 +527,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function calculateStorageDependencies(FieldStorageDefinitionInterface $field_definition) {
     $dependencies = FieldItemBase::calculateStorageDependencies($field_definition);
-    $entity_manager = \Drupal::entityManager();
+    $entity_manager = \Drupal::entityTypeManager();
     foreach (array_keys(static::defaultFieldSettings()) as $entity_type_id) {
       if ($entity_manager->hasDefinition($entity_type_id) && $target_entity_type = $entity_manager->getDefinition($entity_type_id)) {
         $dependencies['module'][] = $target_entity_type->getProvider();
