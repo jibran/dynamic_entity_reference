@@ -3,8 +3,11 @@
 namespace Drupal\Tests\dynamic_entity_reference\FunctionalJavascript;
 
 use Behat\Mink\Exception\ElementNotFoundException;
+use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
@@ -93,9 +96,26 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
       ->selectOption(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $page->uncheckField('settings[exclude_entity_types]');
     $this->submitForm([], t('Save field settings'), 'field-storage-config-edit-form');
+    $page = $this->getSession()->getPage();
+    $autocomplete_field = $page->findField('default_value_input[field_foobar][0][target_id]');
+    $autocomplete_field_1 = $page->findField('default_value_input[field_foobar][1][target_id]');
     $target_type_select = $assert_session->selectExists('default_value_input[field_foobar][0][target_type]');
+    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $target_type_select->selectOption('user');
+    // Changing the selected value changes the autocomplete path for the
+    // corresponding autocomplete field.
+    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('user'));
+    // Changing the selected value of delta 0 doesn't change the autocomplete
+    // path for delta 1 autocomplete field.
+    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $target_type_select->selectOption('entity_test');
+    // Changing the selected value changes the autocomplete path for the
+    // corresponding autocomplete field.
+    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    // Changing the selected value of delta 0 doesn't change the autocomplete
+    // path for delta 1 autocomplete field.
+    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $page = $this->getSession()->getPage();
     $page->checkField('settings[entity_test][handler_settings][target_bundles][entity_test]');
     $this->assertJsCondition('(typeof(jQuery)=="undefined" || (0 === jQuery.active && 0 === jQuery(\':animated\').length))', 20000);
@@ -113,6 +133,26 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $this->assertEquals($settings['entity_test']['handler_settings']['target_bundles'], ['entity_test' => 'entity_test']);
     $this->assertTrue($settings['entity_test']['handler_settings']['auto_create']);
     $this->assertEmpty($settings['entity_test']['handler_settings']['auto_create_bundle']);
+  }
+
+  /**
+   * Creates auto complete path for the given target type.
+   *
+   * @param string $target_type
+   *   The entity type id.
+   *
+   * @return array
+   *   Auto complete paths for the target type.
+   */
+  protected function createAutoCompletePath($target_type) {
+    $selection_settings = [];
+    $data = serialize($selection_settings) . $target_type . "default:$target_type";
+    $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
+    return Url::fromRoute('system.entity_autocomplete', array(
+      'target_type' => $target_type,
+      'selection_handler' => "default:$target_type",
+      'selection_settings_key' => $selection_settings_key,
+    ))->toString();
   }
 
 }

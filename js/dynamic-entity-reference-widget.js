@@ -2,28 +2,27 @@
  * @file
  * Attaches entity-type selection behaviors to the widget form.
  */
-
-(function ($) {
+(function ($, Drupal, drupalSettings) {
 
   'use strict';
 
   Drupal.behaviors.dynamicEntityReferenceWidget = {
-    attach: function (context, settings) {
+    attach: function (context) {
+      drupalSettings.dynamic_entity_reference = drupalSettings.dynamic_entity_reference || {};
       function dynamicEntityReferenceWidgetSelect(e) {
         var data = e.data;
-        var $select = $(data.select);
+        var $select = $('.' + data.select);
         var $autocomplete = $select.parents('.container-inline').find('.form-autocomplete');
         var entityTypeId = $select.val();
-        $autocomplete.attr('data-autocomplete-path', settings.dynamic_entity_reference[$select[0].name][entityTypeId]);
+        $autocomplete.attr('data-autocomplete-path', drupalSettings.dynamic_entity_reference[data.select][entityTypeId]);
       }
-      Object.keys(settings.dynamic_entity_reference).forEach(function (fieldName) {
-        var select = 'select[name="' + fieldName + '"]';
-        $(select)
+      Object.keys(drupalSettings.dynamic_entity_reference).forEach(function (field_class) {
+        $(context)
+          .find('.' + field_class)
           .once('dynamic-entity-reference')
-          .on('change', {select: select}, dynamicEntityReferenceWidgetSelect)
-          .trigger('change');
+          .on('change', {select: field_class}, dynamicEntityReferenceWidgetSelect);
       });
     }
   };
 
-})(jQuery);
+})(jQuery, Drupal, drupalSettings);

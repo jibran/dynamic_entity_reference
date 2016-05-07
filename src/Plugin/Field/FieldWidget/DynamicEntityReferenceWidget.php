@@ -3,6 +3,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
@@ -78,6 +79,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
 
     $element['#title'] = $this->t('Label');
 
+    $js_class = Html::cleanCssIdentifier("dynamic-entity-reference-{$items->getName()}[$delta][target_type]");
     $entity_type = array(
       '#type' => 'select',
       '#options' => array_intersect_key($labels, array_combine($available, $available)),
@@ -85,7 +87,9 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#default_value' => $target_type,
       '#weight' => -50,
       '#attributes' => array(
-        'class' => array('dynamic-entity-reference-entity-type'),
+        'class' => ['dynamic-entity-reference-entity-type',
+          $js_class,
+        ],
       ),
     );
 
@@ -102,7 +106,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         ),
         'drupalSettings' => array(
           'dynamic_entity_reference' => array(
-            "{$items->getName()}[$delta][target_type]" => $this->createAutoCompletePaths($available),
+            $js_class => $this->createAutoCompletePaths($available),
           ),
         ),
       ),
