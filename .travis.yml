@@ -1,0 +1,119 @@
+language: php
+sudo: false
+
+php:
+  - 5.5
+  - 5.6
+  - 7
+  - hhvm
+
+# Install php packages required for running a web server from drush.
+addons:
+  apt:
+    packages:
+    - php5-cgi
+    - php5-mysql
+
+matrix:
+  allow_failures:
+    - php: hhvm
+  # Don't wait for the allowed failures to build.
+  fast_finish: true
+
+
+# Cache Composer directory so that we don't have to download drush all the time.
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+env:
+  matrix:
+    - DRUPAL_VERSION='8.1.x'
+    - DRUPAL_VERSION='8.2.x'
+  global:
+    - SIMPLETEST_BASE_URL=http://127.0.0.1:8888
+    - SIMPLETEST_DB=mysql://root:@127.0.0.1/drupal
+    - MODULE_NAME='dynamic_entity_reference'
+    - MODULE_TEST_GROUP='dynamic_entity_reference'
+    - DRUPAL_REPO='git://drupalcode.org/project/drupal.git'
+    - DRUSH_VERSION='~8.0'
+    - CODER_VERSION='~8.2'
+
+before_install:
+  # Disable XDebug to speed up execution.
+  - phpenv config-rm xdebug.ini
+  # Always update Composer to the recent version, otherwise the drush
+  # installation fails.
+  - composer selfupdate --stable
+
+install:
+  # Add composer's global bin directory to the path.
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+
+  # Install drush globally
+  - composer global require drush/drush:$DRUSH_VERSION
+  - composer global require drupal/coder:$CODER_VERSION
+
+before_script:
+  # Terminate all the phantomjs and php instances so that we can start fresh.
+  - ps axo pid,command | grep phantomjs | grep -v grep | awk '{print $1}' | xargs -I {} kill {}
+  - ps axo pid,command | grep php | grep -v grep | grep -v phpstorm | awk '{print $1}' | xargs -I {} kill {}
+  - sleep 2
+  # Install eslint.
+  - npm i -g eslint
+  # Create a Drupal coding standard reference in PHPCS coding standards.
+  - phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
+  # Remember the current test directory for later use in the Drupal
+  # installation.
+  - TESTDIR=$(pwd)
+  # Navigate out of module directory to prevent blown stack by recursive module
+  # lookup.
+  - cd ..
+
+  # Create new site, stubbing sendmail path with true to prevent delivery errors
+  # and manually resolving drush path.
+  - mysql -e 'create database drupal'
+  # Download Drupal 8 core.
+  - git clone --depth 1 --branch $DRUPAL_VERSION $DRUPAL_REPO drupal
+  - cd drupal
+  # Run composer install.
+  - composer install
+  # Install Drupal.
+  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes site-install --db-url=mysql://root:@127.0.0.1/drupal testing
+
+  # Reference and enable module in build site.
+  - ln -s $TESTDIR modules/$MODULE_NAME
+  - drush --yes pm-enable simpletest $MODULE_NAME
+
+  # Start a web server on port 8888, run in the background; wait for
+  # initialization. This is temporarly disabled since there are no web tests
+  # yet.
+  - drush --verbose --debug runserver 127.0.0.1:8888 > ~/debug.txt 2>&1 &
+  - sleep 5s
+  # Start phanomjs for javascript testing.
+  - phantomjs --ssl-protocol=any --ignore-ssl-errors=true ./vendor/jcalderonzumba/gastonjs/src/Client/main.js 8510 1024 768 2>&1 >> /dev/null &
+  - sleep 2
+
+script:
+  # Run eslint.
+  - eslint -c ./.eslintrc modules/dynamic_entity_reference/
+  # Run the Coder sniffer.
+  - phpcs --report=full --standard=Drupal ./modules/$MODULE_NAME
+  # Run the Simpletests.
+  - php ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url http://127.0.0.1:8888 --color --types "Simpletest" "$MODULE_TEST_GROUP"
+  # Run the PHPUnit tests.
+  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
+
+after_script:
+  # Terminate all the phantomjs and php instances.
+  - ps axo pid,command | grep phantomjs | grep -v grep | awk '{print $1}' | xargs -I {} kill {}
+  - ps axo pid,command | grep php | grep -v grep | awk '{print $1}' | xargs -I {} kill {}
+
+after_failure:
+  - echo "Failures detected. Outputing additional logs:"
+  - cat ~/debug.txt
