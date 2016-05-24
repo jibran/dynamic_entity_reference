@@ -32,7 +32,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
       $target_entity_type = $entity_manager->getDefinition($target_entity_type_id);
       $entity_type_id = $field_storage->getTargetEntityTypeId();
       $entity_type = $entity_manager->getDefinition($entity_type_id);
-      $target_base_table = $target_entity_type->getDataTable() ?: $target_entity_type->getBaseTable();
+      $target_base_table = $entity_manager->getHandler($target_entity_type_id, 'views_data')->getViewsTableForEntityType($target_entity_type);
       $field_name = $field_storage->getName();
 
       // Provide a relationship for the entity type with the dynamic entity
@@ -75,7 +75,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
         'group' => $target_entity_type->getLabel(),
         'help' => t('Relate each @entity with a @field_name set to the @label.', $args),
         'id' => 'entity_reverse',
-        'base' => $entity_type->getDataTable() ?: $entity_type->getBaseTable(),
+        'base' => $entity_manager->getHandler($entity_type_id, 'views_data')->getViewsTableForEntityType($entity_type),
         'entity_type' => $entity_type_id,
         'base field' => $entity_type->getKey('id'),
         'field_name' => $field_name,
@@ -140,7 +140,7 @@ function dynamic_entity_reference_views_data() {
     $table_mapping = $entity_manager->getStorage($entity_type_id)->getTableMapping();
 
     $entity_type = $entity_types[$entity_type_id];
-    $base_table = $entity_type->getDataTable() ?: $entity_type->getBaseTable();
+    $base_table = $entity_manager->getHandler($entity_type_id, 'views_data')->getViewsTableForEntityType($entity_type);
 
     /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
     foreach ($fields as $field) {
@@ -157,7 +157,7 @@ function dynamic_entity_reference_views_data() {
       $targets = array_intersect(DynamicEntityReferenceItem::getTargetTypes($field->getSettings()), array_keys($sql_entity_types));
       foreach ($targets as $target_entity_type_id) {
         $target_entity_type = $entity_types[$target_entity_type_id];
-        $target_table = $target_entity_type->getDataTable() ?: $target_entity_type->getBaseTable();
+        $target_table = $entity_manager->getHandler($target_entity_type_id, 'views_data')->getViewsTableForEntityType($target_entity_type);
 
         $t_args = [
           '@origin_label' => $entity_type->getLabel(),
