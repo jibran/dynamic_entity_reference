@@ -1,19 +1,19 @@
 <?php
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests dynamic entity reference field widgets.
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceWidgetTest extends WebTestBase {
+class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
 
   /**
    * A user with permission to administer content types, node fields, etc.

@@ -1,20 +1,20 @@
 <?php
 
-namespace Drupal\dynamic_entity_reference\Tests;
+namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Ensures that Dynamic Entity References field works correctly.
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceBaseTest extends WebTestBase {
+class DynamicEntityReferenceBaseTest extends BrowserTestBase {
 
   /**
    * The admin user.
@@ -70,8 +70,8 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
 
     // Test the new entity commenting inherits default.
     $this->drupalGet('entity_test/add');
-    $this->assertField('dynamic_references[0][target_id]', 'Found foobar field target id');
-    $this->assertField('dynamic_references[0][target_type]', 'Found foobar field target type');
+    $this->assertSession()->fieldExists('dynamic_references[0][target_id]');
+    $this->assertSession()->fieldExists('dynamic_references[0][target_type]');
 
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
@@ -85,7 +85,7 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
       'selection_handler' => $settings['entity_test']['handler'],
       'selection_settings_key' => $selection_settings_key,
     ))->toString();
-    $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
+    $this->assertTrue(strpos($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path) !== FALSE);
 
     $edit = array(
       // Ensure that an exact match on a unique label is accepted.
@@ -219,8 +219,8 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
 
     // Test the new entity commenting inherits default.
     $this->drupalGet('entity_test/add');
-    $this->assertField('dynamic_references[0][target_id]', 'Found foobar field target id');
-    $this->assertField('dynamic_references[0][target_type]', 'Found foobar field target type');
+    $this->assertSession()->fieldExists('dynamic_references[0][target_id]');
+    $this->assertSession()->fieldExists('dynamic_references[0][target_type]');
 
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
@@ -234,10 +234,10 @@ class DynamicEntityReferenceBaseTest extends WebTestBase {
       'selection_handler' => $settings['entity_test']['handler'],
       'selection_settings_key' => $selection_settings_key,
     ))->toString();
-    $this->assertTrue(strpos((string) $input['data-autocomplete-path'], $expected_autocomplete_path) !== FALSE);
+    $this->assertTrue(strpos($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path) !== FALSE);
 
     // Add some extra dynamic entity reference fields.
-    $this->drupalPostAjaxForm(NULL, array(), array('dynamic_references_add_more' => t('Add another item')), NULL, array(), array(), 'entity-test-entity-test-form');
+    $this->getSession()->getPage()->findButton('Add another item')->click();
 
     $edit = array(
       // Ensure that an exact match on a unique label is accepted.
