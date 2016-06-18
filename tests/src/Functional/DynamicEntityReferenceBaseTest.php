@@ -58,6 +58,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
    * Tests adding and editing single values using dynamic entity reference.
    */
   public function testSingleValueDynamicEntityReference() {
+    $assert_session = $this->assertSession();
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
     \Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
     $this->drupalLogin($this->adminUser);
@@ -70,8 +71,8 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
 
     // Test the new entity commenting inherits default.
     $this->drupalGet('entity_test/add');
-    $this->assertSession()->fieldExists('dynamic_references[0][target_id]');
-    $this->assertSession()->fieldExists('dynamic_references[0][target_type]');
+    $assert_session->fieldExists('dynamic_references[0][target_id]');
+    $assert_session->fieldExists('dynamic_references[0][target_type]');
 
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
@@ -101,14 +102,14 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       ->loadByProperties(array(
         'name' => 'Barfoo',
       ));
-    $this->assertEqual(1, count($entities), 'Entity was saved');
+    $this->assertCount(1, $entities, 'Entity was saved');
     $entity = reset($entities);
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Barfoo');
-    $this->assertText('item1');
+    $assert_session->pageTextContains('Barfoo');
+    $assert_session->pageTextContains('item1');
 
-    $this->assertEqual(count($entity->dynamic_references), 1, 'One item in field');
-    $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'item1');
+    $this->assertCount(1, $entity->dynamic_references, 'One item in field');
+    $this->assertEquals($entity->dynamic_references[0]->entity->label(), 'item1');
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
@@ -117,9 +118,9 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       // Remove one child.
       'dynamic_references[0][target_id]' => '',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Bazbar');
+    $assert_session->pageTextContains('Bazbar');
     // Reload entity.
     \Drupal::entityTypeManager()
       ->getStorage('entity_test')
@@ -143,14 +144,14 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     $edit = array(
       'dynamic_references[0][target_id]' => 'duplicate label',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
 
     // We don't know the order in which the entities will be listed, so just
     // assert parts and make sure both are shown.
     $error_message = t('Multiple entities match this reference;');
-    $this->assertRaw($error_message);
-    $this->assertRaw($labels[0]);
-    $this->assertRaw($labels[1]);
+    $assert_session->responseContains($error_message);
+    $assert_session->responseContains($labels[0]);
+    $assert_session->responseContains($labels[1]);
 
     // Create a few more to trigger the case where there are more than 5
     // matching results.
@@ -163,7 +164,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     }
 
     // Submit again with the same values.
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
 
     $params = array(
       '%value' => 'duplicate label',
@@ -171,7 +172,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     // We don't know which id it will display, so just assert a part of the
     // error.
     $error_message = t('Many entities are called %value. Specify the one you want by appending the id in parentheses', $params);
-    $this->assertRaw($error_message);
+    $assert_session->responseContains($error_message);
 
     // Submit with a label that does not match anything.
     // Now try to submit and just specify the label.
@@ -179,8 +180,8 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     $edit = array(
       'dynamic_references[0][target_id]' => 'does not exist',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
+    $this->submitForm($edit, t('Save'));
+    $assert_session->responseContains(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
@@ -188,21 +189,22 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       // Reference itself.
       'dynamic_references[0][target_id]' => 'Bazbar (' . $entity->id() . ')',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Bazbar');
+    $assert_session->pageTextContains('Bazbar');
     // Reload entity.
     \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
-    $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'Bazbar');
+    $this->assertEquals($entity->dynamic_references[0]->entity->label(), 'Bazbar');
   }
 
   /**
    * Tests adding and editing multi values using dynamic entity reference.
    */
   public function testMultiValueDynamicEntityReference() {
+    $assert_session = $this->assertSession();
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     \Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
     $this->drupalLogin($this->adminUser);
@@ -219,12 +221,11 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
 
     // Test the new entity commenting inherits default.
     $this->drupalGet('entity_test/add');
-    $this->assertSession()->fieldExists('dynamic_references[0][target_id]');
-    $this->assertSession()->fieldExists('dynamic_references[0][target_type]');
+    $assert_session->fieldExists('dynamic_references[0][target_id]');
+    $assert_session->fieldExists('dynamic_references[0][target_type]');
 
     // Ensure that the autocomplete path is correct.
-    $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
-    ;
+    $input = $assert_session->fieldExists('dynamic_references[0][target_id]');
     $settings = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
     $selection_settings = $settings['entity_test']['handler_settings'] ?: [];
     $data = serialize($selection_settings) . 'entity_test' . $settings['entity_test']['handler'];
@@ -234,7 +235,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       'selection_handler' => $settings['entity_test']['handler'],
       'selection_settings_key' => $selection_settings_key,
     ))->toString();
-    $this->assertTrue(strpos($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path) !== FALSE);
+    $this->assertContains($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
 
     // Add some extra dynamic entity reference fields.
     $this->getSession()->getPage()->findButton('Add another item')->click();
@@ -253,16 +254,16 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties(array('name' => 'Barfoo'));
-    $this->assertEqual(1, count($entities), 'Entity was saved');
+    $this->assertCount(1, $entities, 'Entity was saved');
     $entity = reset($entities);
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Barfoo');
-    $this->assertText('item1');
-    $this->assertText('item2');
+    $assert_session->pageTextContains('Barfoo');
+    $assert_session->pageTextContains('item1');
+    $assert_session->pageTextContains('item2');
 
-    $this->assertEqual(count($entity->dynamic_references), 2, 'Two items in field');
-    $this->assertEqual($entity->dynamic_references[0]->entity->label(), 'item1');
-    $this->assertEqual($entity->dynamic_references[1]->entity->label(), 'item2');
+    $this->assertCount(2, $entity->dynamic_references, 'Two items in field');
+    $this->assertEquals($entity->dynamic_references[0]->entity->label(), 'item1');
+    $this->assertEquals($entity->dynamic_references[1]->entity->label(), 'item2');
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
@@ -271,15 +272,15 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       // Remove one child.
       'dynamic_references[1][target_id]' => '',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Bazbar');
+    $assert_session->pageTextContains('Bazbar');
     // Reload entity.
     \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
-    $this->assertEqual(count($entity->dynamic_references), 1, 'One value in field');
+    $this->assertCount(1, $entity->dynamic_references, 'One value in field');
 
     // Create two entities with the same label.
     $labels = array();
@@ -297,14 +298,14 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     $edit = array(
       'dynamic_references[1][target_id]' => 'duplicate label',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
 
     // We don't know the order in which the entities will be listed, so just
     // assert parts and make sure both are shown.
     $error_message = t('Multiple entities match this reference;');
-    $this->assertRaw($error_message);
-    $this->assertRaw($labels[0]);
-    $this->assertRaw($labels[1]);
+    $assert_session->responseContains($error_message);
+    $assert_session->responseContains($labels[0]);
+    $assert_session->responseContains($labels[1]);
 
     // Create a few more to trigger the case where there are more than 5
     // matching results.
@@ -317,7 +318,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     }
 
     // Submit again with the same values.
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
 
     $params = array(
       '%value' => 'duplicate label',
@@ -325,7 +326,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     // We don't know which id it will display, so just assert a part of the
     // error.
     $error_message = t('Many entities are called %value. Specify the one you want by appending the id in parentheses', $params);
-    $this->assertRaw($error_message);
+    $assert_session->responseContains($error_message);
 
     // Submit with a label that does not match anything.
     // Now try to submit and just specify the label.
@@ -333,8 +334,8 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
     $edit = array(
       'dynamic_references[1][target_id]' => 'does not exist',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertRaw(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
+    $this->submitForm($edit, t('Save'));
+    $assert_session->responseContains(t('There are no entities matching "%value".', array('%value' => 'does not exist')));
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = array(
@@ -342,15 +343,15 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       // Reference itself.
       'dynamic_references[1][target_id]' => 'Bazbar (' . $entity->id() . ')',
     );
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $this->drupalGet('entity_test/' . $entity->id());
-    $this->assertText('Bazbar');
+    $assert_session->pageTextContains('Bazbar');
     // Reload entity.
     \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->resetCache(array($entity->id()));
     $entity = EntityTest::load($entity->id());
-    $this->assertEqual($entity->dynamic_references[1]->entity->label(), 'Bazbar');
+    $this->assertEquals($entity->dynamic_references[1]->entity->label(), 'Bazbar');
   }
 
 }

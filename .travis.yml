@@ -105,7 +105,7 @@ script:
   # Run the Coder sniffer.
   - phpcs --report=full --standard=Drupal ./modules/$MODULE_NAME
   # Run the Simpletests.
-  - php ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url http://127.0.0.1:8888 --color --types "Simpletest" "$MODULE_TEST_GROUP"
+#  - php ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url http://127.0.0.1:8888 --color --types "Simpletest" "$MODULE_TEST_GROUP"
   # Run the PHPUnit tests.
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist ./modules/$MODULE_NAME
 
