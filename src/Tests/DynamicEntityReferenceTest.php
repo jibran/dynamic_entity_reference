@@ -101,6 +101,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $edit = array(
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
+      'settings[entity_test_multivalue_basefield][handler_settings][target_bundles][entity_test_multivalue_basefield]' => TRUE,
       'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
@@ -187,6 +188,7 @@ class DynamicEntityReferenceTest extends WebTestBase {
     $edit = array(
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
+      'settings[entity_test_multivalue_basefield][handler_settings][target_bundles][entity_test_multivalue_basefield]' => TRUE,
       'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
