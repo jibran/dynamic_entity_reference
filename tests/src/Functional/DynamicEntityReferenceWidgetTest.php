@@ -118,7 +118,8 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     );
     $this->drupalGet(Url::fromRoute('node.add', array('node_type' => 'reference_content')));
     $this->submitForm($edit, t('Save'));
-    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));
+    $node = $this->drupalGetNodeByTitle($title);
+    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString())));
     $nodes = \Drupal::entityTypeManager()
       ->getStorage('node')
       ->loadByProperties(['title' => $title]);
@@ -148,7 +149,8 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     );
     $this->drupalGet(Url::fromRoute('node.add', array('node_type' => 'reference_content')));
     $this->submitForm($edit, t('Save'));
-    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));
+    $node = $this->drupalGetNodeByTitle($title);
+    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString())));
     $nodes = \Drupal::entityTypeManager()
       ->getStorage('node')
       ->loadByProperties(['title' => $title]);
@@ -178,7 +180,8 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     );
     $this->drupalGet(Url::fromRoute('node.add', array('node_type' => 'reference_content')));
     $this->submitForm($edit, t('Save'));
-    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $title)));
+    $node = $this->drupalGetNodeByTitle($title);
+    $assert_session->responseContains(t('@type %title has been created.', array('@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString())));
     $nodes = \Drupal::entityTypeManager()
       ->getStorage('node')
       ->loadByProperties(['title' => $title]);

@@ -76,7 +76,6 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
 
     // Ensure that the autocomplete path is correct.
     $input = $this->xpath('//input[@name=:name]', array(':name' => 'dynamic_references[0][target_id]'))[0];
-    ;
     $settings = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions('entity_test')['dynamic_references']->getSettings();
     $selection_settings = $settings['entity_test']['handler_settings'] ?: [];
     $data = serialize($selection_settings) . 'entity_test' . $settings['entity_test']['handler'];
