@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\dynamic_entity_reference\Storage;
 
 use Drupal\Core\Database\Connection;
