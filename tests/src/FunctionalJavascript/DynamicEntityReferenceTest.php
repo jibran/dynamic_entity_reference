@@ -111,6 +111,8 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
       'new_storage_type' => 'dynamic_entity_reference',
     ];
     $this->submitForm($edit, t('Save and continue'), 'field-ui-field-storage-add-form');
+
+    // Field storage config page.
     $page = $this->getSession()->getPage();
     $entity_type_ids_select = $assert_session->selectExists('settings[entity_type_ids][]', $page);
     $entity_type_ids_select->selectOption('user');
@@ -119,32 +121,38 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
       ->selectOption(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $page->uncheckField('settings[exclude_entity_types]');
     $this->submitForm([], t('Save field settings'), 'field-storage-config-edit-form');
+
+    // Field config page.
     $page = $this->getSession()->getPage();
-    $autocomplete_field = $page->findField('default_value_input[field_foobar][0][target_id]');
-    $autocomplete_field_1 = $page->findField('default_value_input[field_foobar][1][target_id]');
+    $target_id_field = $page->findField('default_value_input[field_foobar][0][target_id]');
+    $target_id_field_1 = $page->findField('default_value_input[field_foobar][1][target_id]');
     $target_type_select = $assert_session->selectExists('default_value_input[field_foobar][0][target_type]');
-    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
-    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($target_id_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($target_id_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $target_type_select->selectOption('user');
     // Changing the selected value changes the autocomplete path for the
     // corresponding autocomplete field.
-    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('user'));
+    $this->assertSame($target_id_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('user'));
     // Changing the selected value of delta 0 doesn't change the autocomplete
     // path for delta 1 autocomplete field.
-    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($target_id_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $target_type_select->selectOption('entity_test');
     // Changing the selected value changes the autocomplete path for the
     // corresponding autocomplete field.
-    $this->assertSame($autocomplete_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($target_id_field->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     // Changing the selected value of delta 0 doesn't change the autocomplete
     // path for delta 1 autocomplete field.
-    $this->assertSame($autocomplete_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
+    $this->assertSame($target_id_field_1->getAttribute('data-autocomplete-path'), $this->createAutoCompletePath('entity_test'));
     $page = $this->getSession()->getPage();
     $page->checkField('settings[entity_test][handler_settings][target_bundles][entity_test]');
-    $assert_session->assertWaitOnAjaxRequest(20000);
+    $assert_session->assertWaitOnAjaxRequest();
     $page->checkField('settings[entity_test][handler_settings][auto_create]');
     $this->submitForm([], t('Save settings'), 'field-config-edit-form');
+
+    // Field listing page.
     $assert_session->pageTextContains('Saved Foobar configuration');
+
+    // Verify field config.
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
     $field_storage = FieldStorageConfig::loadByName('entity_test', 'field_foobar');
     $this->assertEmpty($field_storage->getSetting('exclude_entity_types'));
@@ -156,36 +164,38 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $this->assertEquals($settings['entity_test']['handler_settings']['target_bundles'], ['entity_test' => 'entity_test']);
     $this->assertTrue($settings['entity_test']['handler_settings']['auto_create']);
     $this->assertEmpty($settings['entity_test']['handler_settings']['auto_create_bundle']);
+
+    // Test the autocomplete fields.
     $this->drupalGet('entity_test/add');
-    $autocomplete_field = $page->findField('field_foobar[0][target_id]');
-    $entity_type_field = $page->findField('field_foobar[0][target_type]');
-    // Change to user.
-    $entity_type_field->selectOption('user');
-    foreach (str_split($autocomplete_query) as $char) {
-      // Autocomplete uses keydown/up directly.
-      $autocomplete_field->keyDown($char);
-      $autocomplete_field->keyUp($char);
-    }
-    // Wait for ajax.
-    $assert_session->assertWaitOnAjaxRequest(20000);
-    // And autocomplete selection.
-    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
-    $assert_session->pageTextContains($this->anotherUser->label());
-    // Clear previous autocomplete.
-    $autocomplete_field->setValue('');
-    $autocomplete_field->keyDown(self::ESCAPE_KEY);
+    $page = $this->getSession()->getPage();
+    $target_id_field = $page->findField('field_foobar[0][target_id]');
+    $target_type_field = $page->findField('field_foobar[0][target_type]');
     // Change to entity_test.
-    $entity_type_field->selectOption('entity_test');
-    foreach (str_split($autocomplete_query) as $char) {
-      // Autocomplete uses keydown/up directly.
-      $autocomplete_field->keyDown($char);
-      $autocomplete_field->keyUp($char);
-    }
-    // Wait for ajax.
-    $assert_session->assertWaitOnAjaxRequest(20000);
-    // And autocomplete selection.
-    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
+    $target_type_field->selectOption('entity_test');
+    $target_id_field->setValue($autocomplete_query);
+    $target_id_field->keyDown(' ');
+    $assert_session->waitOnAutocomplete();
+    // Check the autocomplete results.
+    $results = $page->findAll('css', '.ui-autocomplete li');
+    $this->assertCount(1, $results);
+    // Only test entity is found.
+    $assert_session->pageTextNotContains($this->anotherUser->label());
     $assert_session->pageTextContains($this->testEntity->label());
+    // Clear previous autocomplete.
+    $target_id_field->setValue('');
+    $target_id_field->keyDown(self::ESCAPE_KEY);
+    $assert_session->waitOnAutocomplete();
+    // Change to user.
+    $target_type_field->selectOption('user');
+    $target_id_field->setValue($autocomplete_query);
+    $target_id_field->keyDown(' ');
+    $assert_session->waitOnAutocomplete();
+    // Check the autocomplete results.
+    $results = $page->findAll('css', '.ui-autocomplete li');
+    $this->assertCount(1, $results);
+    // Only user is found.
+    $assert_session->pageTextContains($this->anotherUser->label());
+    $assert_session->pageTextNotContains($this->testEntity->label());
   }
 
   /**
@@ -264,7 +274,7 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
    * @param string $target_type
    *   The entity type id.
    *
-   * @return array
+   * @return string
    *   Auto complete paths for the target type.
    */
   protected function createAutoCompletePath($target_type) {
