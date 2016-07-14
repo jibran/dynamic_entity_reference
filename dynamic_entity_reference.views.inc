@@ -50,7 +50,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
         'base' => $target_base_table,
         'entity type' => $target_entity_type_id,
         'base field' => $target_entity_type->getKey('id'),
-        'relationship field' => $field_name . '_target_id',
+        'relationship field' => $field_name . '_target_id_int',
         // Entity reference field only has one target type whereas dynamic
         // entity reference field can have multiple target types that is why we
         // need extra join condition on target types.
@@ -80,7 +80,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
         'base field' => $entity_type->getKey('id'),
         'field_name' => $field_name,
         'field table' => $table_mapping->getDedicatedDataTableName($field_storage),
-        'field field' => $field_name . '_target_id',
+        'field field' => $field_name . '_target_id_int',
         // Entity reference field only has one target type whereas dynamic
         // entity reference field can have multiple target types that is why we
         // need extra join condition on target types.
@@ -146,7 +146,7 @@ function dynamic_entity_reference_views_data() {
     foreach ($fields as $field) {
       $field_name = $field->getName();
       $columns = $table_mapping->getColumnNames($field_name);
-      $column_id = $columns['target_id'];
+      $column_id = $columns['target_id'] . '_int';
       $column_type = $columns['target_type'];
 
       // Unlimited (-1) or > 1 store field data in a dedicated table.

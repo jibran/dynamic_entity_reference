@@ -4,6 +4,7 @@ namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -224,6 +225,193 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
         $this->assertFalse(isset($entities[$delta]));
       }
     }
+  }
+
+  /**
+   * Tests referencing entities with string IDs.
+   */
+  public function testReferencedEntitiesStringId() {
+    $field_name = 'entity_reference_string_id';
+    $this->installEntitySchema('entity_test_string_id');
+
+    // Create a field.
+    FieldStorageConfig::create(array(
+      'field_name' => $field_name,
+      'type' => 'dynamic_entity_reference',
+      'entity_type' => $this->entityType,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'exclude_entity_types' => FALSE,
+        'entity_type_ids' => [
+          'entity_test_string_id',
+        ],
+      ),
+    ))->save();
+
+    FieldConfig::create(array(
+      'field_name' => $field_name,
+      'entity_type' => $this->entityType,
+      'bundle' => $this->bundle,
+      'label' => 'Field test',
+      'settings' => [
+        'entity_test_string_id' => [
+          'handler' => "default:entity_test_string_id",
+          'handler_settings' => [
+            'target_bundles' => [
+              'entity_test_string_id' => 'entity_test_string_id',
+            ],
+          ],
+        ],
+      ],
+    ))->save();
+    // Create the parent entity.
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityType)
+      ->create(array('type' => $this->bundle));
+
+    // Create the default target entity.
+    $target_entity = EntityTestStringId::create([
+      'id' => $this->randomString(),
+      'type' => 'entity_test_string_id',
+    ]);
+    $target_entity->save();
+
+    // Set the field value.
+    $entity->{$field_name}->setValue([
+      [
+        'target_id' => $target_entity->id(),
+        'target_type' => $target_entity->getEntityTypeId(),
+      ],
+    ]);
+
+    // Load the target entities using
+    // DynamicEntityReferenceFieldItemList::referencedEntities().
+    $entities = $entity->{$field_name}->referencedEntities();
+    $this->assertEquals($entities[0]->id(), $target_entity->id());
+
+    // Test that a string ID works as a default value and the field's config
+    // schema is correct.
+    $field = FieldConfig::loadByName($this->entityType, $this->bundle, $field_name);
+    $field->setDefaultValue([
+      [
+        'target_id' => $target_entity->id(),
+        'target_type' => $target_entity->getEntityTypeId(),
+      ],
+    ]);
+    $field->save();
+    $this->assertConfigSchema(\Drupal::service('config.typed'), 'field.field.' . $field->id(), $field->toArray());
+
+    // Test that the default value works.
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityType)
+      ->create(array('type' => $this->bundle));
+    $entities = $entity->{$field_name}->referencedEntities();
+    $this->assertEquals($entities[0]->id(), $target_entity->id());
+  }
+
+  /**
+   * Tests referencing entities with string and int IDs.
+   */
+  public function testReferencedEntitiesMixId() {
+    $field_name = 'entity_reference_mix_id';
+    $this->installEntitySchema('entity_test_string_id');
+
+    // Create a field.
+    FieldStorageConfig::create(array(
+      'field_name' => $field_name,
+      'type' => 'dynamic_entity_reference',
+      'entity_type' => $this->entityType,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'exclude_entity_types' => FALSE,
+        'entity_type_ids' => [
+          $this->referencedEntityType,
+          'entity_test_string_id',
+        ],
+      ),
+    ))->save();
+
+    FieldConfig::create(array(
+      'field_name' => $field_name,
+      'entity_type' => $this->entityType,
+      'bundle' => $this->bundle,
+      'label' => 'Field test',
+      'settings' => [
+        'entity_test_string_id' => [
+          'handler' => "default:entity_test_string_id",
+          'handler_settings' => [
+            'target_bundles' => [
+              'entity_test_string_id' => 'entity_test_string_id',
+            ],
+          ],
+        ],
+        $this->referencedEntityType => [
+          'handler' => 'default:' . $this->referencedEntityType,
+          'handler_settings' => [
+            'target_bundles' => [
+              $this->bundle => $this->bundle,
+            ],
+          ],
+        ],
+      ],
+    ))->save();
+    // Create the parent entity.
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityType)
+      ->create(array('type' => $this->bundle));
+
+    // Create the default target entity.
+    $target_entity = EntityTestStringId::create([
+      'id' => $this->randomString(),
+      'type' => 'entity_test_string_id',
+    ]);
+    $target_entity->save();
+    $referenced_entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->referencedEntityType)
+      ->create(['type' => $this->bundle]);
+    $referenced_entity->save();
+
+    // Set the field value.
+    $entity->{$field_name}->setValue([
+      [
+        'target_id' => $target_entity->id(),
+        'target_type' => $target_entity->getEntityTypeId(),
+      ],
+      [
+        'target_id' => $referenced_entity->id(),
+        'target_type' => $referenced_entity->getEntityTypeId(),
+      ],
+    ]);
+
+    // Load the target entities using
+    // DynamicEntityReferenceFieldItemList::referencedEntities().
+    $entities = $entity->{$field_name}->referencedEntities();
+    $this->assertEquals($entities[0]->id(), $target_entity->id());
+    $this->assertEquals($entities[1]->id(), $referenced_entity->id());
+
+    // Test that a string ID works as a default value and the field's config
+    // schema is correct.
+    $field = FieldConfig::loadByName($this->entityType, $this->bundle, $field_name);
+    $field->setDefaultValue([
+      [
+        'target_id' => $target_entity->id(),
+        'target_type' => $target_entity->getEntityTypeId(),
+      ],
+      [
+        'target_id' => $referenced_entity->id(),
+        'target_type' => $referenced_entity->getEntityTypeId(),
+      ],
+    ]);
+    $field->save();
+    $this->assertConfigSchema(\Drupal::service('config.typed'), 'field.field.' . $field->id(), $field->toArray());
+
+    // Test that the default value works.
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityType)
+      ->create(array('type' => $this->bundle));
+    $entities = $entity->{$field_name}->referencedEntities();
+    $this->assertEquals($entities[0]->id(), $target_entity->id());
+    $this->assertEquals($entities[1]->id(), $referenced_entity->id());
   }
 
 }

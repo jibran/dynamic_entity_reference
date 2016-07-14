@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Update functions for the dynamic_entity_reference module.
+ */
+
+use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
+
+/**
+ * Changes target_id column to string and creates target_id_int.
+ */
+function dynamic_entity_reference_update_8001() {
+  /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */
+  $schema = \Drupal::database()->schema();
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_type_manager = \Drupal::entityTypeManager();
+  // The key-value collection for tracking installed storage schema.
+  $installed_storage_schema = \Drupal::keyValue('entity.storage_schema.sql');
+  // DER field storage subscriber service to create integer column and add
+  // triggers for target_id column.
+  /** @var \Drupal\dynamic_entity_reference\EventSubscriber\FieldStorageSubscriber $service */
+  $service = \Drupal::service('dynamic_entity_reference.entity_type_subscriber');
+  // Only update dynamic_entity_reference fields.
+  foreach ($entity_field_manager->getFieldMapByFieldType('dynamic_entity_reference') as $entity_type_id => $map) {
+    $entity_storage = $entity_type_manager->getStorage($entity_type_id);
+    // Only SQL storage based entities are supported.
+    if ($entity_storage instanceof SqlEntityStorageInterface) {
+      $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+      $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
+      // Only need field storage definitions of dynamic_entity_reference fields.
+      /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
+      foreach (array_intersect_key($field_storage_definitions, $map) as $field_storage_definition) {
+        $field_name = $field_storage_definition->getName();
+        $table = $table_mapping->getFieldTableName($field_name);
+        $column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_id');
+        $spec = [
+          'description' => 'The ID of the target entity.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ];
+        // Name of the column is not changed only specifications are changed.
+        $schema->changeField($table, $column, $column, $spec);
+        // Update the installed storage schema for this field as well.
+        $key = $entity_type_id . '.field_schema_data.' . $field_name;
+        if ($field_schema_data = $installed_storage_schema->get($key)) {
+          $field_schema_data[$table]['fields'][$column] = $spec;
+          $installed_storage_schema->set($key, $field_schema_data);
+        }
+        // Add the integer column after converting the original column.
+        $service->handleEntityType($entity_type_id, $field_name, $field_storage_definition);
+      }
+    }
+  }
+}

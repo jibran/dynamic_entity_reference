@@ -99,7 +99,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
     // Check views data for test entity - data table referenced from
@@ -108,14 +108,14 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
     // Check the backwards reference for test entity using dynamic_references.
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['id'], 'standard');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['extra'][0]['field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
@@ -124,7 +124,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['id'], 'standard');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['extra'][0]['field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
@@ -137,7 +137,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
     // Check views data for test entity - data table referenced from
@@ -146,14 +146,14 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
     // Check the backwards reference for test entity using dynamic_references.
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['id'], 'standard');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
-    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['field'], 'id');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['extra'][0]['field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
@@ -162,7 +162,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['id'], 'standard');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
-    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id');
+    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'dynamic_references__target_id_int');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field'], 'id');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['extra'][0]['field'], 'dynamic_references__target_type');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
@@ -428,7 +428,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test['entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
     // Check views data for test entity - data table referenced from
@@ -437,7 +437,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test['entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
 
@@ -451,7 +451,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field_name'], 'dynamic_references');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field table'], 'entity_test__dynamic_references');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['join_extra'][0]['field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['join_extra'][0]['value'], 'entity_test');
 
@@ -466,7 +466,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field_name'], 'dynamic_references');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field table'], 'entity_test__dynamic_references');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['join_extra'][0]['field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__dynamic_references']['relationship']['join_extra'][0]['value'], 'entity_test_mul');
 
@@ -478,7 +478,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test_mul['entity_test__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test');
     // Check views data for test entity - data table referenced from
@@ -487,7 +487,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['relationship field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['extra'][0]['left_field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test_mul['entity_test_mul__dynamic_references']['relationship']['extra'][0]['value'], 'entity_test_mul');
 
@@ -501,7 +501,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field_name'], 'dynamic_references');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field table'], 'entity_test_mul__dynamic_references');
-    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['join_extra'][0]['field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['join_extra'][0]['value'], 'entity_test');
 
@@ -516,7 +516,7 @@ class DynamicEntityReferenceBaseFieldRelationshipTest extends ViewsKernelTestBas
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field_name'], 'dynamic_references');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field table'], 'entity_test_mul__dynamic_references');
-    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id');
+    $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['field field'], 'dynamic_references_target_id_int');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['join_extra'][0]['field'], 'dynamic_references_target_type');
     $this->assertEquals($views_data_entity_test_mul['reverse__entity_test_mul__dynamic_references']['relationship']['join_extra'][0]['value'], 'entity_test_mul');
 

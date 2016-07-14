@@ -146,7 +146,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['relationship field'], 'field_test_target_id');
+    $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['relationship field'], 'field_test_target_id_int');
     $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['extra'][0]['left_field'], 'field_test_target_type');
     $this->assertEquals($views_data_field_test['entity_test__field_test']['relationship']['extra'][0]['value'], 'entity_test');
 
@@ -155,7 +155,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['relationship field'], 'field_test_target_id');
+    $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['relationship field'], 'field_test_target_id_int');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['extra'][0]['left_field'], 'field_test_target_type');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test']['relationship']['extra'][0]['value'], 'entity_test_mul');
 
@@ -165,7 +165,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field table'], 'entity_test__field_test');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field field'], 'field_test_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field field'], 'field_test_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][0]['field'], 'field_test_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][0]['value'], 'entity_test');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][1]['field'], 'deleted');
@@ -179,7 +179,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field table'], 'entity_test__field_test');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field field'], 'field_test_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['field field'], 'field_test_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][0]['field'], 'field_test_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][0]['value'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test['reverse__entity_test__field_test']['relationship']['join_extra'][1]['field'], 'deleted');
@@ -259,7 +259,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['base'], 'entity_test');
     $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['entity type'], 'entity_test');
     $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['relationship field'], 'field_test_mul_target_id');
+    $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['relationship field'], 'field_test_mul_target_id_int');
     $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['extra'][0]['left_field'], 'field_test_mul_target_type');
     $this->assertEquals($views_data_field_test['entity_test__field_test_mul']['relationship']['extra'][0]['value'], 'entity_test');
 
@@ -269,7 +269,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['entity type'], 'entity_test_mul');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['base field'], 'id');
-    $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['relationship field'], 'field_test_mul_target_id');
+    $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['relationship field'], 'field_test_mul_target_id_int');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['extra'][0]['left_field'], 'field_test_mul_target_type');
     $this->assertEquals($views_data_field_test['entity_test_mul__field_test_mul']['relationship']['extra'][0]['value'], 'entity_test_mul');
 
@@ -279,7 +279,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field table'], 'entity_test_mul__field_test_mul');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field field'], 'field_test_mul_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field field'], 'field_test_mul_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][0]['field'], 'field_test_mul_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][0]['value'], 'entity_test');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][1]['field'], 'deleted');
@@ -293,7 +293,7 @@ class DynamicEntityReferenceRelationshipTest extends ViewsKernelTestBase {
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['base'], 'entity_test_mul_property_data');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['base field'], 'id');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field table'], 'entity_test_mul__field_test_mul');
-    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field field'], 'field_test_mul_target_id');
+    $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['field field'], 'field_test_mul_target_id_int');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][0]['field'], 'field_test_mul_target_type');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][0]['value'], 'entity_test_mul');
     $this->assertEquals($views_data_entity_test['reverse__entity_test_mul__field_test_mul']['relationship']['join_extra'][1]['field'], 'deleted');

@@ -1,0 +1,7 @@
+name: 'Dynamic Entity Reference fix #275136'
+type: module
+description: 'jerry rigs #275136, remove once that is fixed'
+package: Testing
+core: 8.x
+dependencies:
+  - dynamic_entity_reference

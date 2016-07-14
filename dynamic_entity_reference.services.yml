@@ -2,3 +2,22 @@ services:
   plugin.manager.dynamic_entity_reference_selection:
     class: Drupal\dynamic_entity_reference\SelectionPluginManager
     parent: plugin.manager.entity_reference_selection
+  dynamic_entity_reference.entity_type_subscriber:
+    class: Drupal\dynamic_entity_reference\EventSubscriber\FieldStorageSubscriber
+    arguments: ['@entity_type.manager', '@entity_field.manager', '@dynamic_entity_reference.storage.create_column', '@database']
+    tags:
+      - { name: event_subscriber }
+  dynamic_entity_reference.storage.create_column:
+    class: Drupal\dynamic_entity_reference\Storage\IntColumnHandler
+    tags:
+      - { name: backend_overridable }
+    arguments: ['@database']
+  mysql.dynamic_entity_reference.storage.create_column:
+    class: Drupal\dynamic_entity_reference\Storage\IntColumnHandlerMySQL
+    arguments: ['@database']
+  pgsql.dynamic_entity_reference.storage.create_column:
+    class: Drupal\dynamic_entity_reference\Storage\IntColumnHandlerPostgreSQL
+    arguments: ['@database']
+  sqlite.dynamic_entity_reference.storage.create_column:
+    class: Drupal\dynamic_entity_reference\Storage\IntColumnHandlerSQLite
+    arguments: ['@database']

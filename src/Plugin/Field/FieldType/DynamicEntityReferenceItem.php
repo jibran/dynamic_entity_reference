@@ -73,7 +73,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties['target_id'] = DataReferenceTargetDefinition::create('integer')
+    $properties['target_id'] = DataReferenceTargetDefinition::create('string')
       ->setLabel(t('Entity ID'))
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE);
@@ -99,8 +99,8 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $columns = array(
       'target_id' => array(
         'description' => 'The ID of the target entity.',
-        'type' => 'int',
-        'unsigned' => TRUE,
+        'type' => 'varchar',
+        'length' => 255,
       ),
       'target_type' => array(
         'description' => 'The Entity Type ID of the target entity.',
