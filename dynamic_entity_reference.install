@@ -5,6 +5,7 @@
  * Update functions for the dynamic_entity_reference module.
  */
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 
 /**
@@ -36,16 +37,26 @@ function dynamic_entity_reference_update_8001() {
         $column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_id');
         $spec = [
           'description' => 'The ID of the target entity.',
-          'type' => 'varchar',
+          'type' => 'varchar_ascii',
           'length' => 255,
           'not null' => TRUE,
         ];
         // Name of the column is not changed only specifications are changed.
         $schema->changeField($table, $column, $column, $spec);
+        // For the sake of completeness change the target type to ASCII as well.
+        $type_spec = [
+          'description' => 'The Entity Type ID of the target entity.',
+          'type' => 'varchar_ascii',
+          'length' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
+          'not null' => TRUE,
+        ];
+        $type_column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_type');
+        $schema->changeField($table, $type_column, $type_column, $type_spec);
         // Update the installed storage schema for this field as well.
         $key = $entity_type_id . '.field_schema_data.' . $field_name;
         if ($field_schema_data = $installed_storage_schema->get($key)) {
           $field_schema_data[$table]['fields'][$column] = $spec;
+          $field_schema_data[$table]['fields'][$type_column] = $type_spec;
           $installed_storage_schema->set($key, $field_schema_data);
         }
         // Add the integer column after converting the original column.

@@ -99,12 +99,12 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $columns = array(
       'target_id' => array(
         'description' => 'The ID of the target entity.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => 255,
       ),
       'target_type' => array(
         'description' => 'The Entity Type ID of the target entity.',
-        'type' => 'varchar',
+        'type' => 'varchar_ascii',
         'length' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
       ),
     );
