@@ -31,10 +31,14 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
    * Check whether all columns exist.
    *
    * @param \Drupal\Core\Database\Schema $schema
-   * @param $table
-   * @param array $columns
+   *   The database Schema object for this connection.
+   * @param string $table
+   *   The name of the table in drupal (no prefixing).
+   * @param string[] $columns
+   *   The names of the columns.
    *
    * @return bool
+   *   TRUE if all the given columns exists, otherwise FALSE.
    */
   public static function allColumnsExist(Schema $schema, $table, array $columns) {
     foreach ($columns as $column) {
