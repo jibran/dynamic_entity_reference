@@ -70,7 +70,6 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     $events[FieldStorageDefinitionEvents::CREATE][] = ['onFieldStorage', 100];
     $events[EntityTypeEvents::CREATE][] = ['onEntityType', 100];
-    $events[EntityTypeEvents::UPDATE][] = ['onEntityType', 100];
     return $events;
   }
 
@@ -107,21 +106,23 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    */
   public function handleEntityType($entity_type_id, $field_name = NULL, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
+    $der_fields = $this->entityFieldManager->getFieldMapByFieldType('dynamic_entity_reference');
+    if ($field_name) {
+      $der_fields[$entity_type_id][$field_name] = TRUE;
+    }
     $tables = [];
     // If we know which field is being created / updated check whether it is
     // DER.
-    if ($storage instanceof SqlEntityStorageInterface && (!$field_storage_definition || $field_storage_definition->getType() == 'dynamic_entity_reference')) {
+    if ($storage instanceof SqlEntityStorageInterface && !empty($der_fields[$entity_type_id])) {
       $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type_id);
-      // If a field is given then only work with that.
-      $current_definitions = $field_name ? [$field_name => $field_storage_definition] : $storage_definitions;
-      // DefaultMapping is buggy and requires all the field definitions.
-      $mapping = $storage->getTableMapping($current_definitions + $storage_definitions);
-      foreach ($current_definitions as $storage_definition) {
-        if ($storage_definition->getType() == 'dynamic_entity_reference') {
-          $table = $mapping->getFieldTableName($storage_definition->getName());
-          $column = $mapping->getFieldColumnName($storage_definition, 'target_id');
-          $tables[$table][] = $column;
-        }
+      if ($field_name) {
+        $storage_definitions[$field_name] = $field_storage_definition;
+      }
+      $mapping = $storage->getTableMapping($storage_definitions);
+      foreach (array_keys($der_fields[$entity_type_id]) as $field_name) {
+        $table = $mapping->getFieldTableName($field_name);
+        $column = $mapping->getFieldColumnName($storage_definitions[$field_name], 'target_id');
+        $tables[$table][] = $column;
       }
       $new = [];
       foreach ($tables as $table => $columns) {

@@ -31,6 +31,9 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
    */
   public function create($table, array $columns) {
     $schema = $this->connection->schema();
+    if (!IntColumnHandler::allColumnsExist($schema, $table, $columns)) {
+      return [];
+    }
     // The integer column specification.
     $spec = [
       'type' => 'int',
@@ -65,7 +68,7 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
     $function_name = $this->getFunctionName($table, $column_int);
     $query = "CREATE OR REPLACE FUNCTION $function_name() RETURNS trigger AS $$
       BEGIN
-        NEW.$column_int = (CASE WHEN NEW.$column ~ '^[0-9]+$' THEN NEW.$column ELSE '0' END)::integer";
+        NEW.$column_int = (CASE WHEN NEW.$column ~ '^[0-9]+$' THEN NEW.$column ELSE NULL END)::integer";
     if (strpos($query, ';') !== FALSE) {
       throw new \InvalidArgumentException('; is not supported in SQL strings. Use only one statement at a time.');
     }

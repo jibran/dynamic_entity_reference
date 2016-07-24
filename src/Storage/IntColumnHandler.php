@@ -3,6 +3,7 @@
 namespace Drupal\dynamic_entity_reference\Storage;
 
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Schema;
 
 /**
  * Per database implementation of denormalizing into integer columns.
@@ -27,6 +28,28 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
   }
 
   /**
+   * Check whether all columns exist.
+   *
+   * @param \Drupal\Core\Database\Schema $schema
+   * @param $table
+   * @param array $columns
+   *
+   * @return bool
+   */
+  public static function allColumnsExist(Schema $schema, $table, array $columns) {
+    foreach ($columns as $column) {
+      // When a new module adds more than one new basefields in
+      // hook_entity_base_field_info() then the entity system will report those
+      // but they won't exist yet in the database. It's enough to fire when
+      // called for the last one.
+      if (!$schema->fieldExists($table, $column)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function create($table, array $columns) {
@@ -44,6 +67,9 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
     // In SQLite, it's cheaper to run one query instead on per column.
     $body = [];
     $new = [];
+    if (!static::allColumnsExist($schema, $table, $columns)) {
+      return [];
+    }
     foreach ($columns as $column) {
       $column_int = $column . '_int';
       // Make sure the integer columns exist.

@@ -17,6 +17,7 @@ function dynamic_entity_reference_entity_test_entity_base_field_info(EntityTypeI
   // 'entity_test' with no data table and 'entity_test_mul' is with data table.
   if ($entity_type->id() == 'entity_test' || $entity_type->id() == 'entity_test_mul') {
     $fields['dynamic_references'] = BaseFieldDefinition::create('dynamic_entity_reference')
+      ->setName('dynamic_references')
       ->setLabel((string) new TranslatableMarkup('References'))
       ->setDescription((string) new TranslatableMarkup('Reference another entity.'))
       ->setRequired(FALSE)
@@ -41,29 +42,44 @@ function dynamic_entity_reference_entity_test_entity_base_field_info(EntityTypeI
           ],
           'entity_test_mul' => [
             'handler' => "default:entity_test_mul",
-            'handler_settings' => [],
+            'handler_settings' => [
+              'target_bundles' => [
+                'entity_test_mul' => 'entity_test_mul',
+              ],
+            ],
           ],
         ]);
     }
     else {
       $fields['dynamic_references']
-      ->setSettings([
-        'exclude_entity_types' => FALSE,
-        'entity_type_ids' => [
-          'entity_test' => 'entity_test',
-          'entity_test_mul' => 'entity_test_mul',
-        ],
-        'entity_test' => [
-          'handler' => "default:entity_test",
-          'handler_settings' => [],
-        ],
-        'entity_test_mul' => [
-          'handler' => "default:entity_test_mul",
-          'handler_settings' => [],
-        ],
-      ]);
+        ->setSettings([
+          'exclude_entity_types' => FALSE,
+          'entity_type_ids' => [
+            'entity_test' => 'entity_test',
+            'entity_test_mul' => 'entity_test_mul',
+          ],
+          'entity_test' => [
+            'handler' => "default:entity_test",
+            'handler_settings' => [
+              'target_bundles' => [
+                'entity_test' => 'entity_test',
+              ],
+            ],
+          ],
+          'entity_test_mul' => [
+            'handler' => "default:entity_test_mul",
+            'handler_settings' => [
+              'target_bundles' => [
+                'entity_test_mul' => 'entity_test_mul',
+              ],
+            ],
+          ],
+        ]);
     }
-
+    if (\Drupal::state()->get('dynamic_entity_reference_entity_test_with_two_base_fields', FALSE)) {
+      $fields['der'] = BaseFieldDefinition::createFromFieldStorageDefinition($fields['dynamic_references'])
+        ->setName('der');
+    }
   }
 
   return $fields;

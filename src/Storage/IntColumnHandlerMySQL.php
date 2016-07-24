@@ -11,7 +11,7 @@ class IntColumnHandlerMySQL extends IntColumnHandler {
    * {@inheritdoc}
    */
   protected function createBody($column_int, $column) {
-    return "NEW.$column_int = IF(NEW.$column REGEXP '^[0-9]+$', CAST(NEW.$column AS UNSIGNED), 0)";
+    return "NEW.$column_int = IF(NEW.$column REGEXP '^[0-9]+$', CAST(NEW.$column AS UNSIGNED), NULL)";
   }
 
   /**
