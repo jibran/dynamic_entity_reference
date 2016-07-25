@@ -231,8 +231,18 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
     $this->assertEquals($build[0]['#cache']['tags'], $expected_cache_tags, (string) new FormattableMarkup('The @formatter formatter has the expected cache tags.', array('@formatter' => $formatter)));
 
     // Test the second field item.
+    $expected_rendered_name_field_2 = '
+            <div class="field field--name-name field--type-string field--label-hidden field__item">' . $this->unsavedReferencedEntity->label() . '</div>
+      ';
+    $expected_rendered_body_field_2 = '
+  <div class="clearfix text-formatted field field--name-body field--type-text field--label-above">
+    <div class="field__label">Body</div>
+              <div class="field__item"><p>Hello, unsaved world!</p></div>
+          </div>
+';
+
     $renderer->renderRoot($build[1]);
-    $this->assertEquals($build[1]['#markup'], $this->unsavedReferencedEntity->label(), sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
+    $this->assertEquals($build[1]['#markup'], 'default | ' . $this->unsavedReferencedEntity->label() . $expected_rendered_name_field_2 . $expected_rendered_body_field_2, sprintf('The markup returned by the %s formatter is correct for an item with a unsaved entity.', $formatter));
   }
 
   /**
