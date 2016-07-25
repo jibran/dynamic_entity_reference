@@ -81,7 +81,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    */
   public function onFieldStorage(FieldStorageDefinitionEvent $event) {
     $definition = $event->getFieldStorageDefinition();
-    $this->handleEntityType($definition->getTargetEntityTypeId(), $definition->getName(), $definition);
+    $this->handleEntityType($definition->getTargetEntityTypeId(), $definition);
   }
 
   /**
@@ -99,24 +99,22 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    *
    * @param string $entity_type_id
    *   The entity type ID.
-   * @param string|null $field_name
-   *   The field name. Optional.
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition
    *   The field storage definition.
    */
-  public function handleEntityType($entity_type_id, $field_name = NULL, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
+  public function handleEntityType($entity_type_id, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
     $der_fields = $this->entityFieldManager->getFieldMapByFieldType('dynamic_entity_reference');
-    if ($field_name) {
-      $der_fields[$entity_type_id][$field_name] = TRUE;
+    if ($field_storage_definition) {
+      $der_fields[$entity_type_id][$field_storage_definition->getName()] = TRUE;
     }
     $tables = [];
     // If we know which field is being created / updated check whether it is
     // DER.
     if ($storage instanceof SqlEntityStorageInterface && !empty($der_fields[$entity_type_id])) {
       $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type_id);
-      if ($field_name) {
-        $storage_definitions[$field_name] = $field_storage_definition;
+      if ($field_storage_definition) {
+        $storage_definitions[$field_storage_definition->getName()] = $field_storage_definition;
       }
       $mapping = $storage->getTableMapping($storage_definitions);
       foreach (array_keys($der_fields[$entity_type_id]) as $field_name) {
@@ -129,7 +127,8 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
         $new[$table] = $this->intColumnHandler->create($table, $columns);
       }
       foreach (array_filter($new) as $table => $columns) {
-        // The trigger created will fill in the right value.
+        // reset($columns) is one of the new int columns. The trigger will fill
+        // in the right value for it.
         $this->connection->update($table)->fields([reset($columns) => 0])->execute();
       }
     }
