@@ -199,11 +199,11 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $selection_settings = [];
     $data = serialize($selection_settings) . $target_type . "default:$target_type";
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
-    return Url::fromRoute('system.entity_autocomplete', array(
+    return Url::fromRoute('system.entity_autocomplete', [
       'target_type' => $target_type,
       'selection_handler' => "default:$target_type",
       'selection_settings_key' => $selection_settings_key,
-    ))->toString();
+    ])->toString();
   }
 
 }
