@@ -96,12 +96,20 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Handles an entity type.
+   * Adds integer columns and relevant triggers for an entity type.
+   *
+   * Every dyanmic_entity_reference field belonging to an entity type will get
+   * an integer column pair and a trigger which calculates the integer value if
+   * the target_id looks like a number. This makes it possible to store a
+   * string for entities which have string IDs and yet JOIN and ORDER on
+   * integers when that's desired.
    *
    * @param string $entity_type_id
    *   The entity type ID.
    * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition
-   *   The field storage definition.
+   *   The field storage definition. It is only necessary to pass this if this
+   *   a FieldStorageConfig object during presave and as such the definition is
+   *   not yet available to the entity field manager.
    */
   public function handleEntityType($entity_type_id, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);

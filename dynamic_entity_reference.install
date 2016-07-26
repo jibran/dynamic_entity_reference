@@ -32,7 +32,7 @@ function dynamic_entity_reference_update_8001() {
       $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
       /** @var Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
       $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
-      $updates = [];
+      $field_storage_definition = FALSE;
       // Only need field storage definitions of dynamic_entity_reference fields.
       /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
       foreach (array_intersect_key($field_storage_definitions, $map) as $field_storage_definition) {
@@ -78,11 +78,11 @@ function dynamic_entity_reference_update_8001() {
             $entity_definitions_installed->set($key, $definitions);
           }
         }
-        $updates[] = $field_storage_definition;
       }
-      foreach ($updates as $field_storage_definition) {
-        // Add the integer column after converting all original columns to int.
-        $service->handleEntityType($entity_type_id, $field_storage_definition);
+      if ($field_storage_definition) {
+        // Add the integer columns after converting all original columns to
+        // string.
+        $service->handleEntityType($entity_type_id);
       }
     }
   }
