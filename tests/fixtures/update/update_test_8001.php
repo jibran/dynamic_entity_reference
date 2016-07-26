@@ -17,23 +17,23 @@ use Drupal\field\Entity\FieldStorageConfig;
 
 \Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
 
-$field_storage = FieldStorageConfig::create(array(
+$field_storage = FieldStorageConfig::create([
   'entity_type' => 'entity_test',
   'field_name' => 'field_test',
   'type' => 'dynamic_entity_reference',
-  'settings' => array(
+  'settings' => [
     'exclude_entity_types' => FALSE,
     'entity_type_ids' => [
       'entity_test',
       'entity_test_mul',
       'entity_test_string_id',
     ],
-  ),
+  ],
   'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-));
+]);
 $field_storage->save();
 
-$field = FieldConfig::create(array(
+$field = FieldConfig::create([
   'entity_type' => 'entity_test',
   'field_name' => 'field_test',
   'bundle' => 'entity_test',
@@ -63,26 +63,26 @@ $field = FieldConfig::create(array(
       ],
     ],
   ],
-));
+]);
 $field->save();
 
-$field_storage = FieldStorageConfig::create(array(
+$field_storage = FieldStorageConfig::create([
   'entity_type' => 'entity_test_mul',
   'field_name' => 'field_test_mul',
   'type' => 'dynamic_entity_reference',
-  'settings' => array(
+  'settings' => [
     'exclude_entity_types' => FALSE,
     'entity_type_ids' => [
       'entity_test',
       'entity_test_mul',
       'entity_test_string_id',
     ],
-  ),
+  ],
   'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-));
+]);
 $field_storage->save();
 
-$field = FieldConfig::create(array(
+$field = FieldConfig::create([
   'entity_type' => 'entity_test_mul',
   'field_name' => 'field_test_mul',
   'bundle' => 'entity_test_mul',
@@ -112,7 +112,7 @@ $field = FieldConfig::create(array(
       ],
     ],
   ],
-));
+]);
 $field->save();
 
 

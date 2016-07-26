@@ -44,7 +44,7 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator {
     $referenced_entity = $value->get('entity')->getValue();
     /** @var \Drupal\dynamic_entity_reference\Plugin\Validation\Constraint\ValidDynamicReferenceConstraint $constraint */
     if (!$valid_type || !$referenced_entity) {
-      $this->context->addViolation($constraint->message, array('%type' => $type, '%id' => $id));
+      $this->context->addViolation($constraint->message, ['%type' => $type, '%id' => $id]);
     }
   }
 
