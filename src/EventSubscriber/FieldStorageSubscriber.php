@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeEvent;
 use Drupal\Core\Entity\EntityTypeEvents;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageException;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 use Drupal\Core\Field\FieldStorageDefinitionEvent;
 use Drupal\Core\Field\FieldStorageDefinitionEvents;
@@ -118,8 +119,15 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
       }
       $mapping = $storage->getTableMapping($storage_definitions);
       foreach (array_keys($der_fields[$entity_type_id]) as $field_name) {
-        $table = $mapping->getFieldTableName($field_name);
-        $column = $mapping->getFieldColumnName($storage_definitions[$field_name], 'target_id');
+        try {
+          $table = $mapping->getFieldTableName($field_name);
+          $column = $mapping->getFieldColumnName($storage_definitions[$field_name], 'target_id');
+        }
+        catch (SqlContentEntityStorageException $e) {
+          // Custom storage? Broken site? No matter what, if there is no table
+          // or column, there's little we can do.
+          continue;
+        }
         $tables[$table][] = $column;
       }
       $new = [];

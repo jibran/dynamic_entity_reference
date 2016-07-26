@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageException;
 use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 
 /**
@@ -29,16 +30,23 @@ function dynamic_entity_reference_update_8001() {
     // Only SQL storage based entities are supported.
     if ($entity_storage instanceof SqlEntityStorageInterface) {
       $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+      /** @var Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
       $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
-      $dedicated_tables = $table_mapping->getDedicatedTableNames();
       $updates = [];
       // Only need field storage definitions of dynamic_entity_reference fields.
       /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
       foreach (array_intersect_key($field_storage_definitions, $map) as $field_storage_definition) {
         $field_name = $field_storage_definition->getName();
-        $table = $table_mapping->getFieldTableName($field_name);
-        $column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_id');
-        $dedicated = in_array($table, $dedicated_tables);
+        try {
+          $table = $table_mapping->getFieldTableName($field_name);
+          $column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_id');
+        }
+        catch (SqlContentEntityStorageException $e) {
+          // Custom storage? Broken site? No matter what, if there is no table
+          // or column, there's little we can do.
+          continue;
+        }
+        $dedicated = $table_mapping->requiresDedicatedTableStorage($field_storage_definition);
         $spec = [
           'description' => 'The ID of the target entity.',
           'type' => 'varchar_ascii',
@@ -63,7 +71,7 @@ function dynamic_entity_reference_update_8001() {
           $field_schema_data[$table]['fields'][$type_column] = $type_spec;
           $entity_storage_schema_sql->set($key, $field_schema_data);
         }
-        if (!$dedicated) {
+        if ($table_mapping->allowsSharedTableStorage($field_storage_definition)) {
           $key = "$entity_type_id.field_storage_definitions";
           if ($definitions = $entity_definitions_installed->get($key)) {
             $definitions[$field_name] = $field_storage_definition;
