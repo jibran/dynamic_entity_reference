@@ -4,6 +4,8 @@ namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
@@ -200,6 +202,72 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
         $this->assertFalse(isset($entities[$delta]));
       }
     }
+  }
+
+  /**
+   * Tests the der field type for referencing multiple content entities.
+   */
+  public function testMultipleEntityReference() {
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', '');
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
+    $this->enableModules(['dynamic_entity_reference_entity_test']);
+    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+    $this->installEntitySchema('entity_test_mul');
+
+    // Create some test entities which link each other.
+    $referenced_entity = EntityTest::create();
+    $referenced_entity->save();
+    $referenced_entity_mul = EntityTestMul::create();
+    $referenced_entity_mul->save();
+
+    $entity = EntityTest::create();
+    $entity->dynamic_references[] = $referenced_entity;
+    $entity->der[] = $referenced_entity_mul;
+    $entity->save();
+    // Loads an unchanged entity from the database.
+    $entity = $this->container
+      ->get('entity_type.manager')
+      ->getStorage('entity_test')
+      ->loadUnchanged($entity->id());
+
+    // Check references correctly for dynamic_references field.
+    $this->assertEquals($entity->dynamic_references[0]->target_id, $referenced_entity->id());
+    $this->assertEquals($entity->dynamic_references[0]->target_type, $referenced_entity->getEntityTypeId());
+    $this->assertEquals($entity->dynamic_references[0]->entity->getName(), $referenced_entity->getName());
+    $this->assertEquals($entity->dynamic_references[0]->entity->id(), $referenced_entity->id());
+    $this->assertEquals($entity->dynamic_references[0]->entity->uuid(), $referenced_entity->uuid());
+
+    // Check references correctly for der field.
+    $this->assertEquals($entity->der[0]->target_id, $referenced_entity_mul->id());
+    $this->assertEquals($entity->der[0]->target_type, $referenced_entity_mul->getEntityTypeId());
+    $this->assertEquals($entity->der[0]->entity->getName(), $referenced_entity_mul->getName());
+    $this->assertEquals($entity->der[0]->entity->id(), $referenced_entity_mul->id());
+    $this->assertEquals($entity->der[0]->entity->uuid(), $referenced_entity_mul->uuid());
+
+    $entity = EntityTestMul::create();
+    $entity->der[] = $referenced_entity;
+    $entity->dynamic_references[] = $referenced_entity_mul;
+    $entity->save();
+    // Loads an unchanged entity from the database.
+    $entity = $this->container
+      ->get('entity_type.manager')
+      ->getStorage('entity_test_mul')
+      ->loadUnchanged($entity->id());
+
+    // Check references correctly for dynamic_references field.
+    $this->assertEquals($entity->dynamic_references[0]->target_id, $referenced_entity_mul->id());
+    $this->assertEquals($entity->dynamic_references[0]->target_type, $referenced_entity_mul->getEntityTypeId());
+    $this->assertEquals($entity->dynamic_references[0]->entity->getName(), $referenced_entity_mul->getName());
+    $this->assertEquals($entity->dynamic_references[0]->entity->id(), $referenced_entity_mul->id());
+    $this->assertEquals($entity->dynamic_references[0]->entity->uuid(), $referenced_entity_mul->uuid());
+
+    // Check references correctly for der field.
+    $this->assertEquals($entity->der[0]->target_id, $referenced_entity->id());
+    $this->assertEquals($entity->der[0]->target_type, $referenced_entity->getEntityTypeId());
+    $this->assertEquals($entity->der[0]->entity->getName(), $referenced_entity->getName());
+    $this->assertEquals($entity->der[0]->entity->id(), $referenced_entity->id());
+    $this->assertEquals($entity->der[0]->entity->uuid(), $referenced_entity->uuid());
   }
 
 }
