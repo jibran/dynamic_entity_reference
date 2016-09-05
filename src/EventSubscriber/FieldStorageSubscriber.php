@@ -113,6 +113,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    */
   public function handleEntityType($entity_type_id, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
     $der_fields = $this->entityFieldManager->getFieldMapByFieldType('dynamic_entity_reference');
     if ($field_storage_definition) {
       $der_fields[$entity_type_id][$field_storage_definition->getName()] = TRUE;
@@ -140,12 +141,18 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
         }
         $tables[$table][] = $column;
         if ($entity_type->isRevisionable() && ($storage_definitions[$field_name]->isRevisionable())) {
-          if ($mapping->requiresDedicatedTableStorage($field_storage_definition)) {
-            $tables[$mapping->getDedicatedRevisionTableName($storage_definitions[$field_name])][] = $column;
+          try {
+            if ($mapping->requiresDedicatedTableStorage($storage_definitions[$field_name])) {
+              $tables[$mapping->getDedicatedRevisionTableName($storage_definitions[$field_name])][] = $column;
+            }
+            elseif ($mapping->allowsSharedTableStorage($storage_definitions[$field_name])) {
+              $revision_table = $entity_type->getRevisionDataTable() ?: $entity_type->getRevisionTable();
+              $tables[$revision_table][] = $column;
+              $tables[$revision_table] = array_unique($tables[$revision_table]);
+            }
           }
-          elseif ($mapping->allowsSharedTableStorage($field_storage_definition)) {
-            $revision_table = $entity_type->getRevisionDataTable() ?: $entity_type->getRevisionTable();
-            $tables[$revision_table][] = $column;
+          catch (SqlContentEntityStorageException $e) {
+            // Nothing to do if the revision table doesn't exist.
           }
         }
       }

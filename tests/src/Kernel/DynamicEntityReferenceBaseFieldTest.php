@@ -9,7 +9,7 @@ use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
- * Tests for the dynamic entity reference field.
+ * Tests for the dynamic entity reference base field.
  *
  * @group dynamic_entity_reference
  */
@@ -57,7 +57,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
    */
   public function testEntityReferenceFieldValidation() {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', 'entity_test');
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema('entity_test_mul');
@@ -121,7 +121,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
    */
   public function testReferencedEntitiesMultipleLoad() {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', 'entity_test');
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema('entity_test_mul');
@@ -208,8 +208,6 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
    * Tests the der field type for referencing multiple content entities.
    */
   public function testMultipleEntityReference() {
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
-    \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', '');
     \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     \Drupal::entityDefinitionUpdateManager()->applyUpdates();
@@ -228,7 +226,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     // Loads an unchanged entity from the database.
     $entity = $this->container
       ->get('entity_type.manager')
-      ->getStorage('entity_test')
+      ->getStorage($this->entityType)
       ->loadUnchanged($entity->id());
 
     // Check references correctly for dynamic_references field.
