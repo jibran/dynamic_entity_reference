@@ -117,6 +117,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
     if ($field_storage_definition) {
       $der_fields[$entity_type_id][$field_storage_definition->getName()] = TRUE;
     }
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
     $tables = [];
     // If we know which field is being created / updated check whether it is
     // DER.
@@ -125,6 +126,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
       if ($field_storage_definition) {
         $storage_definitions[$field_storage_definition->getName()] = $field_storage_definition;
       }
+      /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $mapping */
       $mapping = $storage->getTableMapping($storage_definitions);
       foreach (array_keys($der_fields[$entity_type_id]) as $field_name) {
         try {
@@ -137,6 +139,15 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
           continue;
         }
         $tables[$table][] = $column;
+        if ($entity_type->isRevisionable() && ($storage_definitions[$field_name]->isRevisionable())) {
+          if ($mapping->requiresDedicatedTableStorage($field_storage_definition)) {
+            $tables[$mapping->getDedicatedRevisionTableName($storage_definitions[$field_name])][] = $column;
+          }
+          elseif ($mapping->allowsSharedTableStorage($field_storage_definition)) {
+            $revision_table = $entity_type->getRevisionDataTable() ?: $entity_type->getRevisionTable();
+            $tables[$revision_table][] = $column;
+          }
+        }
       }
       $new = [];
       foreach ($tables as $table => $columns) {

@@ -26,11 +26,12 @@ function dynamic_entity_reference_update_8001() {
   $service = \Drupal::service('dynamic_entity_reference.entity_type_subscriber');
   // Only update dynamic_entity_reference fields.
   foreach ($entity_field_manager->getFieldMapByFieldType('dynamic_entity_reference') as $entity_type_id => $map) {
+    $entity_type = $entity_type_manager->getDefinition($entity_type_id);
     $entity_storage = $entity_type_manager->getStorage($entity_type_id);
     // Only SQL storage based entities are supported.
     if ($entity_storage instanceof SqlEntityStorageInterface) {
       $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
-      /** @var Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+      /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
       $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
       $field_storage_definition = FALSE;
       // Only need field storage definitions of dynamic_entity_reference fields.
@@ -64,12 +65,28 @@ function dynamic_entity_reference_update_8001() {
         ];
         $type_column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_type');
         $schema->changeField($table, $type_column, $type_column, $type_spec);
+        $revision_table = NULL;
+        if ($entity_type->isRevisionable() && $field_storage_definition->isRevisionable()) {
+          if ($table_mapping->requiresDedicatedTableStorage($field_storage_definition)) {
+            $revision_table = $table_mapping->getDedicatedRevisionTableName($field_storage_definition);
+          }
+          elseif ($table_mapping->allowsSharedTableStorage($field_storage_definition)) {
+            $revision_table = $entity_type->getRevisionDataTable() ?: $entity_type->getRevisionTable();
+          }
+          $schema->changeField($revision_table, $column, $column, $spec);
+          $schema->changeField($revision_table, $type_column, $type_column, $type_spec);
+        }
         // Update the installed storage schema for this field as well.
         $key = "$entity_type_id.field_schema_data.$field_name";
         if ($field_schema_data = $entity_storage_schema_sql->get($key)) {
           $field_schema_data[$table]['fields'][$column] = $spec;
           $field_schema_data[$table]['fields'][$type_column] = $type_spec;
           $entity_storage_schema_sql->set($key, $field_schema_data);
+          if ($revision_table) {
+            $field_schema_data[$revision_table]['fields'][$column] = $spec;
+            $field_schema_data[$revision_table]['fields'][$type_column] = $type_spec;
+            $entity_storage_schema_sql->set($key, $field_schema_data);
+          }
         }
         if ($table_mapping->allowsSharedTableStorage($field_storage_definition)) {
           $key = "$entity_type_id.field_storage_definitions";
