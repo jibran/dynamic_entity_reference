@@ -11,6 +11,25 @@ use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 
 /**
  * Changes target_id column to string and creates target_id_int.
+ *
+ * This is immensely complicated because
+ * \Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema::updateDedicatedTableSchema()
+ * throws a
+ * \Drupal\Core\Entity\Exception\FieldStorageDefinitionUpdateForbiddenException
+ * when there is a column change even if the change is doable without problem --
+ * like this update here which changes the int target_id column to string. So
+ * this routine needs to find all target_id columns and cast them manually.
+ * After that,
+ * \Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema::saveFieldSchemaData()
+ * is protected so the field storage schema needs to be saved into the key-value
+ * storage. On top of this, shared tables store the field definition objects in
+ * yet another key-value storage which also needs to be manually kept
+ * up-to-date.
+ *
+ * Finally
+ * \Drupal\dynamic_entity_reference\EventSubscriber\FieldStorageSubscriber::handleEntityType()
+ * is called to add the triggers.
+ *
  */
 function dynamic_entity_reference_update_8001() {
   /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */

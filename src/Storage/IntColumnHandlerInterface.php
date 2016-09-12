@@ -8,7 +8,7 @@ namespace Drupal\dynamic_entity_reference\Storage;
 interface IntColumnHandlerInterface {
 
   /**
-   * Create the _int columns and the triggers for them.
+   * Creates the _int columns and the triggers for them.
    *
    * @param string $table
    *   The non-prefix table to operate on.

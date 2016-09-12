@@ -69,6 +69,13 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
+    // When enabling a module implementing an entity type,
+    // EntityTypeEvents::CREATE fires and FieldStorageDefinitionEvents::CREATE
+    // does not. On the other hand, when adding a field
+    // to an existing entity type, EntityTypeEvents::UPDATE does not fire but
+    // FieldStorageDefinitionEvents::CREATE does. This is true for saving a
+    // FieldStorageConfig object or enabling a module implementing
+    // hook_entity_base_field_info().
     $events[FieldStorageDefinitionEvents::CREATE][] = ['onFieldStorage', 100];
     $events[EntityTypeEvents::CREATE][] = ['onEntityType', 100];
     return $events;
@@ -113,7 +120,6 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    */
   public function handleEntityType($entity_type_id, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
-    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
     $der_fields = $this->entityFieldManager->getFieldMapByFieldType('dynamic_entity_reference');
     if ($field_storage_definition) {
       $der_fields[$entity_type_id][$field_storage_definition->getName()] = TRUE;

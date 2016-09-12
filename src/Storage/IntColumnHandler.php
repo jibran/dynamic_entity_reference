@@ -28,7 +28,7 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
   }
 
   /**
-   * Check whether all columns exist.
+   * Checks whether all columns exist.
    *
    * @param \Drupal\Core\Database\Schema $schema
    *   The database Schema object for this connection.
@@ -103,9 +103,9 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
   }
 
   /**
-   * Create the body of the trigger.
+   * Creates the body of the trigger.
    *
-   * Create a part of the statement to set the value of the integer column to
+   * Creates a part of the statement to set the value of the integer column to
    * the integer value of the string column.
    *
    * @param string $column_int
@@ -116,12 +116,12 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
   abstract protected function createBody($column_int, $column);
 
   /**
-   * Actually create the trigger.
+   * Actually creates the trigger.
    *
    * @param string $trigger
    *   The name of the trigger.
    * @param string $op
-   *   Either UPDATE or INSSERT.
+   *   Either UPDATE or INSERT.
    * @param string $prefixed_name
    *   The already prefixed table table.
    * @param string $body
