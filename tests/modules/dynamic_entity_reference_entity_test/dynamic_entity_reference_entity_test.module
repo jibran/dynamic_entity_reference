@@ -181,7 +181,7 @@ function dynamic_entity_reference_entity_test_views_data() {
             'extra' => [
               [
                 'left_field' => 'langcode',
-                'field' => 'langcode'
+                'field' => 'langcode',
               ],
             ],
           ],
