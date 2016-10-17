@@ -15,7 +15,9 @@ use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
-\Drupal::service('module_installer')->install(['dynamic_entity_reference_entity_test']);
+\Drupal::service('module_installer')->install([
+  'dynamic_entity_reference_entity_test',
+]);
 
 $field_storage = FieldStorageConfig::create([
   'entity_type' => 'entity_test',

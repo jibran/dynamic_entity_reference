@@ -12,7 +12,11 @@
 use Drupal\entity_test\Entity\EntityTestMulRev;
 use Drupal\entity_test\Entity\EntityTestRev;
 
-\Drupal::state()->set('dynamic_entity_reference_entity_test_entities', ['entity_test_rev', 'entity_test_mulrev', 'entity_test_string_id']);
+\Drupal::state()->set('dynamic_entity_reference_entity_test_entities', [
+  'entity_test_rev',
+  'entity_test_mulrev',
+  'entity_test_string_id',
+]);
 \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
 \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
 \Drupal::state()->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
