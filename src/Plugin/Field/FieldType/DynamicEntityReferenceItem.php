@@ -344,8 +344,11 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public static function mainPropertyName() {
-    // We have two main properties i.e. target_type and target_id.
-    return NULL;
+    // Dynamic entity reference field has two main properties i.e. target_type
+    // and target_id but for entity field query to evaluate the relationship
+    // specifier correctly the main property is needed. It is also needed to
+    // render the correct field value in views.
+    return 'target_id';
   }
 
   /**
