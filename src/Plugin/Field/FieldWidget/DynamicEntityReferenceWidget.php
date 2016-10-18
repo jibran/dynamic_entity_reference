@@ -135,10 +135,10 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         ]);
       }
       else {
-        $values = $form_state->getValue([
-          $element['#field_name'],
-          $element['#delta'],
-        ]);
+        $parents = $element['#parents'];
+        // Remove the 'target_id' key.
+        array_pop($parents);
+        $values = $form_state->getValue($parents);
       }
       $settings = $this->getFieldSettings();
       $element['#target_type'] = $values['target_type'];
