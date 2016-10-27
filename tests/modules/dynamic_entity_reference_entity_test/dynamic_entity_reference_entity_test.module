@@ -29,9 +29,7 @@ function dynamic_entity_reference_entity_test_entity_base_field_info(EntityTypeI
           $entity_type_id => [
             'handler' => "default:$entity_type_id",
             'handler_settings' => [
-              'target_bundles' => [
-                $entity_type_id => $entity_type_id,
-              ],
+              'target_bundles' => NULL,
             ],
           ],
         ];

@@ -91,7 +91,14 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
       'label' => 'Foo Bar',
-      'settings' => [],
+      'settings' => [
+        'taxonomy_term' => [
+          'handler' => 'default:taxonomy_term',
+          'handler_settings' => [
+            'target_bundles' => NULL,
+          ],
+        ],
+      ],
     ])->save();
   }
 
@@ -211,6 +218,13 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
 
     // Test the generateSampleValue() method.
     $entity = EntityTest::create();
+    // Created a term because the generateSampleItems relies on having terms in
+    // vocabulary.
+    Term::create([
+      'name' => $this->randomMachineName(),
+      'vid' => $this->term->bundle(),
+      'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+    ])->save();
     $entity->field_der->generateSampleItems();
     $entity->field_der->generateSampleItems();
     $this->entityValidateAndSave($entity);
@@ -368,7 +382,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $errors = $entity->validate();
     $this->assertCount(1, $errors);
     $this->assertEquals($errors[0]->getMessage(), (string) new FormattableMarkup('%property should not be null.', ['%property' => 'target_id']));
-    $this->assertEquals($errors[0]->getPropertyPath(), 'field_der.0');
+    $this->assertEquals($errors[0]->getPropertyPath(), 'field_der.0.target_id');
     // This should rectify the issue, favoring the entity over the target_id.
     $entity->save();
     $errors = $entity->validate();
