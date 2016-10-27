@@ -6,6 +6,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\Plugin\Validation\Constraint\ValidReferenceConstraint;
 use Drupal\Core\Field\EntityReferenceFieldItemList;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -30,6 +31,7 @@ class DynamicEntityReferenceFieldItemList extends EntityReferenceFieldItemList {
     }
     $constraints = array_values($constraints);
     $constraint_manager = $this->getTypedDataManager()->getValidationConstraintManager();
+    $constraints[] = $constraint_manager->create('ValidDynamicReference', []);
     return $constraints;
   }
 

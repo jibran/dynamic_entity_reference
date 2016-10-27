@@ -101,8 +101,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', ['%type' => $this->entityType, '%id' => $referenced_entity->id()]));
-
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity type (%type) is not allowed for this field.', ['%type' => $entity->getEntityTypeId()]));
     // Test an invalid entity.
     $entity = $entity_type_manager
       ->getStorage($this->entityType)
@@ -110,7 +109,7 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->entity = $entity;
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', ['%type' => $entity->getEntityTypeId(), '%id' => NULL]));
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity type (%type) is not allowed for this field.', ['%type' => $entity->getEntityTypeId()]));
 
     // @todo Implement a test case for invalid bundle references after
     // https://drupal.org/node/2064191 is fixed
