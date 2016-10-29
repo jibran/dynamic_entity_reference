@@ -3,7 +3,6 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Validation\Constraint;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
 use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -133,7 +132,7 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator imple
     foreach ($target_ids as $delta => $target_id) {
       $definition = $this->entityTypeManager->getDefinition($target_types[$delta]);
       $existing_id = $this->entityTypeManager->getStorage($target_types[$delta])->getQuery()
-        ->condition($definition->getKey('id'), $target_id, 'IN')
+        ->condition($definition->getKey('id'), $target_id)
         ->execute();
       if (!$existing_id) {
         $this->context->buildViolation($constraint->nonExistingMessage)
