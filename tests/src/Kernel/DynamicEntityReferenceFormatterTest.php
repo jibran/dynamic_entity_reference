@@ -182,6 +182,7 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
       entity_get_display($this->entityType, $this->bundle, 'default')
         ->setComponent($field_name, [
           'type' => $formatter,
+          'settings' => $formatter == 'dynamic_entity_reference_entity_view' ? ['view_mode' => [$referencing_entity->getEntityTypeId() => 'default']] : [],
         ])
         ->save();
 
@@ -212,7 +213,16 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $formatter = 'dynamic_entity_reference_entity_view';
-    $build = $this->buildRenderArray([$this->referencedEntity, $this->unsavedReferencedEntity], $formatter);
+    $build = $this->buildRenderArray([$this->referencedEntity, $this->unsavedReferencedEntity], $formatter, [
+      $this->referencedEntity->getEntityTypeId() => [
+        'view_mode' => 'default',
+        'link' => FALSE,
+      ],
+      $this->unsavedReferencedEntity->getEntityTypeId() => [
+        'view_mode' => 'default',
+        'link' => FALSE,
+      ],
+    ]);
 
     // Test the first field item.
     $expected_rendered_name_field_1 = '
