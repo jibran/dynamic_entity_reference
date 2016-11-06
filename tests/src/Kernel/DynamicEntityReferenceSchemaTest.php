@@ -142,8 +142,10 @@ class DynamicEntityReferenceSchemaTest extends EntityKernelTestBase {
       'type' => 'dynamic_entity_reference_entity_view',
       'label' => 'above',
       'settings' => [
-        'view_mode' => 'default',
-        'link' => FALSE,
+        $referenced_entity->getEntityTypeId() => [
+          'view_mode' => 'default',
+          'link' => FALSE,
+        ],
       ],
       'third_party_settings' => [],
     ])->save();
