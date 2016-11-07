@@ -54,8 +54,8 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function defaultFieldSettings() {
     $default_settings = [];
-    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
+    $options = \Drupal::service('entity_type.repository')->getEntityTypeLabels();
+
     // Field storage settings are not accessible here so we are assuming that
     // all the entity types are referenceable by default.
     // See https://www.drupal.org/node/2346273#comment-9385179 for more details.
@@ -202,7 +202,8 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
 
     $settings_form = [];
     $settings = $this->getSettings();
-    foreach (static::getTargetTypes($settings) as $target_type) {
+    // Config entities are excluded from the UI.
+    foreach (static::getTargetTypes($settings, FALSE) as $target_type) {
       $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
       $settings_form[$target_type] = $this->targetTypeFieldSettingsForm($form, $form_state, $target_type);
       $settings_form[$target_type]['handler']['#title'] = t('Reference type for @target_type', ['@target_type' => $entity_type->getLabel()]);
@@ -509,12 +510,20 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    * @param array $settings
    *   The settings of the field storage.
    *
-   * @return string[]
-   *   All the target entity type ids that can be referenced.
+   * @param bool $include_configuration_entities
+   *   (optional) Include configuration entities. Defaults to FALSE.
+   *
+   * @return \string[] All the target entity type ids that can be referenced.
+   * All the target entity type ids that can be referenced.
    */
-  public static function getTargetTypes($settings) {
+  public static function getTargetTypes($settings, $include_configuration_entities = FALSE) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
     $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
+
+    // Add configuration entities.
+    if ($include_configuration_entities) {
+      $options = array_merge($options, array_keys($labels[(string) t('Configuration', [], ['context' => 'Entity type group'])]));
+    }
 
     if (!empty($settings['exclude_entity_types'])) {
       return array_diff($options, $settings['entity_type_ids'] ?: []);

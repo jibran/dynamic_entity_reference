@@ -3,6 +3,7 @@
 namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\config_test\Entity\ConfigTest;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
@@ -39,6 +40,7 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     'dynamic_entity_reference',
     'field_ui',
     'node',
+    'config_test',
   ];
 
   /**
@@ -76,6 +78,7 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
         'exclude_entity_types' => FALSE,
         'entity_type_ids' => [
           'node',
+          'config_test',
         ],
       ],
     ]);
@@ -90,6 +93,10 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
             'target_bundles' => ['referenced_content'],
             'sort' => ['field' => '_none'],
           ],
+        ],
+        'config_test' => [
+          'handler' => 'default',
+          'handler_settings' => [],
         ],
       ],
     ])->save();
@@ -126,6 +133,27 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $reference_node = reset($nodes);
     $this->assertEquals($reference_node->get($field_name)->offsetGet(0)->target_type, $referenced_node->getEntityTypeId());
     $this->assertEquals($reference_node->get($field_name)->offsetGet(0)->target_id, $referenced_node->id());
+
+    // Test with config entity.
+    $referenced_entity = $this->container->get('entity_type.manager')->getStorage('config_test')->create(['label' => $this->randomString(), 'id' => Unicode::strtolower($this->randomMachineName())]);
+    $referenced_entity->save();
+
+    $title = $this->randomMachineName();
+    $edit = [
+      'title[0][value]' => $title,
+      $field_name . '[0][target_type]' => $referenced_entity->getEntityTypeId(),
+      $field_name . '[0][target_id]' => $referenced_entity->label() . ' (' . $referenced_entity->id() . ')',
+    ];
+    $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+    $this->submitForm($edit, t('Save'));
+    $node = $this->drupalGetNodeByTitle($title);
+    $assert_session->responseContains(t('@type %title has been created.', ['@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString()]));
+    $nodes = \Drupal::entityTypeManager()
+      ->getStorage('node')
+      ->loadByProperties(['title' => $title]);
+    $reference_node = reset($nodes);
+    $this->assertEquals($referenced_entity->getEntityTypeId(), $reference_node->get($field_name)->offsetGet(0)->target_type);
+    $this->assertEquals($referenced_entity->id(), $reference_node->get($field_name)->offsetGet(0)->target_id);
   }
 
   /**

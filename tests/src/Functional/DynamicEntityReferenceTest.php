@@ -47,6 +47,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     'field_ui',
     'dynamic_entity_reference',
     'entity_test',
+    'config_test',
   ];
 
   /**
@@ -98,6 +99,13 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
     $assert_session->optionNotExists('default_value_input[field_foobar][0][target_type]', 'user');
+
+    // Ensure no configuration entities are exposed to the UI.
+    $labels = $this->container->get('entity_type.repository')->getEntityTypeLabels(TRUE);
+    foreach (array_keys($labels[(string) t('Configuration')]) as $entity_type) {
+      $assert_session->fieldNotExists('settings[' . $entity_type . '][handler]');
+    }
+
     $edit = [
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
@@ -459,7 +467,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->pageTextContains($this->adminUser->label());
     $assert_session->pageTextContains('tag');
     $assert_session->pageTextContains($term->label());
-
   }
 
   /**

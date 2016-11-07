@@ -68,7 +68,7 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator imple
     $new_entities = [];
     $target_ids = [];
     $target_types = [];
-    $valid_target_types = DynamicEntityReferenceItem::getTargetTypes($value->getFieldDefinition()->getSettings());
+    $valid_target_types = DynamicEntityReferenceItem::getTargetTypes($value->getFieldDefinition()->getSettings(), TRUE);
     foreach ($value as $delta => $item) {
       // We don't use a regular NotNull constraint for the target_id property as
       // NULL is allowed if the entity property contains an unsaved entity.
