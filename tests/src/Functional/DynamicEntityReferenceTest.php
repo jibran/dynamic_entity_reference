@@ -91,6 +91,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'new_storage_type' => 'dynamic_entity_reference',
     ];
     $this->submitForm($edit, t('Save and continue'));
+    $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
+    $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings[entity_type_ids][]' => 'user',
@@ -98,11 +100,12 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
     $assert_session->optionNotExists('default_value_input[field_foobar][0][target_type]', 'user');
+    $assert_session->fieldNotExists('settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
+    $assert_session->fieldNotExists('settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]');
     $edit = [
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
       'settings[entity_test_multivalue_basefield][handler_settings][target_bundles][entity_test_multivalue_basefield]' => TRUE,
-      'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
@@ -125,7 +128,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'settings[entity_test_with_bundle][handler_settings][target_bundles][test]' => TRUE,
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
-      'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
       'settings[entity_test_field_methods][handler_settings][target_bundles][entity_test_field_methods]' => TRUE,
     ];
     $this->submitForm($edit, t('Save settings'));
@@ -183,15 +185,17 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'new_storage_type' => 'dynamic_entity_reference',
     ];
     $this->submitForm($edit, t('Save and continue'));
+    $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
+    $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
     ], t('Save field settings'));
-
+    $assert_session->fieldNotExists('settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
+    $assert_session->fieldNotExists('settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]');
     $edit = [
       'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
       'settings[entity_test_multivalue_basefield][handler_settings][target_bundles][entity_test_multivalue_basefield]' => TRUE,
-      'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
       'settings[entity_test_label_callback][handler_settings][target_bundles][entity_test_label_callback]' => TRUE,
       'settings[entity_test][handler_settings][target_bundles][entity_test]' => TRUE,
@@ -214,7 +218,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'settings[entity_test_with_bundle][handler_settings][target_bundles][test]' => TRUE,
       'settings[entity_test_default_access][handler_settings][target_bundles][entity_test_default_access]' => TRUE,
       'settings[entity_test_cache][handler_settings][target_bundles][entity_test_cache]' => TRUE,
-      'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
       'settings[entity_test_field_methods][handler_settings][target_bundles][entity_test_field_methods]' => TRUE,
 
     ];

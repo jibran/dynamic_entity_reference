@@ -3,6 +3,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -175,7 +176,12 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
     // @todo inject this.
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-
+    $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
+    foreach (array_keys($options) as $entity_type_id) {
+      if (!static::entityHasIntegerId($entity_type_id)) {
+        unset($options[$entity_type_id]);
+      }
+    }
     $element['exclude_entity_types'] = [
       '#type' => 'checkbox',
       '#title' => t('Exclude the selected items'),
@@ -186,7 +192,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $element['entity_type_ids'] = [
       '#type' => 'select',
       '#title' => t('Select items'),
-      '#options' => $labels[(string) t('Content', [], ['context' => 'Entity type group'])],
+      '#options' => $options,
       '#default_value' => $this->getSetting('entity_type_ids'),
       '#disabled' => $has_data,
       '#multiple' => TRUE,
@@ -514,7 +520,9 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function getTargetTypes($settings) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
+    $options = array_filter(array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]), function ($entity_type_id) {
+      return static::entityHasIntegerId($entity_type_id);
+    });
 
     if (!empty($settings['exclude_entity_types'])) {
       return array_diff($options, $settings['entity_type_ids'] ?: []);
@@ -522,6 +530,32 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     else {
       return array_intersect($options, $settings['entity_type_ids'] ?: []);
     }
+  }
+
+  /**
+   * Determines if an entity type has an integer-based ID definition.
+   *
+   * @param string $entity_type_id
+   *   The ID the represents the entity type.
+   *
+   * @return bool
+   *   Returns TRUE if the entity type has an integer-based ID definition and
+   *   FALSE otherwise.
+   */
+  public static function entityHasIntegerId($entity_type_id) {
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+    // Make sure entity type is a content entity type.
+    if (!($entity_type instanceof ContentEntityTypeInterface)) {
+      return FALSE;
+    }
+    // Make sure entity type has an id.
+    if (!$entity_type->hasKey('id')) {
+      return FALSE;
+    }
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $field_definitions */
+    $field_definitions = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
+    $entity_type_id_definition = $field_definitions[$entity_type->getKey('id')];
+    return $entity_type_id_definition->getType() === 'integer';
   }
 
   /**
