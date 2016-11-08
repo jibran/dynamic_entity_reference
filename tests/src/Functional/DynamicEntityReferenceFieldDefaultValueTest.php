@@ -116,7 +116,8 @@ class DynamicEntityReferenceFieldDefaultValueTest extends BrowserTestBase {
     $this->assertTrue(isset($config_entity['default_value'][0]['target_uuid']), 'Default value contains target_uuid property');
     $this->assertEquals($config_entity['default_value'][0]['target_uuid'], $referenced_node->uuid(), 'Content uuid and config entity uuid are the same');
     $this->assertTrue(isset($config_entity['default_value'][0]['target_type']), 'Default value contains target_type property');
-    $this->assertEquals($config_entity['default_value'][0]['target_type'], $referenced_node->getEntityTypeId(), 'Content target_type and config entity target are the same');    // Ensure the configuration has the expected dependency on the entity that
+    $this->assertEquals($config_entity['default_value'][0]['target_type'], $referenced_node->getEntityTypeId(), 'Content target_type and config entity target are the same');
+    // Ensure the configuration has the expected dependency on the entity that
     // is being used a default value.
     $this->assertEquals([$referenced_node->getConfigDependencyName()], $config_entity['dependencies']['content']);
 
@@ -140,7 +141,7 @@ class DynamicEntityReferenceFieldDefaultValueTest extends BrowserTestBase {
    *
    * @see \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::onDependencyRemoval()
    */
-  function testEntityReferenceDefaultConfigValue() {
+  public function testEntityReferenceDefaultConfigValue() {
     // Create a node to be referenced.
     $referenced_node_type = $this->drupalCreateContentType(['type' => 'referenced_config_to_delete']);
     $referenced_node_type2 = $this->drupalCreateContentType(['type' => 'referenced_config_to_preserve']);

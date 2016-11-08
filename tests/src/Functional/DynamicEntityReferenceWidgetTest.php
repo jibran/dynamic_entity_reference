@@ -3,7 +3,6 @@
 namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
 use Drupal\Component\Utility\Unicode;
-use Drupal\config_test\Entity\ConfigTest;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;

@@ -154,7 +154,11 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
    */
   public function testMixedBaseField() {
     // @see dynamic_entity_reference_entity_test_entity_base_field_info()
-    $this->state->set('dynamic_entity_reference_entity_test_entities', [$this->entityType, 'config_test', 'entity_test_mul']);
+    $this->state->set('dynamic_entity_reference_entity_test_entities', [
+      $this->entityType,
+      'config_test',
+      'entity_test_mul',
+    ]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     $this->container->get('entity.definition_update_manager')->applyUpdates();
 
@@ -187,7 +191,11 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
     // @see dynamic_entity_reference_entity_test_entity_base_field_info()
     // Make this base field revisionable.
     $this->state->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
-    $this->state->set('dynamic_entity_reference_entity_test_entities', [$this->entityType, 'config_test', 'entity_test_mul']);
+    $this->state->set('dynamic_entity_reference_entity_test_entities', [
+      $this->entityType,
+      'config_test',
+      'entity_test_mul',
+    ]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
     $this->container->get('entity.definition_update_manager')->applyUpdates();
 

@@ -509,12 +509,11 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    *
    * @param array $settings
    *   The settings of the field storage.
-   *
    * @param bool $include_configuration_entities
    *   (optional) Include configuration entities. Defaults to FALSE.
    *
-   * @return \string[] All the target entity type ids that can be referenced.
-   * All the target entity type ids that can be referenced.
+   * @return string[]
+   *   All the target entity type ids that can be referenced.
    */
   public static function getTargetTypes($settings, $include_configuration_entities = FALSE) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
