@@ -31,9 +31,6 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
   public static $modules = [
     'dynamic_entity_reference',
     'taxonomy',
-    'text',
-    'filter',
-    'views',
   ];
 
   /**

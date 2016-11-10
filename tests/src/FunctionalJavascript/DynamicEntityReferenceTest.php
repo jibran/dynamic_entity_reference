@@ -52,7 +52,6 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
    * @var array
    */
   public static $modules = [
-    'entity_reference',
     'field_ui',
     'dynamic_entity_reference',
     'entity_test',
