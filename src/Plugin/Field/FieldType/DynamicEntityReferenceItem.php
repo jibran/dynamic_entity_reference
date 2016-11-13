@@ -3,6 +3,7 @@
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -530,6 +531,32 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     else {
       return array_intersect($options, $settings['entity_type_ids'] ?: []);
     }
+  }
+
+  /**
+   * Determines if an entity type has an integer-based ID definition.
+   *
+   * @param string $entity_type_id
+   *   The ID the represents the entity type.
+   *
+   * @return bool
+   *   Returns TRUE if the entity type has an integer-based ID definition and
+   *   FALSE otherwise.
+   */
+  public static function entityHasIntegerId($entity_type_id) {
+    $entity_type = \Drupal::entityTypeManager()->getDefinition($entity_type_id);
+    // Make sure entity type is a content entity type.
+    if (!($entity_type instanceof ContentEntityTypeInterface)) {
+      return FALSE;
+    }
+    // Make sure entity type has an id.
+    if (!$entity_type->hasKey('id')) {
+      return FALSE;
+    }
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $field_definitions */
+    $field_definitions = \Drupal::service('entity_field.manager')->getBaseFieldDefinitions($entity_type_id);
+    $entity_type_id_definition = $field_definitions[$entity_type->getKey('id')];
+    return $entity_type_id_definition->getType() === 'integer';
   }
 
   /**
