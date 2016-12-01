@@ -560,6 +560,34 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
   }
 
   /**
+   * Generates a column name for a target_id property.
+   *
+   * @param string $entity_type_id
+   *   The entity type id the DER field is attached to.
+   * @param string $field_name
+   *   The DER field name.
+   * @param string $target_type_id
+   *   The referenced entity type id.
+   *
+   * @return string
+   *   The full target ID column name.
+   */
+  public static function getTargetIdColumnName($entity_type_id, $field_name, $target_type_id) {
+    /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface[] $field_definitions */
+    $field_definitions = \Drupal::service('entity_field.manager')
+      ->getFieldStorageDefinitions($entity_type_id);
+    if (isset($field_definitions[$field_name]) && $field_definitions[$field_name]->getType() == 'dynamic_entity_reference') {
+      /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+      $table_mapping = \Drupal::entityTypeManager()->getStorage($entity_type_id)
+        ->getTableMapping();
+      $column_name = $table_mapping->getFieldColumnName($field_definitions[$field_name], 'target_id');
+      if (in_array($target_type_id, static::getTargetTypes($field_definitions[$field_name]->getSettings(), TRUE))) {
+        return static::entityHasIntegerId($target_type_id) ? $column_name . '_int' : $column_name;
+      }
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function calculateStorageDependencies(FieldStorageDefinitionInterface $field_definition) {
