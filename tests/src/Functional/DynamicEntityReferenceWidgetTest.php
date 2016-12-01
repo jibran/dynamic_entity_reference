@@ -194,6 +194,10 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
       $field_name => $referenced_node->getEntityTypeId() . '-' . $referenced_node->id(),
     ];
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+
+    // Only one bundle is configuerd, so optgroup should not be added to
+    // the select element.
+    $assert_session->elementNotContains('css', '[name=' . $field_name . ']', 'optgroup');
     $this->submitForm($edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title);
     $assert_session->responseContains(t('@type %title has been created.', ['@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString()]));
@@ -234,6 +238,26 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $reference_node = reset($nodes);
     $this->assertEquals($reference_node->get($field_name)->offsetGet(0)->target_type, $referenced_node->getEntityTypeId());
     $this->assertEquals($reference_node->get($field_name)->offsetGet(0)->target_id, $referenced_node->id());
+
+    $field_config = FieldConfig::loadByName('node', 'reference_content', $this->fieldName);
+    $node_setting = $field_config->getSetting('node');
+    $field_config->setSetting('node', [
+      'handler' => 'default',
+      'handler_settings' => [
+        'target_bundles' => ['referenced_content', 'reference_content'],
+        'sort' => ['field' => '_none'],
+      ],
+    ]);
+    $field_config->save();
+
+
+    $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+    // Multiple target_bundles configured, optgroup should be added to the
+    // select element.
+    $assert_session->elementContains('css', '[name=' . $field_name . ']', 'optgroup');
+
+    $field_config->setSetting('node', $node_setting);
+
   }
 
 }
