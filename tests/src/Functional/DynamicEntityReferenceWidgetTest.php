@@ -7,6 +7,7 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\FieldConfigStorage;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -77,7 +78,6 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
         'exclude_entity_types' => FALSE,
         'entity_type_ids' => [
           'node',
-          'config_test',
         ],
       ],
     ]);
@@ -92,10 +92,6 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
             'target_bundles' => ['referenced_content'],
             'sort' => ['field' => '_none'],
           ],
-        ],
-        'config_test' => [
-          'handler' => 'default',
-          'handler_settings' => [],
         ],
       ],
     ])->save();
@@ -119,10 +115,12 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $title = $this->randomMachineName();
     $edit = [
       'title[0][value]' => $title,
-      $field_name . '[0][target_type]' => $referenced_node->getEntityTypeId(),
       $field_name . '[0][target_id]' => $referenced_node->getTitle() . ' (' . $referenced_node->id() . ')',
     ];
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+    // Only 1 target_type is configured, so this field is not available on the
+    // node add/edit page.
+    $assert_session->fieldNotExists($field_name . '[0][target_type]');
     $this->submitForm($edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title);
     $assert_session->responseContains(t('@type %title has been created.', ['@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString()]));
@@ -134,6 +132,19 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $this->assertEquals($reference_node->get($field_name)->offsetGet(0)->target_id, $referenced_node->id());
 
     // Test with config entity.
+    $field_config = FieldConfig::loadByName('node', 'reference_content', $field_name);
+    $field_config_settings = $field_config->getSettings();
+    $field_config->setSetting('config_test', [
+      'handler' => 'default',
+      'handler_settings' => [],
+    ]);
+    $field_config->save();
+
+    $field_storage_config = FieldStorageConfig::loadByName('node', $field_name);
+    $field_storage_config_settings = $field_storage_config->getSettings();
+    $field_storage_config->setSetting('entity_type_ids', ['node', 'config_test']);
+    $field_storage_config->save();
+
     $referenced_entity = $this->container->get('entity_type.manager')->getStorage('config_test')->create(['label' => $this->randomString(), 'id' => Unicode::strtolower($this->randomMachineName())]);
     $referenced_entity->save();
 
@@ -144,6 +155,9 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
       $field_name . '[0][target_id]' => $referenced_entity->label() . ' (' . $referenced_entity->id() . ')',
     ];
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+    // Multiple target_types are configured, so this field should be available
+    // on the node add/edit page.
+    $assert_session->fieldExists($field_name . '[0][target_type]');
     $this->submitForm($edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title);
     $assert_session->responseContains(t('@type %title has been created.', ['@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString()]));
@@ -153,6 +167,11 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $reference_node = reset($nodes);
     $this->assertEquals($referenced_entity->getEntityTypeId(), $reference_node->get($field_name)->offsetGet(0)->target_type);
     $this->assertEquals($referenced_entity->id(), $reference_node->get($field_name)->offsetGet(0)->target_id);
+
+    $field_config->setSettings($field_config_settings);
+    $field_config->save();
+    $field_storage_config->setSettings($field_storage_config_settings);
+    $field_storage_config->save();
   }
 
   /**
