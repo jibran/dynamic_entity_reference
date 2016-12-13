@@ -80,6 +80,7 @@ class DynamicEntityReferenceFieldDefaultValueTest extends BrowserTestBase {
         'exclude_entity_types' => FALSE,
         'entity_type_ids' => [
           'node',
+          'user',
         ],
       ],
     ]);
@@ -93,6 +94,12 @@ class DynamicEntityReferenceFieldDefaultValueTest extends BrowserTestBase {
           'handler_settings' => [
             'target_bundles' => ['referenced_content'],
             'sort' => ['field' => '_none'],
+          ],
+        ],
+        'user' => [
+          'handler' => 'default:user',
+          'handler_settings' => [
+            'target_bundles' => NULL,
           ],
         ],
       ],

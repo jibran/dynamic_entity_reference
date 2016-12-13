@@ -80,26 +80,34 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $element['#title'] = $this->t('Label');
 
     $js_class = Html::cleanCssIdentifier("dynamic-entity-reference-{$items->getName()}[$delta][target_type]");
-    $entity_type = [
-      '#type' => 'select',
-      '#options' => array_intersect_key($labels, array_combine($available, $available)),
-      '#title' => $this->t('Entity type'),
-      '#default_value' => $target_type,
-      '#weight' => -50,
-      '#attributes' => [
-        'class' => [
-          'dynamic-entity-reference-entity-type',
-          $js_class,
+    if (count($available) > 1) {
+      $target_type_element = [
+        '#type' => 'select',
+        '#options' => array_intersect_key($labels, array_combine($available, $available)),
+        '#title' => $this->t('Entity type'),
+        '#default_value' => $target_type,
+        '#weight' => -50,
+        '#attributes' => [
+          'class' => [
+            'dynamic-entity-reference-entity-type',
+            $js_class,
+          ],
         ],
-      ],
-    ];
+      ];
+    }
+    else {
+      $target_type_element = [
+        '#type' => 'value',
+        '#value' => reset($available),
+      ];
+    }
 
     $form_element = [
       '#type' => 'container',
       '#attributes' => [
         'class' => ['container-inline'],
       ],
-      'target_type' => $entity_type,
+      'target_type' => $target_type_element,
       'target_id' => $element,
       '#attached' => [
         'library' => [

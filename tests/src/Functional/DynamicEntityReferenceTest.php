@@ -94,7 +94,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'settings[entity_type_ids][]' => 'user',
+      'settings[entity_type_ids][]' => ['user', 'entity_test_label']
     ], t('Save field settings'));
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
@@ -102,7 +102,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->fieldNotExists('settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
     $assert_session->fieldNotExists('settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]');
     $edit = [
-      'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => TRUE,
       'settings[entity_test_view_builder][handler_settings][target_bundles][entity_test_view_builder]' => TRUE,
       'settings[entity_test_multivalue_basefield][handler_settings][target_bundles][entity_test_multivalue_basefield]' => TRUE,
       'settings[entity_test_no_label][handler_settings][target_bundles][entity_test_no_label]' => TRUE,
@@ -134,24 +133,27 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
-    $this->assertSame(array_keys($excluded_entity_type_ids), ['user']);
+    $this->assertSame(array_keys($excluded_entity_type_ids), ['user', 'entity_test_label']);
     // Check the include entity settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar/storage');
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings[exclude_entity_types]' => FALSE,
-      'settings[entity_type_ids][]' => 'user',
+      'settings[entity_type_ids][]' => ['user', 'entity_test_label'],
     ], t('Save field settings'));
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionNotExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'user');
-    $this->submitForm([], t('Save settings'));
+    $edit = [
+      'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => 'entity_test_label',
+    ];
+    $this->submitForm($edit, t('Save settings'));
     $assert_session->responseContains(t('Saved %name configuration', ['%name' => 'Foobar']));
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
-    $this->assertSame(array_keys($excluded_entity_type_ids), ['user']);
+    $this->assertSame(array_keys($excluded_entity_type_ids), ['user', 'entity_test_label']);
     // Check the default settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $this->submitForm([
@@ -161,7 +163,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     $field_config = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->toArray();
     $this->assertEquals($field_config['default_value']['0'], ['target_type' => 'user', 'target_uuid' => $this->adminUser->uuid()]);
-
   }
 
   /**
@@ -506,9 +507,10 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings[exclude_entity_types]' => FALSE,
-      'settings[entity_type_ids][]' => ['taxonomy_term'],
+      'settings[entity_type_ids][]' => ['taxonomy_term', 'entity_test_label'],
     ], t('Save field settings'));
     $edit = [
+      'settings[entity_test_label][handler_settings][target_bundles][entity_test_label]' => 'entity_test_label',
       'settings[taxonomy_term][handler_settings][target_bundles][' . $vocabulary->id() . ']' => $vocabulary->id(),
       'settings[taxonomy_term][handler_settings][auto_create]' => TRUE,
     ];

@@ -113,10 +113,12 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     $title = $this->randomMachineName();
     $edit = [
       'title[0][value]' => $title,
-      $field_name . '[0][target_type]' => $referenced_node->getEntityTypeId(),
       $field_name . '[0][target_id]' => $referenced_node->getTitle() . ' (' . $referenced_node->id() . ')',
     ];
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
+    // Only 1 target_type is configured, so this field is not available on the
+    // node add/edit page.
+    $assert_session->fieldNotExists($field_name . '[0][target_type]');
     $this->submitForm($edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title);
     $assert_session->responseContains(t('@type %title has been created.', ['@type' => 'reference_content', '%title' => $node->toLink($node->label())->toString()]));
