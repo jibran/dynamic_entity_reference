@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Module file for dynamic_entity_reference_test_views.
+ */
+
+use Drupal\entity_test\EntityTestViewsData;
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function dynamic_entity_reference_test_views_entity_type_alter(array &$entity_types) {
+  if (\Drupal::state()->get('dynamic_entity_reference_test_views.entity_test_string_id.view', FALSE)) {
+    // Integrate with Views.
+    $entity_types['entity_test_string_id']->setHandlerClass('views_data', EntityTestViewsData::class);
+  }
+}

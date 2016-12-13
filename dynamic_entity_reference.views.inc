@@ -6,9 +6,9 @@
  */
 
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
-use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
 
 /**
  * Implements hook_field_views_data().
@@ -27,10 +27,15 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
     $target_entity_type_ids = array_intersect($options, $settings['entity_type_ids'] ?: []);
   }
   foreach ($data as $table_name => $table_data) {
+    // Determine if all target entity types have integer ID fields.
+    $all_int_ids = TRUE;
+
     // Add a relationship to all the target entity types.
     foreach ($target_entity_type_ids as $target_entity_type_id) {
       if ($entity_manager->hasHandler($target_entity_type_id, 'views_data')) {
         $target_entity_type = $entity_manager->getDefinition($target_entity_type_id);
+        $target_entity_id_is_int = DynamicEntityReferenceItem::entityHasIntegerId($target_entity_type_id);
+        $all_int_ids = $all_int_ids && $target_entity_id_is_int;
         $entity_type_id = $field_storage->getTargetEntityTypeId();
         $entity_type = $entity_manager->getDefinition($entity_type_id);
         $target_base_table = $entity_manager->getHandler($target_entity_type_id, 'views_data')
@@ -52,7 +57,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
           'base' => $target_base_table,
           'entity type' => $target_entity_type_id,
           'base field' => $target_entity_type->getKey('id'),
-          'relationship field' => $field_name . '_target_id_int',
+          'relationship field' => $target_entity_id_is_int ? $field_name . '_target_id_int' : $field_name . '_target_id' ,
           // Entity reference field only has one target type whereas dynamic
           // entity reference field can have multiple target types that is why
           // an extra join condition on target types is needed.
@@ -84,7 +89,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
           'base field' => $entity_type->getKey('id'),
           'field_name' => $field_name,
           'field table' => $table_mapping->getDedicatedDataTableName($field_storage),
-          'field field' => $field_name . '_target_id_int',
+          'field field' => $target_entity_id_is_int ? $field_name . '_target_id_int' : $field_name . '_target_id',
           // Entity reference field only has one target type whereas dynamic
           // entity reference field can have multiple target types that is why
           // an extra join condition on target types is needed.
@@ -102,6 +107,12 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
         ];
       }
     }
+
+    // If all target IDs are of type integer, update the plugin type to use.
+    if ($all_int_ids) {
+      $data[$table_name][$field_storage->getName() . '_target_id']['argument']['id'] = 'numeric';
+      $data[$table_name][$field_storage->getName() . '_target_id']['filter']['id'] = 'numeric';
+    }
   }
 
   return $data;
@@ -118,26 +129,7 @@ function dynamic_entity_reference_views_data() {
   $entity_manager = \Drupal::entityManager();
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
-  $entity_types = [];
-  $sql_entity_types = [];
-  $fields_all = [];
-  // Ensure origin and target entity types are SQL.
-  foreach ($entity_manager->getDefinitions() as $entity_type) {
-    // \Drupal\views\EntityViewsData class only allows entities with
-    // \Drupal\Core\Entity\Sql\SqlEntityStorageInterface.
-    if ($entity_type->hasHandlerClass('views_data') && $entity_manager->getStorage($entity_type->id()) instanceof SqlEntityStorageInterface) {
-      $sql_entity_types[$entity_type->id()] = $entity_type->id();
-      // Only fieldable entities have base fields.
-      if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
-        $entity_types[$entity_type->id()] = $entity_type;
-        foreach ($entity_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
-          if ($base_field->getType() == 'dynamic_entity_reference') {
-            $fields_all[$entity_type->id()][] = $base_field;
-          }
-        }
-      }
-    }
-  }
+  list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
 
   $data = [];
   foreach ($fields_all as $entity_type_id => $fields) {
@@ -145,13 +137,14 @@ function dynamic_entity_reference_views_data() {
     $table_mapping = $entity_manager->getStorage($entity_type_id)->getTableMapping();
 
     $entity_type = $entity_types[$entity_type_id];
+    $entity_id_is_int = DynamicEntityReferenceItem::entityHasIntegerId($entity_type_id);
     $base_table = $entity_manager->getHandler($entity_type_id, 'views_data')->getViewsTableForEntityType($entity_type);
 
     /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
     foreach ($fields as $field) {
       $field_name = $field->getName();
       $columns = $table_mapping->getColumnNames($field_name);
-      $column_id = $columns['target_id'] . '_int';
+      $column_id = $entity_id_is_int ? $columns['target_id'] . '_int' : $columns['target_id'];
       $column_type = $columns['target_type'];
 
       // Unlimited (-1) or > 1 store field data in a dedicated table.
@@ -256,4 +249,76 @@ function dynamic_entity_reference_views_data() {
   }
 
   return $data;
+}
+
+/**
+ * Implements hook_views_data_alter().
+ *
+ * Changes dynamic_entity_reference base fields argument and filter to numeric.
+ */
+function dynamic_entity_reference_views_data_alter(&$data) {
+  $entity_manager = \Drupal::entityManager();
+
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
+  list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
+
+  foreach ($fields_all as $entity_type_id => $fields) {
+
+    $entity_type = $entity_types[$entity_type_id];
+    $base_table = $entity_manager->getHandler($entity_type_id, 'views_data')->getViewsTableForEntityType($entity_type);
+
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+    foreach ($fields as $field) {
+      $field_name = $field->getName();
+
+      // Unlimited (-1) or > 1 store field data in a dedicated table.
+      $table = $field->getCardinality() == 1 ? $base_table : $entity_type->getBaseTable() . '__' . $field_name;
+      // Filter out non SQL entity types because \Drupal\views\EntityViewsData
+      // class only allows entities with
+      // \Drupal\Core\Entity\Sql\SqlEntityStorageInterface.
+      $targets = array_intersect(DynamicEntityReferenceItem::getTargetTypes($field->getSettings()), array_keys($sql_entity_types));
+      foreach ($targets as $target_entity_type_id) {
+        $target_entity_id_is_int = DynamicEntityReferenceItem::entityHasIntegerId($target_entity_type_id);
+        if ($target_entity_id_is_int) {
+          $data[$table][$target_entity_type_id . '__' . $field_name]['argument']['id'] = 'numeric';
+          $data[$table][$target_entity_type_id . '__' . $field_name]['filter']['id'] = 'numeric';
+        }
+
+      }
+
+    }
+  }
+
+}
+
+/**
+ * Helper function to return all the base fields.
+ *
+ * @return array
+ *   Returns all the entity types with dynamic_entity_reference base field, all
+ *   the SQL entity types and all the base fields.
+ */
+function dynamic_entity_reference_get_all_base_fields() {
+  $entity_types = [];
+  $sql_entity_types = [];
+  $fields_all = [];
+  // Ensure origin and target entity types are SQL.
+  $entity_manager = \Drupal::entityManager();
+  foreach ($entity_manager->getDefinitions() as $entity_type) {
+    // \Drupal\views\EntityViewsData class only allows entities with
+    // \Drupal\Core\Entity\Sql\SqlEntityStorageInterface.
+    if ($entity_type->hasHandlerClass('views_data') && $entity_manager->getStorage($entity_type->id()) instanceof SqlEntityStorageInterface) {
+      $sql_entity_types[$entity_type->id()] = $entity_type->id();
+      // Only fieldable entities have base fields.
+      if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+        $entity_types[$entity_type->id()] = $entity_type;
+        foreach ($entity_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
+          if ($base_field->getType() == 'dynamic_entity_reference') {
+            $fields_all[$entity_type->id()][] = $base_field;
+          }
+        }
+      }
+    }
+  }
+  return [$entity_types, $sql_entity_types, $fields_all];
 }

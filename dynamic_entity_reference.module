@@ -10,7 +10,7 @@ use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenc
 use Drupal\field\FieldConfigInterface;
 
 /**
- * Implements hook_ENTITY_TYPE_presave() for 'field_config'.
+ * Implements hook_ENTITY_TYPE_presave().
  *
  * @todo Clean this up once field_field_config_save is more accommodating.
  */
