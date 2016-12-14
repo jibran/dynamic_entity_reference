@@ -206,7 +206,6 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     ]);
     $field_config->save();
 
-
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
     // Multiple target_bundles configured, optgroup should be added to the
     // select element.

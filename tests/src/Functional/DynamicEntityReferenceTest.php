@@ -94,7 +94,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-      'settings[entity_type_ids][]' => ['user', 'entity_test_label']
+      'settings[entity_type_ids][]' => ['user', 'entity_test_label'],
     ], t('Save field settings'));
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
