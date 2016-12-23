@@ -1,26 +1,38 @@
 language: php
-sudo: false
+sudo: required
 
 php:
-  - 5.5
   - 5.6
   - 7
-#  - hhvm
+  - 7.1
+  - 7.2
 
 git:
   depth: 1
 
 matrix:
 #  allow_failures:
-#    - php: hhvm
+#    - php: 7.2
   # Don't wait for the allowed failures to build.
   fast_finish: true
+  include:
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.5.x' DB='mysql' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~8.1'
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.5.x' DB='pgsql' SIMPLETEST_DB="$DB://postgres:@127.0.0.1/drupal" DB_USER='postgres' DRUSH_VERSION='~8.1'
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.5.x' DB='sqlite' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~8.1'
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.6.x' DB='mysql' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~8.1'
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.6.x' DB='pgsql' SIMPLETEST_DB="$DB://postgres:@127.0.0.1/drupal" DB_USER='postgres' DRUSH_VERSION='~8.1'
+    - php: 5.5.9
+      env: DRUPAL_VERSION='8.5.x' DB='sqlite' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~8.1'
 
-
-# Cache Composer directory so that we don't have to download drush all the time.
 cache:
   directories:
     - $HOME/.composer/cache
+    - $HOME/.drush/cache
     - $HOME/travis_phantomjs
 
 mysql:
@@ -39,15 +51,17 @@ sqlite:
 
 env:
   matrix:
-    - DRUPAL_VERSION='8.3.x' DB='mysql' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root'
-    - DRUPAL_VERSION='8.3.x' DB='pgsql' SIMPLETEST_DB="$DB://postgres:@127.0.0.1/drupal" DB_USER='postgres'
-    - DRUPAL_VERSION='8.3.x' DB='sqlite' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root'
+    - DRUPAL_VERSION='8.5.x' DB='mysql' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~9.0'
+    - DRUPAL_VERSION='8.5.x' DB='pgsql' SIMPLETEST_DB="$DB://postgres:@127.0.0.1/drupal" DB_USER='postgres' DRUSH_VERSION='~9.0'
+    - DRUPAL_VERSION='8.5.x' DB='sqlite' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~9.0'
+    - DRUPAL_VERSION='8.6.x' DB='mysql' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~9.0'
+    - DRUPAL_VERSION='8.6.x' DB='pgsql' SIMPLETEST_DB="$DB://postgres:@127.0.0.1/drupal" DB_USER='postgres' DRUSH_VERSION='~9.0'
+    - DRUPAL_VERSION='8.6.x' DB='sqlite' SIMPLETEST_DB="$DB://root:@127.0.0.1/drupal" DB_USER='root' DRUSH_VERSION='~9.0'
   global:
     - SIMPLETEST_BASE_URL=http://127.0.0.1:8888
     - MODULE_NAME='dynamic_entity_reference'
     - MODULE_TEST_GROUP='dynamic_entity_reference'
     - DRUPAL_REPO='git://drupalcode.org/project/drupal.git'
-    - DRUSH_VERSION='~8.0'
     - CODER_VERSION='~8.2'
 
 before_install:
@@ -70,8 +84,11 @@ install:
   # Install drush globally
   - composer global require drush/drush:$DRUSH_VERSION
   - composer global require drupal/coder:$CODER_VERSION
+  - phpenv rehash
 
 before_script:
+  - php -v
+  - id -a
   # Remember the current test directory for later use in the Drupal
   # installation.
   - TESTDIR=$(pwd)
@@ -84,45 +101,44 @@ before_script:
   # Navigate out of module directory to prevent blown stack by recursive module
   # lookup.
   - cd ..
-
   # Download Drupal 8 core.
   - git clone --depth 1 --branch $DRUPAL_VERSION $DRUPAL_REPO drupal
+  - mv $MODULE_NAME drupal/modules
   - cd drupal
   # Remember the current Drupal directory.
   - DRUPALDIR=$(pwd)
+  - BROWSERTEST_OUTPUT_DIRECTORY=$DRUPALDIR/sites/simpletest/browser_output
+  - mkdir -p $BROWSERTEST_OUTPUT_DIRECTORY
   # Run composer install.
   - composer install
+  # Updated phpunit for PHP 7.2.
+  - if [ $(phpenv version-name) = "7.2" ]; then composer update phpunit/phpunit --with-dependencies; fi
   # Create database.
   - drush sql-create --verbose --debug --yes --db-su=$DB_USER --db-url=$SIMPLETEST_DB
   # Install Drupal.
-  # Create new site, stubbing sendmail path with true to prevent delivery errors
-  # and manually resolving drush path.
-  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes site-install --db-url=$SIMPLETEST_DB testing
-
+  - drush --yes site-install --db-url=$SIMPLETEST_DB --sites-subdir=default testing
+  # Create the sites/simpletest only if not exists
+  - if [ ! -d sites/simpletest ] ; then mkdir sites/simpletest; fi;
   # Reference and enable module in build site.
-  - ln -s $TESTDIR modules/$MODULE_NAME
+  #- ln -s $TESTDIR modules/$MODULE_NAME
   - drush --yes pm-enable simpletest $MODULE_NAME
-
   # Start a web server on port 8888, run in the background; wait for
   # initialization. This is temporarly disabled since there are no web tests
   # yet.
   - drush --verbose --debug runserver 127.0.0.1:8888 > ~/debug.txt 2>&1 &
   - sleep 5s
   # Start phanomjs for javascript testing.
-  - phantomjs --ssl-protocol=any --ignore-ssl-errors=true ./vendor/jcalderonzumba/gastonjs/src/Client/main.js 8510 1024 768 2>&1 >> /dev/null &
+  - phantomjs --ssl-protocol=any --ignore-ssl-errors=true ./vendor/jcalderonzumba/gastonjs/src/Client/main.js 8510 1024 768 2>&1 >> ~/gastonjs.log &
   - sleep 2
 
 script:
   # Run the Coder sniffer.
-  - phpcs --report=full --standard=Drupal ./modules/$MODULE_NAME
-  # Run the Simpletests.
-#  - php ./core/scripts/run-tests.sh --php `which php` --concurrency 12 --url $SIMPLETEST_BASE_URL --color --types "Simpletest" "$MODULE_TEST_GROUP"
-  # Run the PHPUnit tests.
-#  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist --testsuite=unit --group=$MODULE_TEST_GROUP
+  - phpcs --report=full --standard=Drupal --ignore='*.txt,*.md,*.css' ./modules/$MODULE_NAME
+  # Run the Tests.
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist --testsuite=kernel --group=$MODULE_TEST_GROUP
   - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist --testsuite=functional --group=$MODULE_TEST_GROUP
-  # @todo Enable it after fixing autocomplete selection fails.
-#  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist --testsuite=functional-javascript --group=$MODULE_TEST_GROUP
+  - ./vendor/phpunit/phpunit/phpunit -c ./core/phpunit.xml.dist --testsuite=functional-javascript --group=$MODULE_TEST_GROUP
+
 
 after_script:
   # Terminate all the phantomjs and php instances.
@@ -132,3 +148,10 @@ after_script:
 after_failure:
   - echo "Failures detected. Outputing additional logs:"
   - cat ~/debug.txt
+  - cat ~/gastonjs.log
+  - FILES=$BROWSERTEST_OUTPUT_DIRECTORY/* \
+    for f in $FILES \
+    do \
+      echo "Processing $f file..." \
+      cat $f \
+    done
