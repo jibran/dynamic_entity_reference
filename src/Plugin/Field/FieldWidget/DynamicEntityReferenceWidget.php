@@ -221,7 +221,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
    * @return array
    *   Auto complete paths for all the referenceable target types.
    */
-  protected function createAutoCompletePaths($target_types) {
+  protected function createAutoCompletePaths(array $target_types) {
     $auto_complete_paths = [];
     $settings = $this->getFieldSettings();
     foreach ($target_types as $target_type) {

@@ -340,7 +340,7 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
    * @return array
    *   A render array.
    */
-  protected function buildRenderArray(array $referenced_entities, $formatter, $formatter_options = []) {
+  protected function buildRenderArray(array $referenced_entities, $formatter, array $formatter_options = []) {
     // Create the entity that will have the entity reference field.
     $referencing_entity = EntityTest::create(['name' => $this->randomMachineName()]);
 
