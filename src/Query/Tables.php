@@ -6,6 +6,9 @@ use Drupal\Core\Entity\EntityType;
 use Drupal\Core\Entity\Query\Sql\Tables as BaseTables;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 
+/**
+ * Adds tables and fields to the SQL entity query.
+ */
 class Tables extends BaseTables {
 
   /**

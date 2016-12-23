@@ -42,7 +42,7 @@ class DynamicEntityReferenceServiceProvider extends ServiceProviderBase {
       'pgsql.entity.query.sql' => [
         'old' => BasePgsqlQueryFactory::class,
         'new' => PgsqlQueryFactory::class,
-      ]
+      ],
     ];
     foreach ($map as $service_id => $data) {
       if ($container->hasDefinition($service_id)) {

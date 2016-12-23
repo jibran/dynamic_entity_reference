@@ -7,7 +7,6 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\FieldConfigStorage;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -249,7 +248,6 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
       ],
     ]);
     $field_config->save();
-
 
     $this->drupalGet(Url::fromRoute('node.add', ['node_type' => 'reference_content']));
     // Multiple target_bundles configured, optgroup should be added to the

@@ -5,7 +5,6 @@ namespace Drupal\Tests\dynamic_entity_reference\Kernel\Views;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
-use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
