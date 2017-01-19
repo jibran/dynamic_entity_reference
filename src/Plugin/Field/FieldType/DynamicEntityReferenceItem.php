@@ -564,7 +564,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
   public static function calculateStorageDependencies(FieldStorageDefinitionInterface $field_definition) {
     $dependencies = FieldItemBase::calculateStorageDependencies($field_definition);
     $entity_manager = \Drupal::entityTypeManager();
-    foreach (array_keys(static::defaultFieldSettings()) as $entity_type_id) {
+    foreach (static::getTargetTypes($field_definition->getSettings()) as $entity_type_id) {
       if ($entity_manager->hasDefinition($entity_type_id) && $target_entity_type = $entity_manager->getDefinition($entity_type_id)) {
         $dependencies['module'][] = $target_entity_type->getProvider();
       }
