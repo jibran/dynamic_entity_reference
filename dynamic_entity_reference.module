@@ -54,3 +54,14 @@ function dynamic_entity_reference_module_implements_alter(&$implementations, $ho
     $implementations['dynamic_entity_reference'] = $group;
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter() for 'field_ui_field_storage_add_form'.
+ */
+function dynamic_entity_reference_form_field_ui_field_storage_add_form_alter(array &$form) {
+  $optgroup = (string) t('Dynamic Reference');
+  // Move the "Dynamic entity reference" option to the end of the list and
+  // rename it to "Other".
+  unset($form['add']['new_storage_type']['#options'][$optgroup]['dynamic_entity_reference']);
+  $form['add']['new_storage_type']['#options'][$optgroup]['dynamic_entity_reference'] = t('Other…');
+}
