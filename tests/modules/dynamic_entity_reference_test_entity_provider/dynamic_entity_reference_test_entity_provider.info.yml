@@ -1,0 +1,8 @@
+name: 'Dynamic Entity Reference Entity Provider A'
+type: module
+description: 'A provider of an entity type.'
+package: Testing
+core: 8.x
+dependencies:
+  - dynamic_entity_reference
+  - entity_test
