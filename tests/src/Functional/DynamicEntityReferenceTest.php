@@ -133,6 +133,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
       'settings[entity_test_field_methods][handler_settings][target_bundles][entity_test_field_methods]' => TRUE,
       'settings[entity_test_mulrevpub][handler_settings][target_bundles][entity_test_mulrevpub]' => TRUE,
+      'settings[entity_test_mulrev_chnged_revlog][handler_settings][target_bundles][entity_test_mulrev_chnged_revlog]' => TRUE,
     ];
     $this->submitForm($edit, t('Save settings'));
     $assert_session->responseContains(t('Saved %name configuration', ['%name' => 'Foobar']));
@@ -224,6 +225,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'settings[entity_test_string_id][handler_settings][target_bundles][entity_test_string_id]' => TRUE,
       'settings[entity_test_field_methods][handler_settings][target_bundles][entity_test_field_methods]' => TRUE,
       'settings[entity_test_mulrevpub][handler_settings][target_bundles][entity_test_mulrevpub]' => TRUE,
+      'settings[entity_test_mulrev_chnged_revlog][handler_settings][target_bundles][entity_test_mulrev_chnged_revlog]' => TRUE,
 
     ];
     $this->submitForm($edit, t('Save settings'));
