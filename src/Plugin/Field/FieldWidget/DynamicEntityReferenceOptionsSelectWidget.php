@@ -29,7 +29,7 @@ class DynamicEntityReferenceOptionsSelectWidget extends OptionsSelectWidget {
 
     // We only support groups when there is more than 1 target_bundle
     // available.
-    return count($settings[$entity_type_id]['handler_settings']['target_bundles']) > 1;
+    return !empty($settings[$entity_type_id]['handler_settings']['target_bundles']) && count($settings[$entity_type_id]['handler_settings']['target_bundles']) > 1;
   }
 
 }
