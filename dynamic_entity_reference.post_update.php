@@ -16,9 +16,10 @@ function dynamic_entity_reference_post_update_field_storage_dependencies() {
   $map = $entity_field_manager->getFieldMapByFieldType('dynamic_entity_reference');
   foreach ($map as $entity_type_id => $info) {
     foreach ($info as $name => $data) {
-      $field_storage = FieldStorageConfig::loadByName($entity_type_id, $name);
-      // Re-saving the storage object will fix the dependencies.
-      $field_storage->save();
+      if ($field_storage = FieldStorageConfig::loadByName($entity_type_id, $name)) {
+        // Re-saving the storage object will fix the dependencies.
+        $field_storage->save();
+      }
     }
   }
 }
