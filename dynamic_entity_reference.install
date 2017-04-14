@@ -29,7 +29,6 @@ use Drupal\Core\Entity\Sql\SqlEntityStorageInterface;
  * Finally
  * \Drupal\dynamic_entity_reference\EventSubscriber\FieldStorageSubscriber::handleEntityType()
  * is called to add the triggers.
- *
  */
 function dynamic_entity_reference_update_8001() {
   /** @var \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager */

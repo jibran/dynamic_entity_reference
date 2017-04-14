@@ -57,6 +57,8 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
    *   The entity field manager.
    * @param \Drupal\dynamic_entity_reference\Storage\IntColumnHandlerInterface $int_column_handler
    *   The integer column handler.
+   * @param \Drupal\Core\Database\Connection $connection
+   *   The database connection.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, EntityFieldManagerInterface $entity_field_manager, IntColumnHandlerInterface $int_column_handler, Connection $connection) {
     $this->entityTypeManager = $entity_type_manager;
