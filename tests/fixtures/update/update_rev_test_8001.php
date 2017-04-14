@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains database additions for testing the upgrade path 8001.
+ * Contains database additions for testing the upgrade path 8201.
  *
  * This script is run from drupal root after installing the testing profile of
  * Drupal 8.2.x on 8.x-1.x branch of dynamic_entity_reference. For more details

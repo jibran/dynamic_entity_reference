@@ -24,7 +24,7 @@ class DerUpdateTest extends UpdatePathTestBase {
    */
   protected function setDatabaseDumpFiles() {
     // This dump is created using 8.x-1.x branch of dynamic_entity_reference
-    // after installing testing profile and running update_test_8001.php script.
+    // after installing testing profile and running update_test_8201.php script.
     $this->databaseDumpFiles = [
       __DIR__ . '/../../../tests/fixtures/update/der_dump.php.gz',
     ];
@@ -33,9 +33,9 @@ class DerUpdateTest extends UpdatePathTestBase {
   /**
    * Test that target_id is converted to string and target_id_int is created.
    *
-   * @see dynamic_entity_reference_update_8001()
+   * @see dynamic_entity_reference_update_8201()
    */
-  public function testUpdate8001() {
+  public function testUpdate8201() {
     $connection = \Drupal::database();
     if ($connection->driver() == 'mysql') {
       // This might force an 1071 Specified key was too long; max key length
