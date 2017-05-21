@@ -466,15 +466,33 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function calculateDependencies(FieldDefinitionInterface $field_definition) {
     $dependencies = FieldItemBase::calculateDependencies($field_definition);
-    $manager = \Drupal::service('entity.repository');
+    $entity_repository = \Drupal::service('entity.repository');
     if ($default_value = $field_definition->getDefaultValueLiteral()) {
       foreach ($default_value as $value) {
         if (is_array($value) && isset($value['target_uuid']) && isset($value['target_type'])) {
-          $entity = $manager->loadEntityByUuid($value['target_type'], $value['target_uuid']);
+          $entity = $entity_repository->loadEntityByUuid($value['target_type'], $value['target_uuid']);
           // If the entity does not exist do not create the dependency.
           // @see \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList::processDefaultValue()
           if ($entity) {
             $dependencies[$entity->getEntityType()->getConfigDependencyKey()][] = $entity->getConfigDependencyName();
+          }
+        }
+      }
+    }
+    // Depend on target bundle configurations. Dependencies for 'target_bundles'
+    // also covers the 'auto_create_bundle' setting, if any, because its value
+    // is included in the 'target_bundles' list.
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $settings = $field_definition->getSettings();
+    foreach (static::getTargetTypes($settings) as $target_type) {
+      $handler = $settings[$target_type]['handler_settings'];
+      if (!empty($handler['target_bundles'])) {
+        $target_entity_type = $entity_type_manager->getDefinition($target_type);
+        if ($bundle_entity_type_id = $target_entity_type->getBundleEntityType()) {
+          if ($storage = $entity_type_manager->getStorage($bundle_entity_type_id)) {
+            foreach ($storage->loadMultiple($handler['target_bundles']) as $bundle) {
+              $dependencies[$bundle->getConfigDependencyKey()][] = $bundle->getConfigDependencyName();
+            }
           }
         }
       }
@@ -501,6 +519,57 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       if ($changed) {
         $field_definition->setDefaultValue($default_value);
       }
+    }
+
+    $entity_type_manager = \Drupal::entityTypeManager();
+    // Update the 'target_bundles' handler setting if a bundle config dependency
+    // has been removed.
+    $settings = $field_definition->getSettings();
+    foreach (static::getTargetTypes($settings) as $target_type) {
+      $bundles_changed = FALSE;
+      $handler_settings = $settings[$target_type]['handler_settings'];
+      if (!empty($handler_settings['target_bundles'])) {
+        $target_entity_type = $entity_type_manager->getDefinition($target_type);
+        if ($bundle_entity_type_id = $target_entity_type->getBundleEntityType()) {
+          if ($storage = $entity_type_manager->getStorage($bundle_entity_type_id)) {
+            foreach ($storage->loadMultiple($handler_settings['target_bundles']) as $bundle) {
+              if (isset($dependencies[$bundle->getConfigDependencyKey()][$bundle->getConfigDependencyName()])) {
+                unset($handler_settings['target_bundles'][$bundle->id()]);
+
+                // If this bundle is also used in the 'auto_create_bundle'
+                // setting, disable the auto-creation feature completely.
+                $auto_create_bundle = !empty($handler_settings['auto_create_bundle']) ? $handler_settings['auto_create_bundle'] : FALSE;
+                if ($auto_create_bundle && $auto_create_bundle == $bundle->id()) {
+                  $handler_settings['auto_create'] = NULL;
+                  $handler_settings['auto_create_bundle'] = NULL;
+                }
+
+                $bundles_changed = TRUE;
+
+                // In case we deleted the only target bundle allowed by the
+                // field we have to log a critical message because the field
+                // will not function correctly anymore.
+                if ($handler_settings['target_bundles'] === []) {
+                  \Drupal::logger('dynamic_entity_reference')
+                    ->critical('The %target_bundle bundle (entity type: %target_entity_type) was deleted. As a result, the %field_name dynamic entity reference field (entity_type: %entity_type, bundle: %bundle) no longer has any valid bundle it can reference. The field is not working correctly anymore and has to be adjusted.', [
+                      '%target_bundle' => $bundle->label(),
+                      '%target_entity_type' => $bundle->getEntityType()
+                        ->getBundleOf(),
+                      '%field_name' => $field_definition->getName(),
+                      '%entity_type' => $field_definition->getTargetEntityTypeId(),
+                      '%bundle' => $field_definition->getTargetBundle(),
+                    ]);
+                }
+              }
+            }
+          }
+        }
+      }
+      if ($bundles_changed) {
+        $settings[$target_type]['handler_settings'] = $handler_settings;
+        $field_definition->setSettings($settings);
+      }
+      $changed |= $bundles_changed;
     }
     return $changed;
   }
