@@ -15,8 +15,8 @@ use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenc
  */
 function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $field_storage) {
   $data = views_field_default_views_data($field_storage);
-  $entity_manager = \Drupal::entityManager();
-  $labels = $entity_manager->getEntityTypeLabels(TRUE);
+  $entity_manager = \Drupal::entityTypeManager();
+  $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
   $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
   $settings = $field_storage->getSettings();
   // Identify all the target entity type ids that can be referenced.
@@ -126,7 +126,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
  * @todo remove this when https://www.drupal.org/node/2337515 is in.
  */
 function dynamic_entity_reference_views_data() {
-  $entity_manager = \Drupal::entityManager();
+  $entity_manager = \Drupal::entityTypeManager();
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
   list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
@@ -257,7 +257,7 @@ function dynamic_entity_reference_views_data() {
  * Changes dynamic_entity_reference base fields argument and filter to numeric.
  */
 function dynamic_entity_reference_views_data_alter(&$data) {
-  $entity_manager = \Drupal::entityManager();
+  $entity_manager = \Drupal::entityTypeManager();
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
   list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
@@ -303,7 +303,7 @@ function dynamic_entity_reference_get_all_base_fields() {
   $sql_entity_types = [];
   $fields_all = [];
   // Ensure origin and target entity types are SQL.
-  $entity_manager = \Drupal::entityManager();
+  $entity_manager = \Drupal::entityTypeManager();
   foreach ($entity_manager->getDefinitions() as $entity_type) {
     // \Drupal\views\EntityViewsData class only allows entities with
     // \Drupal\Core\Entity\Sql\SqlEntityStorageInterface.
@@ -312,7 +312,8 @@ function dynamic_entity_reference_get_all_base_fields() {
       // Only fieldable entities have base fields.
       if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
         $entity_types[$entity_type->id()] = $entity_type;
-        foreach ($entity_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
+        $entity_field_manager = \Drupal::service('entity_field.manager');
+        foreach ($entity_field_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
           if ($base_field->getType() == 'dynamic_entity_reference') {
             $fields_all[$entity_type->id()][] = $base_field;
           }

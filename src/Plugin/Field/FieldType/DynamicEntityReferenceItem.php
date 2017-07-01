@@ -156,7 +156,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $return = [];
     foreach ($options as $target_type => $referenceable_entities) {
       // Rebuild the array by changing the bundle key into the bundle label.
-      $bundles = \Drupal::entityManager()->getBundleInfo($target_type);
+      $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type);
       foreach ($referenceable_entities as $bundle => $entities) {
         // The label does not need sanitizing since it is used as an optgroup
         // which is only supported by select elements and auto-escaped.
