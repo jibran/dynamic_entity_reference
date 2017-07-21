@@ -123,7 +123,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
   public function handleEntityType($entity_type_id, FieldStorageDefinitionInterface $field_storage_definition = NULL) {
     $storage = $this->entityTypeManager->getStorage($entity_type_id);
     $der_fields = $this->entityFieldManager->getFieldMapByFieldType('dynamic_entity_reference');
-    if ($field_storage_definition) {
+    if ($field_storage_definition && ($field_storage_definition->getType() === 'dynamic_entity_reference')) {
       $der_fields[$entity_type_id][$field_storage_definition->getName()] = TRUE;
     }
     $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
