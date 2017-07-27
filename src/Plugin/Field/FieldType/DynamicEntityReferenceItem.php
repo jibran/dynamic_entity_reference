@@ -196,9 +196,35 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       '#default_value' => $this->getSetting('entity_type_ids'),
       '#disabled' => $has_data,
       '#multiple' => TRUE,
+      '#element_validate' => [
+        [DynamicEntityReferenceItem::class, 'storageSettingsFormValidate'],
+      ],
     ];
 
     return $element;
+  }
+
+  /**
+   * Form element validation for storage settings.
+   *
+   * @param array $element
+   *   The form element .
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array $form
+   *   The complete form.
+   */
+  public static function storageSettingsFormValidate(array &$element, FormStateInterface $form_state, array $form) {
+    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
+    $options = array_filter(array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]), function ($entity_type_id) {
+      return static::entityHasIntegerId($entity_type_id);
+    });
+    $exclude_entity_types = $form_state->getValue(['settings', 'exclude_entity_types'], 0);
+    $entity_type_ids = $form_state->getValue(['settings', 'entity_type_ids'], []);
+    $diff = array_diff($options, $entity_type_ids);
+    if ((!$exclude_entity_types && empty($entity_type_ids)) || ($exclude_entity_types && empty($diff))) {
+      $form_state->setError($element, t('Select at least one entity type ID.'));
+    }
   }
 
   /**
