@@ -110,6 +110,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'entity_test_no_id',
       'entity_test_no_bundle',
       'entity_test_string_id',
+      'entity_test_computed_field',
     ];
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
       if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
@@ -209,6 +210,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'entity_test_no_id',
       'entity_test_no_bundle',
       'entity_test_string_id',
+      'entity_test_computed_field',
     ];
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
       if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
@@ -242,12 +244,12 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     // Ensure that the autocomplete path is correct.
     $input = $assert_session->fieldExists('field_foobar[0][target_id]');
     $settings = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->getSettings();
-    $selection_settings = $settings['entity_test_label']['handler_settings'] ?: [];
-    $data = serialize($selection_settings) . 'entity_test_label' . $settings['entity_test_label']['handler'];
+    $selection_settings = $settings['entity_test_computed_field']['handler_settings'] ?: [];
+    $data = serialize($selection_settings) . 'entity_test_computed_field' . $settings['entity_test_computed_field']['handler'];
     $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
     $expected_autocomplete_path = Url::fromRoute('system.entity_autocomplete', [
-      'target_type' => 'entity_test_label',
-      'selection_handler' => $settings['entity_test_label']['handler'],
+      'target_type' => 'entity_test_computed_field',
+      'selection_handler' => $settings['entity_test_computed_field']['handler'],
       'selection_settings_key' => $selection_settings_key,
     ])->toString();
     $this->assertContains($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
