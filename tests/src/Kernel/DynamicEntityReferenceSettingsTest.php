@@ -28,7 +28,7 @@ class DynamicEntityReferenceSettingsTest extends KernelTestBase {
     'dynamic_entity_reference',
     'entity_test',
     'system',
-    ];
+  ];
 
   /**
    * Testing node type.
