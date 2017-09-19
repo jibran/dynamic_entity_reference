@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\FunctionalJavascript;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -161,30 +162,15 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $entity_type_field = $page->findField('field_foobar[0][target_type]');
     // Change to user.
     $entity_type_field->selectOption('user');
-    foreach (str_split($autocomplete_query) as $char) {
-      // Autocomplete uses keydown/up directly.
-      $autocomplete_field->keyDown($char);
-      $autocomplete_field->keyUp($char);
-    }
-    // Wait for ajax.
-    $assert_session->assertWaitOnAjaxRequest(20000);
-    // And autocomplete selection.
-    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
+    $this->performAutocompleteQuery($autocomplete_query, $autocomplete_field);
+    $this->selectAutocompleteOption();
     $assert_session->pageTextContains($this->anotherUser->label());
-    // Clear previous autocomplete.
-    $autocomplete_field->setValue('');
-    $autocomplete_field->keyDown(self::ESCAPE_KEY);
-    // Change to entity_test.
+    // Change to entity_test, this should automatically clear the autocomplete
+    // field.
     $entity_type_field->selectOption('entity_test');
-    foreach (str_split($autocomplete_query) as $char) {
-      // Autocomplete uses keydown/up directly.
-      $autocomplete_field->keyDown($char);
-      $autocomplete_field->keyUp($char);
-    }
-    // Wait for ajax.
-    $assert_session->assertWaitOnAjaxRequest(20000);
-    // And autocomplete selection.
-    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
+    $this->assertEmpty($autocomplete_field->getValue());
+    $this->performAutocompleteQuery($autocomplete_query, $autocomplete_field);
+    $this->selectAutocompleteOption();
     $assert_session->pageTextContains($this->testEntity->label());
   }
 
@@ -276,6 +262,39 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
       'selection_handler' => "default:$target_type",
       'selection_settings_key' => $selection_settings_key,
     ])->toString();
+  }
+
+  /**
+   * Peforms an autocomplete query on an element.
+   *
+   * @param string $autocomplete_query
+   *   String to search for.
+   * @param \Behat\Mink\Element\NodeElement $autocomplete_field
+   *   Field to search in.
+   */
+  protected function performAutocompleteQuery($autocomplete_query, NodeElement $autocomplete_field) {
+    foreach (str_split($autocomplete_query) as $char) {
+      // Autocomplete uses keydown/up directly.
+      $autocomplete_field->keyDown($char);
+      $autocomplete_field->keyUp($char);
+    }
+    // Wait for ajax.
+    $this->assertSession()->assertWaitOnAjaxRequest(20000);
+    // And autocomplete selection.
+    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
+  }
+
+  /**
+   * Selects the autocomplete result with the given delta.
+   *
+   * @param int $delta
+   *   Delta of item to select. Starts from 0.
+   */
+  protected function selectAutocompleteOption($delta = 0) {
+    // Press the down arrow to select the nth option.
+    /** @var \Behat\Mink\Element\NodeElement $element */
+    $element = $this->getSession()->getPage()->findAll('css', '.ui-autocomplete.ui-menu li.ui-menu-item')[$delta];
+    $element->click();
   }
 
 }
