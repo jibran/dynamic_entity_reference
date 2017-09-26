@@ -58,6 +58,14 @@ function dynamic_entity_reference_entity_test_entity_base_field_info(EntityTypeI
       $fields['der'] = BaseFieldDefinition::createFromFieldStorageDefinition($fields['dynamic_references'])
         ->setName('der');
     }
+
+    // Adds a normal entity reference field if set to do so.
+    if (\Drupal::state()->get('dynamic_entity_reference_entity_test_with_normal', FALSE)) {
+      $fields['normal_reference'] = BaseFieldDefinition::create('entity_reference')
+        ->setLabel(t('Entity ID'))
+        ->setDescription(t('The referenced ID of the entity.'))
+        ->setRequired(TRUE);
+    }
   }
 
   return $fields;

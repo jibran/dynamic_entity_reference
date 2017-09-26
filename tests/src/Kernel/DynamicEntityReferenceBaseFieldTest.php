@@ -297,4 +297,40 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     $this->assertSame($int_column, $str_column);
   }
 
+  /**
+   * Test entity field query with normal entity reference and DER base fields.
+   */
+  public function testEntityFieldQuery() {
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
+    \Drupal::state()->set('dynamic_entity_reference_entity_test_with_normal', TRUE);
+    $this->enableModules(['dynamic_entity_reference_entity_test']);
+    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+    $this->installEntitySchema('entity_test_mul');
+
+    // Add some users and test entities.
+    $accounts = $entities = [];
+    foreach (range(1, 3) as $i) {
+      $accounts[$i] = $this->createUser();
+      $entity = EntityTestMul::create();
+
+      // Add reference to user 2 for entities 2 and 3.
+      if ($i > 1) {
+        $entity->normal_reference = $accounts[2];
+      }
+
+      $entity->save();
+      $entities[$i] = $entity;
+    }
+
+    $result = \Drupal::entityTypeManager()->getStorage('entity_test_mul')->getQuery()
+      ->condition('normal_reference.entity:user.status', 1)
+      ->sort('id')
+      ->execute();
+    $expected = [
+      $entities[2]->id() => $entities[2]->id(),
+      $entities[3]->id() => $entities[3]->id(),
+    ];
+    $this->assertSame($expected, $result);
+  }
+
 }

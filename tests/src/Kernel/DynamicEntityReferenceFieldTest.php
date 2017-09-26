@@ -4,6 +4,7 @@ namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestStringId;
 use Drupal\field\Entity\FieldConfig;
@@ -470,6 +471,65 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
     $entities = $entity->{$field_name}->referencedEntities();
     $this->assertEquals($entities[0]->id(), $target_entity->id());
     $this->assertEquals($entities[1]->id(), $referenced_entity->id());
+  }
+
+  /**
+   * Tests with normal entity reference fields.
+   */
+  public function testNormalEntityReference() {
+    // Create a field.
+    FieldStorageConfig::create([
+      'field_name' => 'field_normal_er',
+      'type' => 'entity_reference',
+      'entity_type' => $this->entityType,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'settings' => [
+        'exclude_entity_types' => FALSE,
+        'entity_type_ids' => [
+          'user',
+        ],
+      ],
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => 'field_normal_er',
+      'entity_type' => $this->entityType,
+      'bundle' => $this->bundle,
+      'label' => 'Field test',
+      'settings' => [
+        $this->referencedEntityType => [
+          'handler' => 'default:user',
+          'handler_settings' => [
+            'target_bundles' => NULL,
+          ],
+        ],
+      ],
+    ])->save();
+
+    // Add some users and test entities.
+    $accounts = $entities = [];
+    foreach (range(1, 3) as $i) {
+      $accounts[$i] = $this->createUser();
+      $entity = EntityTest::create();
+
+      // Add reference to user 2 for entities 2 and 3.
+      if ($i > 1) {
+        $entity->field_normal_er = $accounts[2];
+      }
+
+      $entity->save();
+      $entities[$i] = $entity;
+    }
+
+    $result = \Drupal::entityTypeManager()->getStorage('entity_test')->getQuery()
+      ->condition('field_normal_er.entity:user.status', 1)
+      ->sort('id')
+      ->execute();
+    $expected = [
+      $entities[2]->id() => $entities[2]->id(),
+      $entities[3]->id() => $entities[3]->id(),
+    ];
+    $this->assertSame($expected, $result);
   }
 
 }
