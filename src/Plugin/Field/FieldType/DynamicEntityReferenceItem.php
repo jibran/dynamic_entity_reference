@@ -145,24 +145,40 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public function getSettableOptions(AccountInterface $account = NULL) {
     $field_definition = $this->getFieldDefinition();
+    $entity_type_manager = \Drupal::entityTypeManager();
+    $entity_type_bundles_info = \Drupal::service('entity_type.bundle.info');
+    $selection_manager = \Drupal::service('plugin.manager.dynamic_entity_reference_selection');
     $options = [];
     $settings = $this->getSettings();
-    foreach (static::getTargetTypes($settings) as $target_type) {
-      $options[$target_type] = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($field_definition, $this->getEntity(), $target_type)->getReferenceableEntities();
+    $target_types = static::getTargetTypes($settings);
+    foreach ($target_types as $target_type) {
+      $options[$target_type] = $selection_manager->getSelectionHandler($field_definition, $this->getEntity(), $target_type)->getReferenceableEntities();
     }
     if (empty($options)) {
       return [];
     }
     $return = [];
     foreach ($options as $target_type => $referenceable_entities) {
+      $target_type_info = $entity_type_manager->getDefinition($target_type);
+      $target_type_label = $target_type_info->getLabel();
       // Rebuild the array by changing the bundle key into the bundle label.
-      $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type);
+      $bundles = $entity_type_bundles_info->getBundleInfo($target_type);
       foreach ($referenceable_entities as $bundle => $entities) {
         // The label does not need sanitizing since it is used as an optgroup
         // which is only supported by select elements and auto-escaped.
         $bundle_label = $bundles[$bundle]['label'];
         foreach ($entities as $id => $entity_label) {
-          $return[(string) $bundle_label]["{$target_type}-{$id}"] = $entity_label;
+          if (count($target_types) > 1) {
+            if ($target_type_info->hasKey('bundle')) {
+              $return[(string) $target_type_label . ': ' . (string) $bundle_label]["{$target_type}-{$id}"] = "$entity_label ($target_type_label:$id)";
+            }
+            else {
+              $return[(string) $target_type_label]["{$target_type}-{$id}"] = "$entity_label ($target_type_label:$id)";
+            }
+          }
+          else {
+            $return[(string) $bundle_label]["{$target_type}-{$id}"] = "$entity_label ($target_type_label:$id)";
+          }
         }
       }
     }
