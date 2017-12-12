@@ -206,6 +206,9 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
    * Tests the multiple target entities loader.
    */
   public function testReferencedEntitiesMultipleLoad() {
+    // Verify an index is created on the _int column.
+    $this->assertTrue(\Drupal::database()->schema()->indexExists('entity_test__field_test', 'field_test_target_id_int'));
+
     $entity_type_manager = \Drupal::entityTypeManager();
     // Create the parent entity.
     $entity = $entity_type_manager

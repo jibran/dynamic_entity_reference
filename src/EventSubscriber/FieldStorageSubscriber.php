@@ -128,6 +128,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
     }
     $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
     $tables = [];
+    $index_columns = [];
     // If we know which field is being created / updated check whether it is
     // DER.
     if ($storage instanceof SqlEntityStorageInterface && !empty($der_fields[$entity_type_id])) {
@@ -141,6 +142,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
         try {
           $table = $mapping->getFieldTableName($field_name);
           $column = $mapping->getFieldColumnName($storage_definitions[$field_name], 'target_id');
+          $index_column = $mapping->getFieldColumnName($storage_definitions[$field_name], 'target_type');
         }
         catch (SqlContentEntityStorageException $e) {
           // Custom storage? Broken site? No matter what, if there is no table
@@ -148,15 +150,26 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
           continue;
         }
         $tables[$table][] = $column;
+
+        $schema_info = $storage_definitions[$field_name]->getSchema();
+        $index_columns[$table] = [
+          $index_column => $schema_info['columns']['target_type'],
+        ];
         if ($entity_type->isRevisionable() && ($storage_definitions[$field_name]->isRevisionable())) {
           try {
             if ($mapping->requiresDedicatedTableStorage($storage_definitions[$field_name])) {
               $tables[$mapping->getDedicatedRevisionTableName($storage_definitions[$field_name])][] = $column;
+              $index_columns[$mapping->getDedicatedRevisionTableName($storage_definitions[$field_name])] = [
+                $index_column => $schema_info['columns']['target_type'],
+              ];
             }
             elseif ($mapping->allowsSharedTableStorage($storage_definitions[$field_name])) {
               $revision_table = $entity_type->getRevisionDataTable() ?: $entity_type->getRevisionTable();
               $tables[$revision_table][] = $column;
               $tables[$revision_table] = array_unique($tables[$revision_table]);
+              $index_columns[$revision_table] = [
+                $index_column => $schema_info['columns']['target_type'],
+              ];
             }
           }
           catch (SqlContentEntityStorageException $e) {
@@ -166,7 +179,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
       }
       $new = [];
       foreach ($tables as $table => $columns) {
-        $new[$table] = $this->intColumnHandler->create($table, $columns);
+        $new[$table] = $this->intColumnHandler->create($table, $columns, $index_columns[$table]);
       }
       foreach (array_filter($new) as $table => $columns) {
         // reset($columns) is one of the new int columns. The trigger will fill

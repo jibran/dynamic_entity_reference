@@ -123,3 +123,68 @@ function dynamic_entity_reference_update_8201() {
   }
 
 }
+
+/**
+ * Create index on all target_id_int fields.
+ *
+ * By creating the index, joins on this column will be speed up significantly.
+ *
+ * @return string
+ */
+function dynamic_entity_reference_update_8202() {
+  $schema = \Drupal::database()->schema();
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_type_manager = \Drupal::entityTypeManager();
+
+  // The _int column spec needed for creating the index.
+  $column_spec = [
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+  ];
+
+  // Only update dynamic_entity_reference fields.
+  $return = [];
+  foreach ($entity_field_manager->getFieldMapByFieldType('dynamic_entity_reference') as $entity_type_id => $map) {
+    $entity_storage = $entity_type_manager->getStorage($entity_type_id);
+    // Only SQL storage based entities are supported.
+    if ($entity_storage instanceof SqlEntityStorageInterface) {
+      $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+      /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+      $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
+      // Only need field storage definitions of dynamic_entity_reference fields.
+      /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
+      foreach (array_intersect_key($field_storage_definitions, $map) as $field_storage_definition) {
+        $field_name = $field_storage_definition->getName();
+        try {
+          $table = $table_mapping->getFieldTableName($field_name);
+          $column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_id_int');
+          $index_column = $table_mapping->getFieldColumnName($field_storage_definition, 'target_type');
+        }
+        catch (SqlContentEntityStorageException $e) {
+          // Custom storage? Broken site? No matter what, if there is no table
+          // or column, there's little we can do.
+          continue;
+        }
+        $schema_info = $field_storage_definition->getSchema();
+        if ($schema->fieldExists($table, $column)) {
+          $spec = [
+            'fields' => [
+              $column => $column_spec,
+              $index_column => $schema_info['columns']['target_type'],
+            ],
+          ];
+          if (!$schema->indexExists($table, $column)) {
+            $schema->addIndex($table, $column, [$column, $index_column], $spec);
+            $args = [
+              ':fields' => implode(', ', [$column, $index_column]),
+              ':table' => $table,
+            ];
+            $return[] = t('Added index on ":fields" fields from ":table" table.', $args);
+          }
+        }
+      }
+    }
+  }
+  return implode("\n", $return);
+}

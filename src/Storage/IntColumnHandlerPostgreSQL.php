@@ -29,7 +29,7 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function create($table, array $columns) {
+  public function create($table, array $columns, array $index_columns = []) {
     $schema = $this->connection->schema();
     if (!IntColumnHandler::allColumnsExist($schema, $table, $columns)) {
       return [];
@@ -47,7 +47,19 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
       if (!$schema->fieldExists($table, $column_int)) {
         $this->createTriggerFunction($table, $column, $column_int);
         $this->createTrigger($table, $column, $column_int);
+
+        $index_fields = [$column_int];
+        $full_spec = [
+          'fields' => [
+            $column_int => $spec,
+          ],
+        ];
+        if (!empty($index_columns)) {
+          $full_spec['fields'] = array_merge($full_spec['fields'], $index_columns);
+          $index_fields = array_merge($index_fields, array_keys($index_columns));
+        }
         $schema->addField($table, $column_int, $spec);
+        $schema->addIndex($table, $column_int, $index_fields, $full_spec);
         $new[] = $column_int;
       }
     }

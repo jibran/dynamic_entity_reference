@@ -295,6 +295,9 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     $int_column = $database->query('SELECT der__target_id_int FROM {entity_test_mul_property_data}')->fetchCol();
     $str_column = $database->query('SELECT der__target_id FROM {entity_test_mul_property_data}')->fetchCol();
     $this->assertSame($int_column, $str_column);
+
+    // Verify an index is created on the _int columns.
+    $this->assertTrue(\Drupal::database()->schema()->indexExists('entity_test', 'dynamic_references__target_id_int'));
   }
 
   /**

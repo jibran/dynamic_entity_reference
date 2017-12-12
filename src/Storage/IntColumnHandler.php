@@ -56,7 +56,7 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
   /**
    * {@inheritdoc}
    */
-  public function create($table, array $columns) {
+  public function create($table, array $columns, array $index_columns = []) {
     $schema = $this->connection->schema();
     // The integer column specification.
     $spec = [
@@ -78,8 +78,21 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
       $column_int = $column . '_int';
       // Make sure the integer columns exist.
       if (!$schema->fieldExists($table, $column_int)) {
+        $index_fields = [$column_int];
+        $full_spec = [
+          'fields' => [
+            $column_int => $spec,
+          ],
+        ];
+
+        if (!empty($index_columns)) {
+          $full_spec['fields'] = array_merge($full_spec['fields'], $index_columns);
+          $index_fields = array_merge($index_fields, array_keys($index_columns));
+        }
+
         $new[] = $column_int;
         $schema->addField($table, $column_int, $spec);
+        $schema->addIndex($table, $column_int, $index_fields, $full_spec);
       }
       // This is the heart of this function: before an UPDATE/INSERT, set the
       // value of the integer column to the integer value of the string column.

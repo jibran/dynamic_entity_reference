@@ -111,6 +111,13 @@ class DerUpdateTest extends UpdatePathTestBase {
     // Check the both columns of configurable fields values.
     $this->assertEquals([1, 1, 1, 1, 0, 1, 1], $connection->query('SELECT field_test_mul_target_id_int FROM {entity_test_mul__field_test_mul} ORDER BY entity_id, delta')->fetchCol());
     $this->assertEquals([1, 1, 1, 1, 'test', 1, 1], $connection->query('SELECT field_test_mul_target_id FROM {entity_test_mul__field_test_mul} ORDER BY entity_id, delta')->fetchCol());
+
+    // Even though this was fixed after this update hook, since this one adds
+    // the _int column, the index is created at that time.
+    // @see \Drupal\Tests\dynamic_entity_reference\Functional\Update\DerUpdate8202
+    $this->assertTrue(\Drupal::database()->schema()->indexExists('entity_test', 'dynamic_references__target_id_int'));
+    $this->assertTrue(\Drupal::database()->schema()->indexExists('entity_test__field_test', 'field_test_target_id_int'));
+    $this->assertTrue(\Drupal::database()->schema()->indexExists('entity_test_mul__field_test_mul', 'field_test_mul_target_id_int'));
   }
 
 }
