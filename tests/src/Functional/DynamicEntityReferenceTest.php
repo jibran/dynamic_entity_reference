@@ -111,6 +111,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'entity_test_label',
       'entity_test_no_bundle',
       'entity_test_computed_field',
+      'entity_test_map_field',
     ];
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
       if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
@@ -201,6 +202,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'file',
       'entity_test_no_bundle',
       'entity_test_computed_field',
+      'entity_test_map_field',
     ];
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
       if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
