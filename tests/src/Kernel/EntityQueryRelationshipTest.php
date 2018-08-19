@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
@@ -133,12 +132,12 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     // Create some test entities which link each other.
     $referenced_entity_1 = EntityTestStringId::create([
       'name' => 'Foobar',
-      'id' => Unicode::strtolower($this->randomMachineName()),
+      'id' => mb_strtolower($this->randomMachineName()),
     ]);
     $referenced_entity_1->save();
     $referenced_entity_2 = EntityTestStringId::create([
       'name' => 'Barfoo',
-      'id' => Unicode::strtolower($this->randomMachineName()),
+      'id' => mb_strtolower($this->randomMachineName()),
     ]);
     $referenced_entity_2->save();
 

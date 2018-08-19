@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
@@ -82,9 +81,9 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
     $this->configTestReference = $this->container->get('entity_type.manager')
       ->getStorage('config_test')
       ->create([
-        'id' => Unicode::strtolower($this->randomMachineName()),
+        'id' => mb_strtolower($this->randomMachineName()),
         'label' => $this->randomString(),
-        'style' => Unicode::strtolower($this->randomMachineName()),
+        'style' => mb_strtolower($this->randomMachineName()),
       ]);
     $this->configTestReference->save();
   }
