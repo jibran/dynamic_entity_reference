@@ -4,7 +4,6 @@ namespace Drupal\Tests\dynamic_entity_reference\FunctionalJavascript;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
@@ -95,7 +94,7 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
       'description' => 'My test description',
     ])->save();
     // We will query on the first two characters of the second username.
-    $autocomplete_query = Unicode::substr($this->anotherUser->label(), 0, 3);
+    $autocomplete_query = mb_substr($this->anotherUser->label(), 0, 3);
     $this->testEntity = EntityTest::create([
       // Make this partially match the second user name.
       'name' => $autocomplete_query . $this->randomMachineName(5),

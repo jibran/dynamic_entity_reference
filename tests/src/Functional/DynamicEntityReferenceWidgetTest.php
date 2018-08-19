@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
@@ -67,7 +66,7 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
     // Create admin user.
     $this->adminUser = $this->drupalCreateUser($this->permissions);
 
-    $field_name = Unicode::strtolower($this->randomMachineName());
+    $field_name = mb_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'node',

@@ -3,7 +3,6 @@
 namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
@@ -400,7 +399,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     \Drupal::service('module_installer')->install(['taxonomy']);
     $vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
-      'vid' => Unicode::strtolower($this->randomMachineName()),
+      'vid' => mb_strtolower($this->randomMachineName()),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ]);
     $vocabulary->save();
@@ -485,7 +484,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     $vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
-      'vid' => Unicode::strtolower($this->randomMachineName()),
+      'vid' => mb_strtolower($this->randomMachineName()),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ]);
     $vocabulary->save();

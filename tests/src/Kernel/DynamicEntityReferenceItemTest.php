@@ -11,7 +11,6 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Component\Utility\Unicode;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\field\Kernel\FieldKernelTestBase;
 use Drupal\user\Entity\User;
@@ -57,7 +56,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
 
     $this->vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
-      'vid' => Unicode::strtolower($this->randomMachineName()),
+      'vid' => mb_strtolower($this->randomMachineName()),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
     ]);
     $this->vocabulary->save();
@@ -314,7 +313,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
    * Tests that the 'handler' field setting stores the proper plugin ID.
    */
   public function testSelectionHandlerSettings() {
-    $field_name = Unicode::strtolower($this->randomMachineName());
+    $field_name = mb_strtolower($this->randomMachineName());
     $field_storage = FieldStorageConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
