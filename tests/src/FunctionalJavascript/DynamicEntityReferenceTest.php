@@ -11,14 +11,14 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Ensures that Dynamic Entity References field works correctly.
  *
  * @group dynamic_entity_reference
  */
-class DynamicEntityReferenceTest extends JavascriptTestBase {
+class DynamicEntityReferenceTest extends WebDriverTestBase {
 
   /**
    * Escape key code.
@@ -105,12 +105,16 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    $edit = [
-      'label' => 'Foobar',
-      'field_name' => 'foobar',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
-    $this->submitForm($edit, t('Save and continue'), 'field-ui-field-storage-add-form');
+    $select = $assert_session->selectExists('new_storage_type');
+    $select->selectOption('dynamic_entity_reference');
+    // This is needed to execute machine name JS.
+    $label = $assert_session->fieldExists('label');
+    $label->focus();
+    $label->setValue('Foobar');
+    $label->blur();
+    $select->focus();
+    sleep(1);
+    $this->submitForm([], t('Save and continue'), 'field-ui-field-storage-add-form');
     $page = $this->getSession()->getPage();
     $entity_type_ids_select = $assert_session->selectExists('settings[entity_type_ids][]', $page);
     $entity_type_ids_select->selectOption('user');
@@ -181,12 +185,16 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalCreateContentType(['type' => 'test_content']);
     $this->drupalGet('/admin/structure/types/manage/test_content/fields/add-field');
-    $edit = [
-      'label' => 'Foobar',
-      'field_name' => 'foobar',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
-    $this->submitForm($edit, t('Save and continue'), 'field-ui-field-storage-add-form');
+    $select = $assert_session->selectExists('new_storage_type');
+    $select->selectOption('dynamic_entity_reference');
+    // This is needed to execute machine name JS.
+    $label = $assert_session->fieldExists('label');
+    $label->focus();
+    $label->setValue('Foobar');
+    $label->blur();
+    $select->focus();
+    sleep(1);
+    $this->submitForm([], t('Save and continue'), 'field-ui-field-storage-add-form');
     $page = $this->getSession()->getPage();
     $entity_type_ids_select = $assert_session->selectExists('settings[entity_type_ids][]', $page);
     $entity_type_ids_select->selectOption('user');
@@ -272,15 +280,9 @@ class DynamicEntityReferenceTest extends JavascriptTestBase {
    *   Field to search in.
    */
   protected function performAutocompleteQuery($autocomplete_query, NodeElement $autocomplete_field) {
-    foreach (str_split($autocomplete_query) as $char) {
-      // Autocomplete uses keydown/up directly.
-      $autocomplete_field->keyDown($char);
-      $autocomplete_field->keyUp($char);
-    }
-    // Wait for ajax.
-    $this->assertSession()->assertWaitOnAjaxRequest(20000);
-    // And autocomplete selection.
-    $this->assertJsCondition('jQuery(".ui-autocomplete.ui-menu li.ui-menu-item:visible").length > 0', 5000);
+    $autocomplete_field->setValue($autocomplete_query);
+    $autocomplete_field->keyDown(' ');
+    $this->assertSession()->waitOnAutocomplete();
   }
 
   /**
