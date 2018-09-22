@@ -130,6 +130,7 @@ function dynamic_entity_reference_update_8201() {
  * By creating the index, joins on this column will be speed up significantly.
  *
  * @return string
+ *   The update message.
  */
 function dynamic_entity_reference_update_8202() {
   $schema = \Drupal::database()->schema();

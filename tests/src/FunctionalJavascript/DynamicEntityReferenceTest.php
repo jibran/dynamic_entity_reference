@@ -107,13 +107,10 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
     $select = $assert_session->selectExists('new_storage_type');
     $select->selectOption('dynamic_entity_reference');
-    // This is needed to execute machine name JS.
     $label = $assert_session->fieldExists('label');
-    $label->focus();
     $label->setValue('Foobar');
-    $label->blur();
-    $select->focus();
-    sleep(1);
+    // Wait for the machine name.
+    $assert_session->waitForElementVisible('css', '[name="label"] + * .machine-name-value');
     $this->submitForm([], t('Save and continue'), 'field-ui-field-storage-add-form');
     $page = $this->getSession()->getPage();
     $entity_type_ids_select = $assert_session->selectExists('settings[entity_type_ids][]', $page);
@@ -187,13 +184,10 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalGet('/admin/structure/types/manage/test_content/fields/add-field');
     $select = $assert_session->selectExists('new_storage_type');
     $select->selectOption('dynamic_entity_reference');
-    // This is needed to execute machine name JS.
     $label = $assert_session->fieldExists('label');
-    $label->focus();
     $label->setValue('Foobar');
-    $label->blur();
-    $select->focus();
-    sleep(1);
+    // Wait for the machine name.
+    $assert_session->waitForElementVisible('css', '[name="label"] + * .machine-name-value');
     $this->submitForm([], t('Save and continue'), 'field-ui-field-storage-add-form');
     $page = $this->getSession()->getPage();
     $entity_type_ids_select = $assert_session->selectExists('settings[entity_type_ids][]', $page);

@@ -54,13 +54,6 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
   protected $fieldName = 'field_test';
 
   /**
-   * The entity field query factory.
-   *
-   * @var \Drupal\Core\Entity\Query\QueryFactory
-   */
-  protected $factory;
-
-  /**
    * The results returned by EntityQuery.
    *
    * @var array
@@ -73,14 +66,6 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
    * @var array
    */
   protected $entities = [];
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-    $this->factory = \Drupal::service('entity.query');
-  }
 
   /**
    * Tests entity query for DER for entites with integer IDs.
@@ -113,7 +98,9 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $this->entities[] = $entity;
     // This returns the 0th entity as that's only one pointing to the 0th
     // account.
-    $query = $this->factory->get('entity_test')
+    $query = $this->container->get('entity_type.manager')
+      ->getStorage('entity_test')
+      ->getQuery()
       ->condition("field_test.0.entity:entity_test_rev.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_rev.name", 'Barfoo');
     $this->queryResults = $query->execute();
@@ -158,7 +145,9 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $this->entities[] = $entity;
     // This returns the 0th entity as that's only one pointing to the 0th
     // account.
-    $query = $this->factory->get('entity_test')
+    $query = $this->container->get('entity_type.manager')
+      ->getStorage('entity_test')
+      ->getQuery()
       ->condition("field_test.0.entity:entity_test_string_id.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_string_id.name", 'Barfoo');
     $this->queryResults = $query->execute();
