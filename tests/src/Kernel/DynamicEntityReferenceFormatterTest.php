@@ -82,7 +82,6 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
       ->save();
 
     // The label formatter rendering generates links, so build the router.
-    $this->installSchema('system', 'router');
     $this->container->get('router.builder')->rebuild();
 
     FieldStorageConfig::create([

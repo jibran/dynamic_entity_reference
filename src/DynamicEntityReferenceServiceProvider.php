@@ -6,7 +6,6 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
 use Drupal\dynamic_entity_reference\Normalizer\DynamicEntityReferenceItemNormalizer;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Service Provider for Dynamic Entity Reference.
@@ -31,7 +30,7 @@ class DynamicEntityReferenceServiceProvider extends ServiceProviderBase {
       // The priority must be higher than that of
       // serializer.normalizer.entity_reference_item.hal in
       // hal.services.yml.
-      $service_definition->addTag('normalizer', array('priority' => $parent_definition->getTags()['normalizer'][0]['priority'] + 1));
+      $service_definition->addTag('normalizer', ['priority' => $parent_definition->getTags()['normalizer'][0]['priority'] + 1]);
       $container->setDefinition('serializer.normalizer.entity.dynamic_entity_reference_item.hal', $service_definition);
 
     }
