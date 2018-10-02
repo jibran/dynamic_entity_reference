@@ -11,6 +11,7 @@ use Drupal\FunctionalTests\Update\UpdatePathTestBase;
  * Tests the revisionable DER fields update path.
  *
  * @group dynamic_entity_reference
+ * @group legacy
  */
 class DerRevUpdateTest extends UpdatePathTestBase {
 

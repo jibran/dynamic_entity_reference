@@ -8,6 +8,7 @@ use Drupal\FunctionalTests\Update\UpdatePathTestBase;
  * Tests DER update path from 8201 and on.
  *
  * @group dynamic_entity_reference
+ * @group legacy
  */
 class DerUpdate8202Test extends UpdatePathTestBase {
 
