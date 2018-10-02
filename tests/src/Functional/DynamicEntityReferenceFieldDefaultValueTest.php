@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Functional;
 
-use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\Node;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\SchemaCheckTestTrait;
 
 /**
  * Tests dynamic entity reference field default values storage in CMI.

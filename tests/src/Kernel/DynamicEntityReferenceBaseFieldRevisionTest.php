@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
-use Drupal\config\Tests\SchemaCheckTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\SchemaCheckTestTrait;
 
 /**
  * Tests for the dynamic entity reference base field for revisionable entities.
