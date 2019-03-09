@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
@@ -59,7 +60,6 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema('entity_test_mul');
     $entity_type_manager = \Drupal::entityTypeManager();
     // Test a valid reference.
@@ -122,7 +122,6 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema('entity_test_mul');
     $entity_type_manager = \Drupal::entityTypeManager();
     // Create the parent entity.
@@ -209,9 +208,15 @@ class DynamicEntityReferenceBaseFieldTest extends EntityKernelTestBase {
   public function testMultipleEntityReference() {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema('entity_test_mul');
-
+    // Update entity_test schema.
+    $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+    $mock_entity_type = $this->prophesize(EntityTypeInterface::class);
+    $mock_entity_type->id()->willReturn('entity_test');
+    $field_storage_definitions = dynamic_entity_reference_entity_test_entity_base_field_info($mock_entity_type->reveal());
+    foreach ($field_storage_definitions as $field_name => $field_storage_definition) {
+      $entity_definition_update_manager->installFieldStorageDefinition($field_name, 'entity_test', 'dynamic_entity_reference_entity_test', $field_storage_definition);
+    }
     // Create some test entities which link each other.
     $referenced_entity = EntityTest::create();
     $referenced_entity->save();

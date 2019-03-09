@@ -58,7 +58,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', 1);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
     $entity_type_manager = \Drupal::entityTypeManager();
@@ -124,7 +123,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_cardinality', FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
     $entity_type_manager = \Drupal::entityTypeManager();
@@ -213,7 +211,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_entities', [$this->entityType, $this->referencedEntityType]);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
 
@@ -293,7 +290,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
     $entity_type_manager = \Drupal::entityTypeManager();
@@ -360,7 +356,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
     $entity_type_manager = \Drupal::entityTypeManager();
@@ -450,7 +445,6 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     \Drupal::state()->set('dynamic_entity_reference_entity_test_with_two_base_fields', TRUE);
     \Drupal::state()->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
     $this->installEntitySchema($this->entityType);
     $this->installEntitySchema($this->referencedEntityType);
 
