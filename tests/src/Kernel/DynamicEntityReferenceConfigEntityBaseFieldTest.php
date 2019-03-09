@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
@@ -94,7 +95,6 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
   public function testBaseField() {
     // @see dynamic_entity_reference_entity_test_entity_base_field_info()
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    $this->container->get('entity.definition_update_manager')->applyUpdates();
 
     // Reference a config entity.
     $entity = $this->container->get('entity_type.manager')
@@ -115,7 +115,15 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
     // Make this base field revisionable.
     $this->state->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    $this->container->get('entity.definition_update_manager')->applyUpdates();
+
+    // Update entity_test schema.
+    $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+    $mock_entity_type = $this->prophesize(EntityTypeInterface::class);
+    $mock_entity_type->id()->willReturn('entity_test');
+    $field_storage_definitions = dynamic_entity_reference_entity_test_entity_base_field_info($mock_entity_type->reveal());
+    foreach ($field_storage_definitions as $field_name => $field_storage_definition) {
+      $entity_definition_update_manager->installFieldStorageDefinition($field_name, 'entity_test', 'dynamic_entity_reference_entity_test', $field_storage_definition);
+    }
 
     $entity = $this->container->get('entity_type.manager')
       ->getStorage($this->entityType)
@@ -159,7 +167,6 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
       'entity_test_mul',
     ]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    $this->container->get('entity.definition_update_manager')->applyUpdates();
 
     // Reference a config entity.
     $entity = $this->container->get('entity_type.manager')
@@ -196,7 +203,16 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
       'entity_test_mul',
     ]);
     $this->enableModules(['dynamic_entity_reference_entity_test']);
-    $this->container->get('entity.definition_update_manager')->applyUpdates();
+    $this->installEntitySchema('entity_test_mul');
+
+    // Update entity_test schema.
+    $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+    $mock_entity_type = $this->prophesize(EntityTypeInterface::class);
+    $mock_entity_type->id()->willReturn('entity_test');
+    $field_storage_definitions = dynamic_entity_reference_entity_test_entity_base_field_info($mock_entity_type->reveal());
+    foreach ($field_storage_definitions as $field_name => $field_storage_definition) {
+      $entity_definition_update_manager->installFieldStorageDefinition($field_name, 'entity_test', 'dynamic_entity_reference_entity_test', $field_storage_definition);
+    }
 
     // Reference a config entity.
     $entity = $this->container->get('entity_type.manager')
