@@ -226,7 +226,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       else {
         // @todo Expose a proper UI for choosing the bundle for autocreated
         // entities in https://www.drupal.org/node/2412569.
-        $bundles = entity_get_bundles($target_type);
+        $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type);
         $bundle = key($bundles);
       }
     }

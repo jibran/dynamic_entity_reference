@@ -175,18 +175,18 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
 
     $formatter_manager = $this->container->get('plugin.manager.field.formatter');
 
+    $entity_type_manager = \Drupal::entityTypeManager();
     // Get all the existing formatters.
     foreach ($formatter_manager->getOptions('dynamic_entity_reference') as $formatter => $name) {
       // Set formatter type for the 'full' view mode.
-      entity_get_display($this->entityType, $this->bundle, 'default')
-        ->setComponent($field_name, [
-          'type' => $formatter,
-          'settings' => $formatter == 'dynamic_entity_reference_entity_view' ? ['view_mode' => [$referencing_entity->getEntityTypeId() => 'default']] : [],
-        ])
+      $this->getEntityDisplay($this->entityType, $this->bundle, 'default')->setComponent($field_name, [
+        'type' => $formatter,
+        'settings' => $formatter == 'dynamic_entity_reference_entity_view' ? ['view_mode' => [$referencing_entity->getEntityTypeId() => 'default']] : [],
+      ])
         ->save();
 
       // Invoke entity view.
-      \Drupal::entityTypeManager()->getViewBuilder($referencing_entity->getEntityTypeId())->view($referencing_entity, 'default');
+      $entity_type_manager->getViewBuilder($referencing_entity->getEntityTypeId())->view($referencing_entity, 'default');
 
       // Verify the un-accessible item still exists.
       $this->assertEquals($referencing_entity->{$field_name}->target_id, $this->referencedEntity->id(), (string) new FormattableMarkup('The un-accessible item still exists after @name formatter was executed.', ['@name' => $name]));
@@ -352,6 +352,41 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
 
     // Build the renderable array for the field.
     return $items->view(['type' => $formatter, 'settings' => $formatter_options]);
+  }
+
+  /**
+   * Returns the entity view display associated with a bundle and view mode.
+   *
+   * @param string $entity_type
+   *   The entity type.
+   * @param string $bundle
+   *   The bundle.
+   * @param string $view_mode
+   *   The view mode, or 'default' to retrieve the 'default' display object for
+   *   this bundle.
+   *
+   * @return \Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   *   The entity view display associated with the view mode.
+   */
+  protected function getEntityDisplay($entity_type, $bundle, $view_mode) {
+    // Try loading the display from configuration.
+    $display = EntityViewDisplay::load($entity_type . '.' . $bundle . '.' . $view_mode);
+
+    // If not found, create a fresh display object. We do not preemptively
+    // create new entity_view_display configuration entries for each existing
+    // entity type and bundle whenever a new view mode becomes available.
+    // Instead, configuration entries are only created when a display object is
+    // explicitly configured and saved.
+    if (!$display) {
+      $display = EntityViewDisplay::create([
+        'targetEntityType' => $entity_type,
+        'bundle' => $bundle,
+        'mode' => $view_mode,
+        'status' => TRUE,
+      ]);
+    }
+
+    return $display;
   }
 
 }
