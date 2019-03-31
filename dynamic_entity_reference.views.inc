@@ -57,7 +57,7 @@ function dynamic_entity_reference_field_views_data(FieldStorageConfigInterface $
           'base' => $target_base_table,
           'entity type' => $target_entity_type_id,
           'base field' => $target_entity_type->getKey('id'),
-          'relationship field' => $target_entity_id_is_int ? $field_name . '_target_id_int' : $field_name . '_target_id' ,
+          'relationship field' => $target_entity_id_is_int ? $field_name . '_target_id_int' : $field_name . '_target_id',
           // Entity reference field only has one target type whereas dynamic
           // entity reference field can have multiple target types that is why
           // an extra join condition on target types is needed.
