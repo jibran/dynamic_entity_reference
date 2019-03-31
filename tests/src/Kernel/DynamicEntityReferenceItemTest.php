@@ -198,7 +198,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
       $this->fail('Assigning an invalid item throws an exception.');
     }
     catch (\InvalidArgumentException $e) {
-      $this->pass('Assigning an invalid item throws an exception.');
+      $this->assertTrue(TRUE, 'Assigning an invalid item throws an exception.');
     }
 
     $entity->field_der->target_type = $entity_type_id;
