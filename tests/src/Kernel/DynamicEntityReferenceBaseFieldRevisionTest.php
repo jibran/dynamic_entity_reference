@@ -218,7 +218,7 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     $referenced_entity = $this->container
       ->get('entity_type.manager')
       ->getStorage($this->entityType)
-      ->create();;
+      ->create();
     $referenced_entity->save();
     $referenced_entity_mul = $this->container
       ->get('entity_type.manager')
@@ -482,7 +482,7 @@ class DynamicEntityReferenceBaseFieldRevisionTest extends EntityKernelTestBase {
     $referenced_entity = $this->container
       ->get('entity_type.manager')
       ->getStorage($this->entityType)
-      ->create();;
+      ->create();
     $referenced_entity->save();
     $referenced_entity_mul = $this->container
       ->get('entity_type.manager')
