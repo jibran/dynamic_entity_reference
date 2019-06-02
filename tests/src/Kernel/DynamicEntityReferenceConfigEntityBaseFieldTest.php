@@ -110,10 +110,9 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
    * Config entity only revisionable base DER field.
    */
   public function testRevisionableBaseField() {
-    // @see dynamic_entity_reference_entity_test_entity_base_field_info()
-
     // Make this base field revisionable.
     $this->state->set('dynamic_entity_reference_entity_test_revisionable', TRUE);
+    // @see dynamic_entity_reference_entity_test_entity_base_field_info()
     $this->enableModules(['dynamic_entity_reference_entity_test']);
 
     // Update entity_test schema.
