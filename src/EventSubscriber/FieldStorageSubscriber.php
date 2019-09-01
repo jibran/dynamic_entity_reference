@@ -132,7 +132,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
     // If we know which field is being created / updated check whether it is
     // DER.
     if ($storage instanceof SqlEntityStorageInterface && !empty($der_fields[$entity_type_id])) {
-      $storage_definitions = $this->entityFieldManager->getFieldStorageDefinitions($entity_type_id);
+      $storage_definitions = $this->entityFieldManager->getActiveFieldStorageDefinitions($entity_type_id);
       if ($field_storage_definition) {
         $storage_definitions[$field_storage_definition->getName()] = $field_storage_definition;
       }
