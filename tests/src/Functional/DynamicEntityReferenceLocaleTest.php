@@ -12,6 +12,9 @@ use Drupal\locale\Gettext;
  */
 class DynamicEntityReferenceLocaleTest extends DynamicEntityReferenceTest {
 
+  /**
+   * {@inheritdoc}
+   */
   public static $modules = [
     'language',
     'locale',
