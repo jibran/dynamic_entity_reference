@@ -42,7 +42,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'field_ui',
     'dynamic_entity_reference',
     'entity_test',

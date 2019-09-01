@@ -16,7 +16,7 @@ class DynamicEntityReferenceFieldDependencyTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'dynamic_entity_reference',
     'field',
     'entity_test',
