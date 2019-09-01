@@ -15,7 +15,7 @@ class DynamicEntityReferenceLocaleTest extends DynamicEntityReferenceTest {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'language',
     'locale',
   ];
@@ -23,7 +23,7 @@ class DynamicEntityReferenceLocaleTest extends DynamicEntityReferenceTest {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $file = new \stdClass();
