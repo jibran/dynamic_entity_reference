@@ -105,6 +105,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $excluded_entity_type_ids = [
       'user',
       'file',
+      'path_alias',
       'entity_test_label',
       'entity_test_no_id',
       'entity_test_no_bundle',
@@ -207,6 +208,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $excluded_entity_type_ids = [
       'user',
       'file',
+      'path_alias',
       'entity_test_no_id',
       'entity_test_no_bundle',
       'entity_test_string_id',
