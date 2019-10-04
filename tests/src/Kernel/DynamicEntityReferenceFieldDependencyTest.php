@@ -59,7 +59,7 @@ class DynamicEntityReferenceFieldDependencyTest extends KernelTestBase {
     foreach ($entityTypeManager->getDefinitions() as $entity_id => $entity_type) {
       if ($entity_type instanceof ContentEntityTypeInterface) {
         $provider = $entity_type->getProvider();
-        if (!in_array($provider, $this->entityTypeProviders)) {
+        if (!in_array($provider, $this->entityTypeProviders) && $provider !== 'core') {
           $this->entityTypeProviders[] = $provider;
         }
       }
