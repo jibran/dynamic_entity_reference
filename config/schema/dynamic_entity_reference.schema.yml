@@ -78,6 +78,9 @@ field.widget.settings.dynamic_entity_reference_default:
     match_operator:
       type: string
       label: 'Autocomplete matching'
+    match_limit:
+      type: integer
+      label: 'Maximum number of autocomplete suggestions.'
     size:
       type: integer
       label: 'Size of textfield'
