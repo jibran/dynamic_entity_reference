@@ -2,7 +2,7 @@ name: Dynamic Entity Reference
 type: module
 description: 'Provides an entity reference field that can reference multiple entity types.'
 package: Field types
-core: 8.x
+core_version_requirement: ^8 || ^9
 dependencies:
   - drupal:field
 test_dependencies:
