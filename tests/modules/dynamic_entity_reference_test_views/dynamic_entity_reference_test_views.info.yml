@@ -3,6 +3,7 @@ type: module
 description: 'Provides default views for views dynamic entity reference tests.'
 package: Testing
 core_version_requirement: ^8 || ^9
+hidden: TRUE
 dependencies:
   - dynamic_entity_reference
   - views
