@@ -55,6 +55,11 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Sets up a Drupal site for running functional and integration tests.
    */
   protected function setUp() {

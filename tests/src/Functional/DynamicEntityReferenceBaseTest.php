@@ -47,6 +47,11 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Sets the test up.
    */
   protected function setUp() {
