@@ -128,7 +128,7 @@ function dynamic_entity_reference_views_data() {
     if ($entity_type->hasHandlerClass('views_data') && $entity_manager->getStorage($entity_type->id()) instanceof SqlEntityStorageInterface) {
       $sql_entity_types[$entity_type->id()] = $entity_type->id();
       // Only fieldable entities have base fields.
-      if ($entity_type->isSubclassOf(FieldableEntityInterface::class)) {
+      if ($entity_type->entityClassImplements(FieldableEntityInterface::class)) {
         $entity_types[$entity_type->id()] = $entity_type;
         $entity_field_manager = \Drupal::service('entity_field.manager');
         foreach ($entity_field_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
