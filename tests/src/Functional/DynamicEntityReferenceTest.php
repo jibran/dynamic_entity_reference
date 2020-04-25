@@ -260,7 +260,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'selection_handler' => $settings['entity_test_computed_field']['handler'],
       'selection_settings_key' => $selection_settings_key,
     ])->toString();
-    $this->assertContains($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
+    $this->assertStringContainsString($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
 
     // Add some extra dynamic entity reference fields.
     $this->getSession()->getPage()->findButton('Add another item')->click();
@@ -308,7 +308,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
         'selection_handler' => $settings[$expected_entity_type]['handler'],
         'selection_settings_key' => $selection_settings_key,
       ])->toString();
-      $this->assertContains($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
+      $this->assertStringContainsString($input->getAttribute('data-autocomplete-path'), $expected_autocomplete_path);
     }
 
     $edit = [
