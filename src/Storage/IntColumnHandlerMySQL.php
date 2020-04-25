@@ -18,7 +18,7 @@ class IntColumnHandlerMySQL extends IntColumnHandler {
    * {@inheritdoc}
    */
   protected function createTrigger($trigger, $op, $prefixed_name, $body) {
-    $this->connection->query("CREATE TRIGGER $trigger BEFORE $op ON $prefixed_name FOR EACH ROW SET $body");
+    $this->connection->query("CREATE TRIGGER $trigger BEFORE $op ON $prefixed_name FOR EACH ROW SET $body", [], ['allow_square_brackets' => TRUE]);
   }
 
 }

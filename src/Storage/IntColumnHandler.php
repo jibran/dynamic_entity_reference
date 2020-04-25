@@ -100,7 +100,7 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
     }
     if ($new) {
       $body = implode(', ', $body);
-      $prefixed_name = $this->connection->prefixTables('{' . $table . '}');
+      $prefixed_name = str_replace('"', '', $this->connection->prefixTables('{' . $table . '}'));
       foreach (['update', 'insert'] as $op) {
         $trigger = $prefixed_name . '_der_' . $op;
         if (strlen($trigger) > 64) {

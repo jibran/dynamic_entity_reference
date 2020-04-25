@@ -84,7 +84,7 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
     if (strpos($query, ';') !== FALSE) {
       throw new \InvalidArgumentException('; is not supported in SQL strings. Use only one statement at a time.');
     }
-    $this->connection->query("$query; RETURN NEW; END; $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT", [], ['allow_delimiter_in_query' => TRUE]);
+    $this->connection->query("$query; RETURN NEW; END; $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT", [], ['allow_delimiter_in_query' => TRUE, 'allow_square_brackets' => TRUE]);
   }
 
   /**
@@ -137,7 +137,7 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
    *   The prefixed table name.
    */
   protected function getPrefixedTable($table) {
-    return $this->connection->prefixTables('{' . $table . '}');
+    return trim($this->connection->prefixTables('{' . $table . '}'), '"');
   }
 
 }
