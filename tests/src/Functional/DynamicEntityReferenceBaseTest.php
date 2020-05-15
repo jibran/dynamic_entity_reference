@@ -54,7 +54,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
   /**
    * Sets the test up.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser($this->permissions);
   }

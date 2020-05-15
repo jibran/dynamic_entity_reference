@@ -62,7 +62,7 @@ class DynamicEntityReferenceWidgetTest extends BrowserTestBase {
   /**
    * Sets up a Drupal site for running functional and integration tests.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create default content type.
