@@ -132,7 +132,7 @@ function dynamic_entity_reference_views_data() {
         $entity_types[$entity_type->id()] = $entity_type;
         $entity_field_manager = \Drupal::service('entity_field.manager');
         foreach ($entity_field_manager->getBaseFieldDefinitions($entity_type->id()) as $base_field) {
-          if ($base_field->getType() == 'dynamic_entity_reference') {
+          if ($base_field->getType() == 'dynamic_entity_reference' && !$base_field->isComputed()) {
             $fields_all[$entity_type->id()][] = $base_field;
           }
         }
