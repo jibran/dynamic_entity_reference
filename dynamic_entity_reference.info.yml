@@ -11,3 +11,4 @@ test_dependencies:
   - drupal:locale
   - drupal:node
   - drupal:taxonomy
+  - diff:diff

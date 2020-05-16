@@ -24,5 +24,8 @@
   "minimum-stability": "dev",
   "require": {
       "drupal/core": "^8.7.7 || ^9"
+  },
+  "require-dev": {
+      "drupal/diff": "1.x-dev"
   }
 }
