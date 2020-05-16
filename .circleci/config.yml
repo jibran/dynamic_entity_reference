@@ -56,6 +56,7 @@ jobs:
         command: |
           composer install --prefer-dist --no-progress
           composer update phpunit/phpunit symfony/phpunit-bridge phpspec/prophecy symfony/yaml --with-dependencies --no-progress
+          composer require drupal/diff:1.x-dev --no-progress
 
     - checkout:
         path: modules/${MODULE_NAME}
