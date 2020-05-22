@@ -151,7 +151,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
   public static function processFormElement(array &$element, FormStateInterface $form_state, array &$complete_form) {
     $name = implode('-', $element['#parents']);
     $js_class = Html::cleanCssIdentifier("js-dynamic-entity-reference-{$name}-target_type");
-    $element['target_type']['#attributes']['class'][] = $js_class;
+    $element['target_type']['#attributes']['data-dynamic-entity-reference'] = $element['target_type']['#attributes']['class'][] = $js_class;
     $auto_complete_paths = $element['#attached']['drupalSettings']['dynamic_entity_reference']['auto_complete_paths'];
     unset($element['#attached']['drupalSettings']['dynamic_entity_reference']['auto_complete_paths']);
     $element['#attached']['drupalSettings']['dynamic_entity_reference'][$js_class] = $auto_complete_paths;
