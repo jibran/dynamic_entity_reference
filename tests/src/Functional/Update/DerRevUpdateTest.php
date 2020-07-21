@@ -38,6 +38,13 @@ class DerRevUpdateTest extends UpdatePathTestBase {
    */
   public function testUpdate8201() {
     $connection = \Drupal::database();
+    if (version_compare(\Drupal::VERSION, '9.0.2', '>')) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $entity_type = $update_manager->getEntityType('entity_test_mulrev_chnged_revlog');
+      $update_manager->uninstallEntityType($entity_type);
+      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_mulrev_changed_rev');
+      $update_manager->installEntityType($entity_type);
+    }
     $this->runUpdates();
     // The db dump contain two entity_test_rev entities referencing one
     // entity_test_rev entity and one entity_test_mulrev entity.

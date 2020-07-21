@@ -43,6 +43,13 @@ class DerUpdateTest extends UpdatePathTestBase {
       // is 767 bytes error if innodb_large_prefix is ON so test it.
       $connection->query('ALTER TABLE {entity_test__field_test} ROW_FORMAT=compact');
     }
+    if (version_compare(\Drupal::VERSION, '9.0.2', '>')) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $entity_type = $update_manager->getEntityType('entity_test_mulrev_chnged_revlog');
+      $update_manager->uninstallEntityType($entity_type);
+      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_mulrev_changed_rev');
+      $update_manager->installEntityType($entity_type);
+    }
     $this->runUpdates();
     // The db dump contain two entity_test entities referencing one entity_test
     // entity and one entity_test_mul entity.
