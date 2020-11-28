@@ -8,12 +8,14 @@ workflows:
     - test_89x
     - test_90x
     - test_91x
+    - test_92x
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
     - test_89x
     - test_90x
     - test_91x
+    - test_92x
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -55,7 +57,6 @@ jobs:
         name: Fetch drupal dependencies
         command: |
           composer install --prefer-dist --no-progress
-          composer update phpunit/phpunit symfony/phpunit-bridge phpspec/prophecy symfony/yaml --with-dependencies --no-progress
           composer require drupal/diff:1.x-dev --no-progress
 
     - checkout:
@@ -96,3 +97,7 @@ jobs:
     <<: *test
     environment:
     - DRUPAL_BRANCH: 9.1.x
+  test_92x:
+    <<: *test
+    environment:
+      - DRUPAL_BRANCH: 9.2.x
