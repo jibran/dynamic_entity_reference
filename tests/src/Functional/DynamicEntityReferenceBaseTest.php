@@ -104,7 +104,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       'user_id[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
     ];
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties([
@@ -262,7 +262,7 @@ class DynamicEntityReferenceBaseTest extends BrowserTestBase {
       'user_id[0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
     ];
 
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
     $entities = \Drupal::entityTypeManager()
       ->getStorage('entity_test')
       ->loadByProperties(['name' => 'Barfoo']);
