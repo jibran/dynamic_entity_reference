@@ -27,7 +27,7 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'dynamic_entity_reference',
     'taxonomy',
   ];
