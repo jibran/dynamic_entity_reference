@@ -43,14 +43,6 @@ class DerUpdate8202Test extends UpdatePathTestBase {
       $this->assertFalse($schema->indexExists($table, $index_name));
     }
 
-    if (version_compare(\Drupal::VERSION, '9.0.2', '>')) {
-      $update_manager = \Drupal::entityDefinitionUpdateManager();
-      $entity_type = $update_manager->getEntityType('entity_test_mulrev_chnged_revlog');
-      $update_manager->uninstallEntityType($entity_type);
-      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_mulrev_changed_rev');
-      $update_manager->installEntityType($entity_type);
-    }
-
     // Run updates and verify the indexes have been created.
     $this->runUpdates();
     foreach ($index_mapping as $table => $index_name) {
