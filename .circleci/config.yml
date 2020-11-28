@@ -5,14 +5,12 @@ workflows:
   version: 2
   main:
     jobs:
-    - test_89x
     - test_90x
     - test_91x
     - test_92x
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
-    - test_89x
     - test_90x
     - test_91x
     - test_92x
@@ -85,10 +83,6 @@ jobs:
     - store_test_results:
         path: build/logs
 
-  test_89x:
-    <<: *test
-    environment:
-    - DRUPAL_BRANCH: 8.9.x
   test_90x:
     <<: *test
     environment:
