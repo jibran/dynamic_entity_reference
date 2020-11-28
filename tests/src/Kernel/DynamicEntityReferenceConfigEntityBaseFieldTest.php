@@ -59,7 +59,7 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['config_test', 'dynamic_entity_reference'];
+  protected static $modules = ['config_test', 'dynamic_entity_reference'];
 
   /**
    * {@inheritdoc}

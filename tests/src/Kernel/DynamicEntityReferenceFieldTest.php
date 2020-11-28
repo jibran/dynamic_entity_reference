@@ -52,7 +52,7 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = ['dynamic_entity_reference'];
+  protected static $modules = ['dynamic_entity_reference'];
 
   /**
    * {@inheritdoc}
