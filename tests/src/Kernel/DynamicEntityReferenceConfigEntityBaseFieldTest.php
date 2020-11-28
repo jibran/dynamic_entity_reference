@@ -75,7 +75,10 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
     // Setup some states for controlling the base field configuration.
     // @see dynamic_entity_reference_entity_test_entity_base_field_info()
     $this->state->set('dynamic_entity_reference_entity_test_cardinality', 1);
-    $this->state->set('dynamic_entity_reference_entity_test_entities', [$this->entityType, 'config_test']);
+    $this->state->set('dynamic_entity_reference_entity_test_entities', [
+      $this->entityType,
+      'config_test',
+    ]);
     $this->state->set('dynamic_entity_reference_entity_test_exclude', [$this->entityType]);
 
     // Add a config entity for referencing.

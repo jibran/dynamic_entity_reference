@@ -57,8 +57,8 @@ class ValidDynamicReferenceConstraintValidator extends ConstraintValidator imple
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
-    /* @var \Drupal\dynamic_entity_reference\Plugin\Validation\Constraint\ValidDynamicReferenceConstraint $constraint */
-    /* @var \Drupal\Core\Field\FieldItemListInterface $value */
+    /** @var \Drupal\dynamic_entity_reference\Plugin\Validation\Constraint\ValidDynamicReferenceConstraint $constraint */
+    /** @var \Drupal\Core\Field\FieldItemListInterface $value */
     if (!isset($value)) {
       return;
     }

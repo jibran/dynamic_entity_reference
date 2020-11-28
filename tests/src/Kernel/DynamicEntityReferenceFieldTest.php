@@ -127,7 +127,10 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->target_id = 9999;
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', ['%type' => $this->referencedEntityType, '%id' => 9999]));
+    $this->assertEquals($violations[0]->getMessage(), t('The referenced entity (%type: %id) does not exist.', [
+      '%type' => $this->referencedEntityType,
+      '%id' => 9999,
+    ]));
 
     // Test an invalid target_type.
     $entity = $entity_type_manager
@@ -199,7 +202,10 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
     $entity->{$this->fieldName}->target_id = $referenced_entity->id();
     $violations = $entity->{$this->fieldName}->validate();
     $this->assertEquals($violations->count(), 1, 'Validation throws a violation.');
-    $this->assertEquals($violations[0]->getMessage(), t('Referenced entity %label does not belong to one of the supported bundles (%bundles).', ['%label' => $referenced_entity->label(), '%bundles' => 'newbundle']));
+    $this->assertEquals($violations[0]->getMessage(), t('Referenced entity %label does not belong to one of the supported bundles (%bundles).', [
+      '%label' => $referenced_entity->label(),
+      '%bundles' => 'newbundle',
+    ]));
   }
 
   /**
@@ -224,7 +230,10 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
         ->create(['type' => $this->bundle]);
       $target_entity->save();
       $target_entities[] = $target_entity;
-      $reference_field[] = ['target_id' => $target_entity->id(), 'target_type' => $this->referencedEntityType];
+      $reference_field[] = [
+        'target_id' => $target_entity->id(),
+        'target_type' => $this->referencedEntityType,
+      ];
     }
 
     // Also attach a non-existent entity and a NULL target id.

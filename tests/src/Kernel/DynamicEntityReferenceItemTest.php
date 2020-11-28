@@ -142,7 +142,10 @@ class DynamicEntityReferenceItemTest extends FieldKernelTestBase {
     $this->assertEquals($entity->field_der->entity->id(), $term->id());
     $this->assertEquals($entity->field_der->entity->getName(), $term->getName());
 
-    $entity->field_der = ['target_id' => $term2->id(), 'target_type' => $entity_type_id];
+    $entity->field_der = [
+      'target_id' => $term2->id(),
+      'target_type' => $entity_type_id,
+    ];
     $this->assertEquals($entity->field_der->entity->id(), $term2->id());
     $this->assertEquals($entity->field_der->entity->getName(), $term2->getName());
 

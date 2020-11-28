@@ -84,7 +84,10 @@ class IntColumnHandlerPostgreSQL implements IntColumnHandlerInterface {
     if (strpos($query, ';') !== FALSE) {
       throw new \InvalidArgumentException('; is not supported in SQL strings. Use only one statement at a time.');
     }
-    $this->connection->query("$query; RETURN NEW; END; $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT", [], ['allow_delimiter_in_query' => TRUE, 'allow_square_brackets' => TRUE]);
+    $this->connection->query("$query; RETURN NEW; END; $$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT", [], [
+      'allow_delimiter_in_query' => TRUE,
+      'allow_square_brackets' => TRUE,
+    ]);
   }
 
   /**

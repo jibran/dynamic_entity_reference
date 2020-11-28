@@ -37,7 +37,10 @@ class DynamicEntityReferenceEntityFormatter extends EntityReferenceEntityFormatt
   public static function defaultSettings() {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
     $options = array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]);
-    return array_fill_keys($options, ['view_mode' => 'default', 'link' => FALSE]);
+    return array_fill_keys($options, [
+      'view_mode' => 'default',
+      'link' => FALSE,
+    ]);
   }
 
   /**
