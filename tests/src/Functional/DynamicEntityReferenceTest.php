@@ -134,7 +134,10 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
-    $this->assertSame(array_keys($excluded_entity_type_ids), ['user', 'entity_test_label']);
+    $this->assertSame(array_keys($excluded_entity_type_ids), [
+      'user',
+      'entity_test_label',
+    ]);
     // Check the include entity settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar/storage');
     $this->submitForm([
@@ -170,7 +173,10 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);
-    $this->assertSame(array_keys($excluded_entity_type_ids), ['user', 'entity_test_label']);
+    $this->assertSame(array_keys($excluded_entity_type_ids), [
+      'user',
+      'entity_test_label',
+    ]);
     // Check the default settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $this->submitForm([
@@ -179,7 +185,10 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     ], t('Save settings'));
 
     $field_config = FieldConfig::loadByName('entity_test', 'entity_test', 'field_foobar')->toArray();
-    $this->assertEquals($field_config['default_value']['0'], ['target_type' => 'user', 'target_uuid' => $this->adminUser->uuid()]);
+    $this->assertEquals($field_config['default_value']['0'], [
+      'target_type' => 'user',
+      'target_uuid' => $this->adminUser->uuid(),
+    ]);
   }
 
   /**
@@ -304,7 +313,12 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
 
     // Ensure that the autocomplete path is correct.
-    foreach (['0' => 'user', '1' => 'entity_test', '2' => 'entity_test'] as $index => $expected_entity_type) {
+    $expected_entity_types = [
+      '0' => 'user',
+      '1' => 'entity_test',
+      '2' => 'entity_test',
+    ];
+    foreach ($expected_entity_types as $index => $expected_entity_type) {
       $selection_settings = $settings[$expected_entity_type]['handler_settings'] ?: [];
       $selection_settings += [
         'match_operator' => 'CONTAINS',
