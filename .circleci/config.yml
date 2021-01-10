@@ -33,6 +33,8 @@ jobs:
         MODULE_NAME: dynamic_entity_reference
         SIMPLETEST_BASE_URL: http://127.0.0.1
         SIMPLETEST_DB: mysql://drupal:drupal@127.0.0.1/local
+        BROWSERTEST_OUTPUT_FILE: /data/app/sites/simpletest/browser_output.html
+        BROWSERTEST_OUTPUT_DIRECTORY: /data/app/sites/simpletest/browser_output
         MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", null, "http:\/\/127.0.0.1:4444\/wd\/hub"]'
     - image: mariadb
       environment:
@@ -51,8 +53,9 @@ jobs:
         command: |
           git clone --depth 1 --branch ${DRUPAL_BRANCH} \
             https://git.drupal.org/project/drupal.git .
+          git log -1 --oneline
     - run:
-        name: Fetch drupal dependencies
+        name: Fetch drupal dependencies and module test dependencies
         command: |
           composer install --prefer-dist --no-progress
           composer require drupal/diff:1.x-dev --no-progress
@@ -79,9 +82,11 @@ jobs:
     - run:
         name: Run unit tests
         command: |
-          su -m apache -s /bin/bash -c "./vendor/bin/phpunit -v -c core/phpunit.xml.dist --log-junit build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}"
+          su -m apache -s /bin/bash -c "./vendor/bin/phpunit -v -c ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}"
     - store_test_results:
-        path: build/logs
+        path: /data/build/logs
+    - store_artifacts:
+        path: /data/app/sites/simpletest/browser_output
 
   test_90x:
     <<: *test
