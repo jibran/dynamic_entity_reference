@@ -150,7 +150,7 @@ abstract class IntColumnHandler implements IntColumnHandlerInterface {
    * @param string $column
    *   Name of the column.
    *
-   * @TODO not sure whether we want to bother with deleting.
+   * @todo not sure whether we want to bother with deleting.
    */
   public function delete($table, $column) {
 
