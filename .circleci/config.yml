@@ -5,15 +5,27 @@ workflows:
   version: 2
   main:
     jobs:
-    - test_90x
-    - test_91x
-    - test_92x
+    - test_7390x
+#    - test_7490x
+#    - test_8090x
+#    - test_7391x
+#    - test_7491x
+#    - test_8091x
+#    - test_7392x
+#    - test_7492x
+#    - test_8092x
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
-    - test_90x
-    - test_91x
-    - test_92x
+    - test_7390x
+    - test_7490x
+    - test_8090x
+    - test_7391x
+    - test_7491x
+    - test_8091x
+    - test_7392x
+    - test_7492x
+    - test_8092x
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -28,22 +40,44 @@ jobs:
 
   test: &test
     docker:
-    - image: previousnext/php-apache:7.3-3.x-dev
+    - image: wodby/php:${PHP_TAG}
+      name: php
       environment:
         MODULE_NAME: dynamic_entity_reference
-        SIMPLETEST_BASE_URL: http://127.0.0.1
-        SIMPLETEST_DB: mysql://drupal:drupal@127.0.0.1/local
-        BROWSERTEST_OUTPUT_FILE: /data/app/sites/simpletest/browser_output.html
-        BROWSERTEST_OUTPUT_DIRECTORY: /data/app/sites/simpletest/browser_output
-        MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", null, "http:\/\/127.0.0.1:4444\/wd\/hub"]'
+        SIMPLETEST_BASE_URL: http://apache
+        SIMPLETEST_DB: mysql://drupal:drupal@mariadb/local
+        BROWSERTEST_OUTPUT_FILE: /var/www/html/sites/simpletest/browser_output/browser_output.html
+        BROWSERTEST_OUTPUT_DIRECTORY: /var/www/html/sites/simpletest/browser_output
+        MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", null, "http:\/\/chrome:4444\/wd\/hub"]'
+        PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
+        DB_HOST: mariadb
+        DB_USER: drupal
+        DB_PASSWORD: drupal
+        DB_NAME: local
+        PHP_FPM_USER: wodby
+        PHP_FPM_GROUP: wodby
+        PHP_XDEBUG: 0
     - image: mariadb
+      name: mariadb
       environment:
         MYSQL_ROOT_PASSWORD: root
         MYSQL_DATABASE: local
         MYSQL_USER: drupal
         MYSQL_PASSWORD: drupal
+    - image: wodby/apache
+      command:
+      - httpd -D FOREGROUND
+      - sleep 5s
+      - httpd -k restart
+      name: apache
+      environment:
+        APACHE_LOG_LEVEL: debug
+        APACHE_BACKEND_HOST: localhost
+        APACHE_VHOST_PRESET: php
+        APACHE_DOCUMENT_ROOT: /var/www/html
     - image: selenium/standalone-chrome:latest
-    working_directory: /data/app
+      name: chrome
+    working_directory: /var/www/html
     steps:
     - add_ssh_keys:
         fingerprints:
@@ -52,7 +86,7 @@ jobs:
         name: Download specified drupal version
         command: |
           git clone --depth 1 --branch ${DRUPAL_BRANCH} \
-            https://git.drupal.org/project/drupal.git .
+            https://git.drupalcode.org/project/drupal.git .
           git log -1 --oneline
     - run:
         name: Fetch drupal dependencies and module test dependencies
@@ -74,29 +108,62 @@ jobs:
     - run:
         name: Setup Directories
         command: |
-          mkdir -p sites/default/files/tmp sites/default/private /data/app/sites/simpletest/browser_output ../build/logs/phpunit
-          chmod -R 2775 sites/default/files sites/default/private sites/simpletest ../build/logs
-          chown -R apache:apache /data
+          mkdir -p sites/default/files/tmp sites/default/private sites/simpletest/browser_output build/logs/phpunit
+          chmod -R 2775 sites/default/files sites/default/private sites/simpletest build/logs
+          touch sites/simpletest/browser_output/browser_output.html
+          chown -R wodby:wodby /var/www/html
 
-    - run: httpd -k restart
     - run:
         name: Run unit tests
         command: |
-          su -m apache -s /bin/bash -c "./vendor/bin/phpunit -v -c ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}"
+          ./vendor/bin/phpunit -v -c ./core/phpunit.xml.dist --log-junit build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
     - store_test_results:
-        path: /data/build/logs
+        path: build/logs
     - store_artifacts:
-        path: /data/app/sites/simpletest/browser_output
+        path: sites/simpletest/browser_output
 
-  test_90x:
+  test_7390x:
     <<: *test
     environment:
     - DRUPAL_BRANCH: 9.0.x
-  test_91x:
+    - PHP_TAG: 7.3
+  test_7490x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.0.x
+    - PHP_TAG: 7.4
+  test_8090x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.0.x
+    - PHP_TAG: 8.0
+  test_7391x:
     <<: *test
     environment:
     - DRUPAL_BRANCH: 9.1.x
-  test_92x:
+    - PHP_TAG: 7.3
+  test_7491x:
     <<: *test
     environment:
-      - DRUPAL_BRANCH: 9.2.x
+    - DRUPAL_BRANCH: 9.1.x
+    - PHP_TAG: 7.4
+  test_8091x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.1.x
+    - PHP_TAG: 8.0
+  test_7392x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.2.x
+    - PHP_TAG: 7.3
+  test_7492x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.2.x
+    - PHP_TAG: 7.4
+  test_8092x:
+    <<: *test
+    environment:
+    - DRUPAL_BRANCH: 9.2.x
+    - PHP_TAG: 8.0
