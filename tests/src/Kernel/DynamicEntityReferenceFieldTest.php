@@ -533,7 +533,10 @@ class DynamicEntityReferenceFieldTest extends EntityKernelTestBase {
       $entities[$i] = $entity;
     }
 
-    $result = \Drupal::entityTypeManager()->getStorage('entity_test')->getQuery()
+    $result = \Drupal::entityTypeManager()
+      ->getStorage('entity_test')
+      ->getQuery()
+      ->accessCheck(FALSE)
       ->condition('field_normal_er.entity:user.status', 1)
       ->sort('id')
       ->execute();

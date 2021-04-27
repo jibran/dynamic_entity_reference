@@ -111,6 +111,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $query = $this->container->get('entity_type.manager')
       ->getStorage('entity_test')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition("field_test.0.entity:entity_test_mul.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_mul.name", 'Barfoo');
     $this->queryResults = $query->execute();
@@ -121,6 +122,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $query = $this->container->get('entity_type.manager')
       ->getStorage('entity_test')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition("field_test.0.entity:entity_test_rev.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_rev.name", 'Barfoo');
     $this->queryResults = $query->execute();
@@ -168,6 +170,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $query = $this->container->get('entity_type.manager')
       ->getStorage('entity_test')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition("field_test.0.entity:entity_test_string_id.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_string_id.name", 'Barfoo');
     $this->queryResults = $query->execute();
