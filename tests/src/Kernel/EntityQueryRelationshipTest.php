@@ -126,6 +126,7 @@ class EntityQueryRelationshipTest extends EntityKernelTestBase {
     $this->queryResults = $this->container->get('entity_type.manager')
       ->getStorage('entity_test')
       ->getQuery()
+      ->accessCheck(FALSE)
       ->condition("field_test.0.entity:entity_test_rev.name", 'Foobar')
       ->condition("field_test.1.entity:entity_test_rev.name", 'Barfoo')
       ->execute();
