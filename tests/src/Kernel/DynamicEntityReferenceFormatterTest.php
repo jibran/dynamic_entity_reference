@@ -339,6 +339,45 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
   }
 
   /**
+   * Renders the same entity referenced from different places.
+   */
+  public function testEntityReferenceRecursiveProtectionWithManyRenderedEntities() {
+    $formatter = 'dynamic_entity_reference_entity_view';
+    $view_builder = $this->entityTypeManager->getViewBuilder($this->entityType);
+
+    // Set the default view mode to use the 'entity_reference_entity_view'
+    // formatter.
+    \Drupal::service('entity_display.repository')
+      ->getViewDisplay($this->entityType, $this->bundle)
+      ->setComponent($this->fieldName, [
+        'type' => $formatter,
+      ])
+      ->save();
+
+    $storage = $this->entityTypeManager->getStorage($this->entityType);
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $referenced_entity */
+    $referenced_entity = $storage->create(['name' => $this->randomMachineName()]);
+
+    $referencing_entities = array_map(function () use ($storage, $referenced_entity) {
+      $referencing_entity = $storage->create([
+        'name' => $this->randomMachineName(),
+        $this->fieldName => $referenced_entity,
+      ]);
+      $referencing_entity->save();
+      return $referencing_entity;
+    }, range(0, 29));
+
+    $build = $view_builder->viewMultiple($referencing_entities, 'default');
+    $output = $this->render($build);
+
+    // The title of entity_test entities is printed twice by default, so we have
+    // to multiply the formatter's recursive rendering protection limit by 2.
+    $expected_occurrences = 30 * 2;
+    $actual_occurrences = substr_count($output, $referenced_entity->get('name')->value);
+    $this->assertEquals($expected_occurrences, $actual_occurrences);
+  }
+
+  /**
    * Sets field values and returns a render array as built by field list view.
    *
    * @param \Drupal\Core\Entity\EntityInterface[] $referenced_entities
