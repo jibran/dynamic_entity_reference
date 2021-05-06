@@ -8,12 +8,14 @@ workflows:
     - test_90x
     - test_91x
     - test_92x
+    - test_93x
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
     - test_90x
     - test_91x
     - test_92x
+    - test_93x
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -91,12 +93,16 @@ jobs:
   test_90x:
     <<: *test
     environment:
-    - DRUPAL_BRANCH: 9.0.x
+      DRUPAL_BRANCH: 9.0.x
   test_91x:
     <<: *test
     environment:
-    - DRUPAL_BRANCH: 9.1.x
+      DRUPAL_BRANCH: 9.1.x
   test_92x:
     <<: *test
     environment:
-      - DRUPAL_BRANCH: 9.2.x
+      DRUPAL_BRANCH: 9.2.x
+  test_93x:
+    <<: *test
+    environment:
+      DRUPAL_BRANCH: 9.3.x
