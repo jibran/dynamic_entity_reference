@@ -99,11 +99,11 @@ class DiffDynamicEntityReferencePluginTest extends DiffPluginTestBase {
     // Check differences between revisions.
     $this->clickLink(t('Revisions'));
     $this->submitForm([], t('Compare selected revisions'));
-    $this->assertText('Reference');
-    $this->assertText('Article B');
-    $this->assertText('Article C');
-    $this->assertText('admin');
-    $this->assertText($this->adminUser->label());
+    $this->assertSession()->pageTextContains('Reference');
+    $this->assertSession()->pageTextContains('Article B');
+    $this->assertSession()->pageTextContains('Article C');
+    $this->assertSession()->pageTextContains('admin');
+    $this->assertSession()->pageTextContains($this->adminUser->label());
   }
 
 }
