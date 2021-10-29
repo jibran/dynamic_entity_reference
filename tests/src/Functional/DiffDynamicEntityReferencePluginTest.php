@@ -10,6 +10,7 @@ use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
  * Tests dynamic entity reference diff plugin.
  *
  * @group dynamic_entity_reference
+ * @group legacy
  */
 class DiffDynamicEntityReferencePluginTest extends DiffPluginTestBase {
 
@@ -43,7 +44,11 @@ class DiffDynamicEntityReferencePluginTest extends DiffPluginTestBase {
    * @see \Drupal\dynamic_entity_reference\Plugin\diff\Field\DynamicEntityReferenceFieldBuilder
    */
   public function testDynamicEntityReferencePlugin() {
-    // Add an dynamic entity reference field to the article content type.
+
+    $this->expectDeprecation('The "access_check.node.revision" service is deprecated. You should use the \'access_check.entity\' service instead. See https://www.drupal.org/node/3161210');
+    $this->expectDeprecation('NodeRevisionAccessCheck is deprecated in drupal:9.3.0 and will be removed before drupal:10.0.0. Use "_entity_access" requirement with relevant operation instead. See https://www.drupal.org/node/3161210');
+    $this->expectDeprecation('The core/jquery.once asset library is deprecated in Drupal 9.3.0 and will be removed in Drupal 10.0.0. Use the core/once library instead. See https://www.drupal.org/node/3158256');
+    // Add a dynamic entity reference field to the article content type.
     $bundle_path = 'admin/structure/types/manage/article';
     $field_name = 'reference';
     $storage_edit = [
