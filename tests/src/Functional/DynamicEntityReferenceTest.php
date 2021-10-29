@@ -8,7 +8,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\taxonomy\Entity\Term;
@@ -62,6 +61,32 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
   ];
 
   /**
+   * List of excluded entity IDs.
+   *
+   * @var array
+   */
+  protected $excludedEntities = [
+    'user',
+    'file',
+    'path_alias',
+    'entity_test_label',
+    'entity_test_no_bundle',
+    'entity_test_computed_field',
+    'entity_test_map_field',
+    'entity_test_no_bundle_with_label',
+  ];
+
+  /**
+   * List of test entity IDs with bundle entities.
+   *
+   * @var array
+   */
+  protected $bundleAbleEntities = [
+    'entity_test_with_bundle' => 'entity_test_bundle',
+    'entity_test_mul_with_bundle' => 'entity_test_mul_bundle',
+  ];
+
+  /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
@@ -73,6 +98,18 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser($this->permissions);
     $this->anotherUser = $this->drupalCreateUser();
+    $entity_type_manager = \Drupal::entityTypeManager();
+
+    // Add entity bundles for entity with bundles.
+    foreach ($this->bundleAbleEntities as $entity_id => $bundle_able_entity_id) {
+      $entity_type_manager->getStorage($bundle_able_entity_id)
+        ->create([
+          'id' => $bundle_able_entity_id,
+          'label' => "$entity_id Bundle",
+          'description' => "Bundle for $entity_id",
+        ])
+        ->save();
+    }
   }
 
   /**
@@ -80,12 +117,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
    */
   public function testFieldSettings() {
     $assert_session = $this->assertSession();
-    // Add EntityTestBundle for EntityTestWithBundle.
-    EntityTestBundle::create([
-      'id' => 'test',
-      'label' => 'Test label',
-      'description' => 'My test description',
-    ])->save();
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -109,23 +140,15 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       $assert_session->fieldNotExists('settings[' . $entity_type . '][handler]');
     }
     $edit = [];
-    $excluded_entity_type_ids = [
-      'user',
-      'file',
-      'path_alias',
-      'entity_test_label',
-      'entity_test_no_bundle',
-      'entity_test_computed_field',
-      'entity_test_map_field',
-      'entity_test_no_bundle_with_label',
-    ];
+    $excluded_entity_type_ids = $this->excludedEntities;
+    $bundled_entities_type_ids = $this->bundleAbleEntities;
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
-      if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
-        if ($entity_type_id !== 'entity_test_with_bundle') {
+      if (!in_array($entity_type_id, $excluded_entity_type_ids, TRUE)) {
+        if (!in_array($entity_type_id, array_keys($bundled_entities_type_ids, TRUE))) {
           $edit["settings[$entity_type_id][handler_settings][target_bundles][$entity_type_id]"] = TRUE;
         }
         else {
-          $edit['settings[entity_test_with_bundle][handler_settings][target_bundles][test]'] = TRUE;
+          $edit["settings[$entity_type_id][handler_settings][target_bundles][{$bundled_entities_type_ids[$entity_type_id]}]"] = TRUE;
         }
       }
     }
@@ -192,12 +215,6 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
    */
   public function testDynamicEntityReference() {
     $assert_session = $this->assertSession();
-    // Add EntityTestBundle for EntityTestWithBundle.
-    EntityTestBundle::create([
-      'id' => 'test',
-      'label' => 'Test label',
-      'description' => 'My test description',
-    ])->save();
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
@@ -212,22 +229,16 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     ], t('Save field settings'));
     $labels = $this->container->get('entity_type.repository')->getEntityTypeLabels(TRUE);
     $edit = [];
-    $excluded_entity_type_ids = [
-      'user',
-      'file',
-      'path_alias',
-      'entity_test_no_bundle',
-      'entity_test_computed_field',
-      'entity_test_map_field',
-      'entity_test_no_bundle_with_label',
-    ];
+    $excluded_entity_type_ids = array_combine($this->excludedEntities, $this->excludedEntities);
+    unset($excluded_entity_type_ids['entity_test_label']);
+    $bundled_entities_type_ids = $this->bundleAbleEntities;
     foreach ($labels[(string) t('Content', [], ['context' => 'Entity type group'])] as $entity_type_id => $entity_type_label) {
-      if (!in_array($entity_type_id, $excluded_entity_type_ids)) {
-        if ($entity_type_id !== 'entity_test_with_bundle') {
+      if (!in_array($entity_type_id, $excluded_entity_type_ids, TRUE)) {
+        if (!in_array($entity_type_id, array_keys($bundled_entities_type_ids, TRUE))) {
           $edit["settings[$entity_type_id][handler_settings][target_bundles][$entity_type_id]"] = TRUE;
         }
         else {
-          $edit['settings[entity_test_with_bundle][handler_settings][target_bundles][test]'] = TRUE;
+          $edit["settings[$entity_type_id][handler_settings][target_bundles][{$bundled_entities_type_ids[$entity_type_id]}]"] = TRUE;
         }
       }
     }
