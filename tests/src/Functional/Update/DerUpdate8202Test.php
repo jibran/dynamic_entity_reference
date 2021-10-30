@@ -22,7 +22,7 @@ class DerUpdate8202Test extends UpdatePathTestBase {
    */
   protected function setDatabaseDumpFiles() {
     $this->databaseDumpFiles = [
-      __DIR__ . '/../../../fixtures/update/update_test_8202.php.gz',
+      __DIR__ . '/../../../fixtures/update/der_dump.php.gz',
     ];
   }
 
