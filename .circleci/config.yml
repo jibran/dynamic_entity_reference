@@ -1,21 +1,21 @@
----
-version: 2
+version: 2.1
 
 workflows:
-  version: 2
-  main:
+  test:
     jobs:
-    - test_90x
-    - test_91x
-    - test_92x
-    - test_93x
+      - test:
+          matrix:
+            parameters:
+              php: ["7.4", "8.0"]
+              drupal-version: ["9.3.x", "9.4.x"]
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
-    - test_90x
-    - test_91x
-    - test_92x
-    - test_93x
+    - test:
+        matrix:
+          parameters:
+            php: ["7.4", "8.0"]
+            drupal-version: ["9.3.x", "9.4.x"]
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -27,13 +27,17 @@ workflows:
             - 8.x-2.x
 
 jobs:
-
-  test: &test
+  test:
+    parameters:
+      php:
+        type: string
+      drupal-version:
+        type: string
     docker:
-    - image: previousnext/php-apache:7.3-3.x-dev
+    - image: skpr/php-circleci:<< parameters.php >>-1.x
       environment:
         MODULE_NAME: dynamic_entity_reference
-        SIMPLETEST_BASE_URL: http://127.0.0.1
+        SIMPLETEST_BASE_URL: http://127.0.0.1:8080
         SIMPLETEST_DB: mysql://drupal:drupal@127.0.0.1/local
         BROWSERTEST_OUTPUT_FILE: /data/app/sites/simpletest/browser_output.html
         BROWSERTEST_OUTPUT_DIRECTORY: /data/app/sites/simpletest/browser_output
@@ -47,13 +51,15 @@ jobs:
     - image: selenium/standalone-chrome:latest
     working_directory: /data/app
     steps:
+    - setup_remote_docker:
+        docker_layer_caching: true
     - add_ssh_keys:
         fingerprints:
           - a6:e4:76:63:c3:bf:5e:a5:cf:0e:0b:a1:7e:c9:c0:21
     - run:
         name: Download specified drupal version
         command: |
-          git clone --depth 1 --branch ${DRUPAL_BRANCH} \
+          git clone --depth 1 --branch << parameters.drupal-version >> \
             https://git.drupal.org/project/drupal.git .
           git log -1 --oneline
     - run:
@@ -78,31 +84,23 @@ jobs:
         command: |
           mkdir -p sites/default/files/tmp sites/default/private /data/app/sites/simpletest/browser_output ../build/logs/phpunit
           chmod -R 2775 sites/default/files sites/default/private sites/simpletest ../build/logs
-          chown -R apache:apache /data
-
-    - run: httpd -k restart
+          chown -R skpr:skpr /data
+    - run:
+        name: "Start: PHP-FPM"
+        command: php-fpm -F
+        background: true
+    - run:
+        name: "Start: Nginx"
+        command: nginx
+        background: true
     - run:
         name: Run unit tests
         command: |
-          su -m apache -s /bin/bash -c "./vendor/bin/phpunit -v -c ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}"
+          ./vendor/bin/phpunit --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
+#          ./vendor/bin/phpunit --verbose  --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
+#          ./vendor/bin/phpunit --debug --verbose  --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
     - store_test_results:
         path: /data/build/logs
     - store_artifacts:
         path: /data/app/sites/simpletest/browser_output
 
-  test_90x:
-    <<: *test
-    environment:
-      DRUPAL_BRANCH: 9.0.x
-  test_91x:
-    <<: *test
-    environment:
-      DRUPAL_BRANCH: 9.1.x
-  test_92x:
-    <<: *test
-    environment:
-      DRUPAL_BRANCH: 9.2.x
-  test_93x:
-    <<: *test
-    environment:
-      DRUPAL_BRANCH: 9.3.x
