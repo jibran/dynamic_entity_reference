@@ -103,4 +103,3 @@ jobs:
         path: /data/build/logs
     - store_artifacts:
         path: /data/app/sites/simpletest/browser_output
-
