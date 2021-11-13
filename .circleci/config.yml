@@ -36,6 +36,7 @@ jobs:
     docker:
     - image: skpr/php-circleci:<< parameters.php >>-1.x
       environment:
+        TZ: "/usr/share/zoneinfo/Australia/Sydney"
         MODULE_NAME: dynamic_entity_reference
         SIMPLETEST_BASE_URL: http://127.0.0.1:8080
         SIMPLETEST_DB: mysql://drupal:drupal@127.0.0.1/local
