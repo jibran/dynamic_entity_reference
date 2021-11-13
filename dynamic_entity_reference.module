@@ -16,7 +16,7 @@ use Drupal\field\FieldConfigInterface;
  * We are duplicating the work done by
  * \Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem::onDependencyRemoval()
  * because we need to take into account bundles that are not provided by a
- * config entity type so they are not part of the config dependencies.
+ * config entity type, so they are not part of the config dependencies.
  */
 function dynamic_entity_reference_entity_bundle_delete($entity_type_id, $bundle) {
 
@@ -63,7 +63,7 @@ function dynamic_entity_reference_entity_bundle_delete($entity_type_id, $bundle)
 /**
  * Implements hook_ENTITY_TYPE_presave().
  *
- * @todo Clean this up once field_field_config_save is more accommodating.
+ * @todo Clean this up once field_field_config_presave is more accommodating.
  */
 function dynamic_entity_reference_field_config_presave(FieldConfigInterface $field) {
   // Don't change anything during a configuration sync.
