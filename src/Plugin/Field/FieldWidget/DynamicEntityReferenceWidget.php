@@ -222,23 +222,31 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     if ($target_type === NULL) {
       return parent::getAutocreateBundle();
     }
-    $bundle = NULL;
     if ($this->getSelectionHandlerSetting('auto_create', $target_type)) {
-      // If the 'target_bundles' setting is restricted to a single choice, we
-      // can use that.
-      if (($target_bundles = $this->getSelectionHandlerSetting('target_bundles', $target_type)) && count($target_bundles) == 1) {
-        $bundle = reset($target_bundles);
+      $target_bundles = $this->getSelectionHandlerSetting('target_bundles', $target_type);
+      // If there's no target bundle at all, use the target_type. It's the
+      // default for bundleless entity types.
+      if (empty($target_bundles)) {
+        return $target_type;
       }
-      // Otherwise use the first bundle as a fallback.
-      else {
-        // @todo Expose a proper UI for choosing the bundle for autocreated
-        // entities in https://www.drupal.org/node/2412569.
-        $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type);
-        $bundle = key($bundles);
+      // If there's only one target bundle, use it.
+      if (count($target_bundles) == 1) {
+        return reset($target_bundles);
+      }
+      // If there's more than one target bundle, use the autocreate bundle
+      // stored in selection handler settings.
+      if (!$this->getSelectionHandlerSetting('auto_create_bundle', $target_type)) {
+        // If no bundle has been set as auto create target means that there is
+        // an inconsistency in entity reference field settings.
+        trigger_error(sprintf(
+          "The 'Create referenced entities if they don't already exist' option is enabled but a specific destination bundle is not set. You should re-visit and fix the settings of the '%s' (%s) field.",
+          $this->fieldDefinition->getLabel(),
+          $this->fieldDefinition->getName()
+        ), E_USER_WARNING);
       }
     }
 
-    return $bundle;
+    return NULL;
   }
 
   /**
