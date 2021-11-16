@@ -5,13 +5,18 @@ namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldWidget;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\Render\ElementInfoManagerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
 use Drupal\user\EntityOwnerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'dynamic_entity_reference autocomplete' widget.
@@ -26,6 +31,74 @@ use Drupal\user\EntityOwnerInterface;
  * )
  */
 class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
+
+  /**
+   * The entity type repository.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeRepositoryInterface
+   */
+  protected EntityTypeRepositoryInterface $entityTypeRepository;
+
+  /**
+   * The element info manager.
+   *
+   * @var \Drupal\Core\Render\ElementInfoManagerInterface
+   */
+  protected ElementInfoManagerInterface $elementInfo;
+
+  /**
+   * The current active user.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected AccountProxyInterface $currentUser;
+
+  /**
+   * The key value manager.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
+   */
+  protected KeyValueFactoryInterface $keyValue;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->setEntityTypeRepository($container->get('entity_type.repository'));
+    $instance->setElementInfo($container->get('element_info'));
+    $instance->setCurrentUser($container->get('current_user'));
+    $instance->setKeyValue($container->get('keyvalue'));
+    return $instance;
+  }
+
+  /**
+   * Sets entity type repository service.
+   */
+  public function setEntityTypeRepository(EntityTypeRepositoryInterface $entity_type_repository) {
+    $this->entityTypeRepository = $entity_type_repository;
+  }
+
+  /**
+   * Sets element info manager.
+   */
+  public function setElementInfo(ElementInfoManagerInterface $element_info) {
+    $this->elementInfo = $element_info;
+  }
+
+  /**
+   * Sets current user.
+   */
+  public function setCurrentUser(AccountProxyInterface $current_user) {
+    $this->currentUser = $current_user;
+  }
+
+  /**
+   * Sets key value manager.
+   */
+  public function setKeyValue(KeyValueFactoryInterface $key_value) {
+    $this->keyValue = $key_value;
+  }
 
   /**
    * {@inheritdoc}
@@ -47,7 +120,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     $referenced_entities = $items->referencedEntities();
 
     $settings = $this->getFieldSettings();
-    $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels();
+    $labels = $this->entityTypeRepository->getEntityTypeLabels();
     $available = DynamicEntityReferenceItem::getTargetTypes($settings, TRUE);
     $cardinality = $items->getFieldDefinition()->getFieldStorageDefinition()->getCardinality();
     $target_type = $items->get($delta)->target_type ?: reset($available);
@@ -72,7 +145,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       '#placeholder' => $this->getSetting('placeholder'),
       '#element_validate' => array_merge(
         [[$this, 'elementValidate']],
-        \Drupal::service('element_info')->getInfoProperty('entity_autocomplete', '#element_validate', [])
+        $this->elementInfo->getInfoProperty('entity_autocomplete', '#element_validate', [])
       ),
       '#field_name' => $items->getName(),
     ];
@@ -80,7 +153,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     if ($this->getSelectionHandlerSetting('auto_create', $target_type)) {
       $element['#autocreate'] = [
         'bundle' => $this->getAutocreateBundle($target_type),
-        'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
+        'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : $this->currentUser->id(),
       ];
     }
 
@@ -186,7 +259,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
         $entity = $form_object instanceof EntityFormInterface ? $form_object->getEntity() : '';
         $element['#autocreate'] = [
           'bundle' => $this->getAutocreateBundle($values['target_type']),
-          'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id(),
+          'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : $this->currentUser->id(),
         ];
       }
       else {
@@ -271,7 +344,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       ];
       $data = serialize($selection_settings) . $target_type . $settings[$target_type]['handler'];
       $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
-      $key_value_storage = \Drupal::keyValue('entity_autocomplete');
+      $key_value_storage = $this->keyValue->get('entity_autocomplete');
       if (!$key_value_storage->has($selection_settings_key)) {
         $key_value_storage->set($selection_settings_key, $selection_settings);
       }
