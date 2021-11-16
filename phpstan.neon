@@ -1,0 +1,16 @@
+parameters:
+  reportUnmatchedIgnoredErrors: false
+  customRulesetUsed: true
+  checkMissingIterableValueType: false
+  excludePaths:
+    - *Test.php
+    - *TestBase.php
+  fileExtensions:
+    - module
+    - theme
+    - profile
+    - install
+  ignoreErrors:
+includes:
+  - vendor/mglaman/phpstan-drupal/extension.neon
+  - vendor/phpstan/phpstan-deprecation-rules/rules.neon

@@ -63,13 +63,28 @@ jobs:
             https://git.drupal.org/project/drupal.git .
           git log -1 --oneline
     - run:
-        name: Fetch drupal dependencies and module test dependencies
+        name: Fetch drupal dependencies, dev dependencies, and module test dependencies
         command: |
           composer install --prefer-dist --no-progress
           composer require drupal/diff:1.x-dev --no-progress
+          composer require --dev "phpstan/phpstan:^1.1" "phpstan/phpstan-deprecation-rules:^1.0" "mglaman/phpstan-drupal:^1.0"
 
     - checkout:
         path: modules/${MODULE_NAME}
+
+    - run:
+        name: Setup Directories
+        command: |
+          mkdir -p sites/default/files/tmp \
+            sites/default/private \
+            sites/simpletest/browser_output \
+            ../build/logs/phpunit \
+            ../build/logs/phpstan \
+            ../build/logs/phpcs
+          cp modules/${MODULE_NAME}/phpstan.neon .
+          chmod -R 2775 sites/default/files sites/default/private sites/simpletest ../build/logs
+          chown -R skpr:skpr /data
+
     - run:
         name: Lint PHP against Drupal coding standards
         command: |
@@ -77,29 +92,39 @@ jobs:
             --standard=vendor/drupal/coder/coder_sniffer/Drupal \
             --extensions=php,module,inc,install,test,profile,theme,css,info \
             --ignore=*.md \
+            --report=junit \
+            --report-file=../build/logs/phpcs/phpcs.xml \
             modules/${MODULE_NAME}
 
     - run:
-        name: Setup Directories
+        name: PHPStan
         command: |
-          mkdir -p sites/default/files/tmp sites/default/private /data/app/sites/simpletest/browser_output ../build/logs/phpunit
-          chmod -R 2775 sites/default/files sites/default/private sites/simpletest ../build/logs
-          chown -R skpr:skpr /data
+          vendor/bin/phpstan analyze \
+            --memory-limit=-1 \
+            --no-progress \
+            --error-format=junit \
+            -- modules/${MODULE_NAME} \
+            > ../build/logs/phpstan/phpstan.xml
+
     - run:
         name: "Start: PHP-FPM"
         command: php-fpm -F
         background: true
+
     - run:
         name: "Start: Nginx"
         command: nginx
         background: true
+
     - run:
         name: Run unit tests
         command: |
           ./vendor/bin/phpunit --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
 #          ./vendor/bin/phpunit --verbose  --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
 #          ./vendor/bin/phpunit --debug --verbose  --configuration ./core/phpunit.xml.dist --log-junit ../build/logs/phpunit/phpunit.xml modules/${MODULE_NAME}
+
     - store_test_results:
         path: /data/build/logs
+
     - store_artifacts:
         path: /data/app/sites/simpletest/browser_output
