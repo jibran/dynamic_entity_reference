@@ -28,7 +28,7 @@
   },
   "require-dev": {
     "drupal/diff": "1.x-dev",
-    "mglaman/phpstan-drupal": "^1.0",
+    "mglaman/phpstan-drupal": "^1.1",
     "phpstan/phpstan": "^1.1",
     "phpstan/phpstan-deprecation-rules": "^1.0"
   }
