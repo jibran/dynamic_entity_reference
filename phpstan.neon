@@ -2,9 +2,6 @@ parameters:
   reportUnmatchedIgnoredErrors: false
   customRulesetUsed: true
   checkMissingIterableValueType: false
-  excludePaths:
-    - *Test.php
-    - *TestBase.php
   fileExtensions:
     - module
     - theme
