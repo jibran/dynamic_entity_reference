@@ -509,7 +509,9 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     $settings = $field_definition->getSettings();
     foreach (static::getTargetTypes($settings) as $target_type) {
       $values['target_type'] = $target_type;
-      if ($referenceable = $manager->getSelectionHandler($field_definition, NULL, $target_type)->getReferenceableEntities()) {
+      // Select a random number of references between the last 50 referenceable
+      // entities created.
+      if ($referenceable = $manager->getSelectionHandler($field_definition, NULL, $target_type)->getReferenceableEntities(NULL, 'CONTAINS', 50)) {
         $group = array_rand($referenceable);
         $values['target_id'] = array_rand($referenceable[$group]);
         return $values;
