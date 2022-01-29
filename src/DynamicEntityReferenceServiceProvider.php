@@ -31,6 +31,7 @@ class DynamicEntityReferenceServiceProvider extends ServiceProviderBase {
       // serializer.normalizer.entity_reference_item.hal in
       // hal.services.yml.
       $service_definition->addTag('normalizer', ['priority' => $parent_definition->getTags()['normalizer'][0]['priority'] + 1]);
+      $service_definition->setPublic(TRUE);
       $container->setDefinition('serializer.normalizer.entity.dynamic_entity_reference_item.hal', $service_definition);
 
     }
