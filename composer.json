@@ -23,7 +23,7 @@
   "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
-    "php": ">=7.3",
+    "php": ">=7.4",
     "drupal/core": "^9.3"
   },
   "require-dev": {
