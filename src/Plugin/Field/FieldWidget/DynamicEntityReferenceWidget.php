@@ -163,7 +163,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       $target_type_element = [
         '#type' => 'select',
         '#options' => array_intersect_key($labels, array_combine($available, $available)),
-        '#title' => $this->t('Entity type'),
+        '#title' => $this->t('Type'),
         '#default_value' => $target_type,
         '#weight' => -50,
         '#attributes' => [
