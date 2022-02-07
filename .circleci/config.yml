@@ -6,16 +6,16 @@ workflows:
       - test:
           matrix:
             parameters:
-              php: ["7.4", "8.0"]
-              drupal-version: ["9.3.x", "9.4.x"]
+              php: ["8.0"]
+              drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
     - test:
         matrix:
           parameters:
-            php: ["7.4", "8.0"]
-            drupal-version: ["9.3.x", "9.4.x"]
+            php: ["8.0"]
+            drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -66,8 +66,7 @@ jobs:
         name: Fetch drupal dependencies, dev dependencies, and module test dependencies
         command: |
           composer install --prefer-dist --no-progress
-          composer require drupal/diff:1.x-dev --no-progress
-          composer require --dev "phpstan/phpstan:^1.1" "phpstan/phpstan-deprecation-rules:^1.0" "mglaman/phpstan-drupal:^1.0"
+          composer require --dev "phpstan/phpstan-deprecation-rules:^1.0"
 
     - checkout:
         path: modules/${MODULE_NAME}

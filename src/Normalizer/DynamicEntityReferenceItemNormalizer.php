@@ -20,7 +20,7 @@ class DynamicEntityReferenceItemNormalizer extends EntityReferenceItemNormalizer
   /**
    * {@inheritdoc}
    */
-  public function normalize($field_item, $format = NULL, array $context = []) {
+  public function normalize($field_item, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     $normalized = parent::normalize($field_item, $format, $context);
     $normalized['target_type'] = $field_item->target_type;
     return $normalized;
