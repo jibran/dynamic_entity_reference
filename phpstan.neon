@@ -1,4 +1,5 @@
 parameters:
+#  level: 0
   reportUnmatchedIgnoredErrors: false
   customRulesetUsed: true
   checkMissingIterableValueType: false
@@ -7,8 +8,10 @@ parameters:
     - theme
     - profile
     - install
+  bootstrapFiles:
+    - core/tests/bootstrap.php
+  # @todo remove this once diff supports D10.
+  excludePaths:
+    - *DynamicEntityReferenceFieldBuilder.php
   ignoreErrors:
     - '#Plugin definitions cannot be altered.#'
-includes:
-  - vendor/mglaman/phpstan-drupal/extension.neon
-  - vendor/phpstan/phpstan-deprecation-rules/rules.neon
