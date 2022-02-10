@@ -6,7 +6,7 @@ workflows:
       - test:
           matrix:
             parameters:
-              php: ["8.0"]
+              php: ["8.0", "8.1"]
               drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
   # Run nightly tests every day 8 AM.
   nightly:
@@ -14,7 +14,7 @@ workflows:
     - test:
         matrix:
           parameters:
-            php: ["8.0"]
+            php: ["8.0", "8.1"]
             drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
     triggers:
     - schedule:
@@ -23,8 +23,8 @@ workflows:
         filters:
           branches:
             only:
-            - 8.x-1.x
-            - 8.x-2.x
+            - 3.x
+            - 4.x
 
 jobs:
   test:
