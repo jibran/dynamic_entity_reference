@@ -6,16 +6,22 @@ workflows:
       - test:
           matrix:
             parameters:
-              php: ["8.0"]
+              php: ["8.0", "8.1"]
               drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
+            exclude:
+            - php: "8.0"
+              drupal-version: "10.0.x"
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
     - test:
         matrix:
           parameters:
-            php: ["8.0"]
+            php: ["8.0", "8.1"]
             drupal-version: ["9.3.x", "9.4.x", "10.0.x"]
+          exclude:
+          - php: "8.0"
+            drupal-version: "10.0.x"
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
@@ -23,8 +29,8 @@ workflows:
         filters:
           branches:
             only:
-            - 8.x-1.x
-            - 8.x-2.x
+            - 3.x
+            - 4.x
 
 jobs:
   test:
@@ -67,6 +73,12 @@ jobs:
         command: |
           composer install --prefer-dist --no-progress
           composer require --dev "phpstan/phpstan-deprecation-rules:^1.0"
+    - when:
+        name: Fetch drupal 10 dependencies, dev dependencies, and module test dependencies
+        condition:
+          equal: [ "10.0.x", << parameters.drupal-version >> ]
+        steps:
+          - run: composer require 'drupal/hal-hal:^1.0'
 
     - checkout:
         path: modules/${MODULE_NAME}
