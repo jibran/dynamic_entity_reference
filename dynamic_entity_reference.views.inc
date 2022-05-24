@@ -131,7 +131,7 @@ function dynamic_entity_reference_views_data() {
   $entity_manager = \Drupal::entityTypeManager();
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
-  list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
+  [$entity_types, $sql_entity_types, $fields_all] = dynamic_entity_reference_get_all_base_fields();
 
   $data = [];
   foreach ($fields_all as $entity_type_id => $fields) {
@@ -262,7 +262,7 @@ function dynamic_entity_reference_views_data_alter(&$data) {
   $entity_manager = \Drupal::entityTypeManager();
 
   /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
-  list($entity_types, $sql_entity_types, $fields_all) = dynamic_entity_reference_get_all_base_fields();
+  [$entity_types, $sql_entity_types, $fields_all] = dynamic_entity_reference_get_all_base_fields();
 
   foreach ($fields_all as $entity_type_id => $fields) {
 
