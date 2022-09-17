@@ -17,6 +17,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
  * Ensures that Dynamic Entity References field works correctly.
  *
  * @group dynamic_entity_reference
+ * @group functional_javascript
  */
 class DynamicEntityReferenceTest extends WebDriverTestBase {
 
