@@ -3,7 +3,7 @@ type: module
 description: 'Provides an entity reference field that can reference multiple entity types.'
 package: Field types
 core_version_requirement: ^9.3 || ^10
-php: 7.4
+php: 8.0
 dependencies:
   - drupal:field
 test_dependencies:
