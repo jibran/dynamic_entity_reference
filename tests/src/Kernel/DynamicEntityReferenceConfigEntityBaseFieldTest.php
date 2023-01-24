@@ -4,6 +4,7 @@ namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Base field tests for referencing config entities.
@@ -11,6 +12,8 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
  * @group dynamic_entity_reference
  */
 class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBase {
+
+  use ProphecyTrait;
 
   /**
    * The entity type used in this test.
@@ -120,7 +123,7 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
 
     // Update entity_test schema.
     $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
-    $mock_entity_type = $this->prophesize(EntityTypeInterface::class);
+    $mock_entity_type = $this->getProphet()->prophesize(EntityTypeInterface::class);
     $mock_entity_type->id()->willReturn('entity_test');
     $field_storage_definitions = dynamic_entity_reference_entity_test_entity_base_field_info($mock_entity_type->reveal());
     foreach ($field_storage_definitions as $field_name => $field_storage_definition) {
@@ -209,7 +212,7 @@ class DynamicEntityReferenceConfigEntityBaseFieldTest extends EntityKernelTestBa
 
     // Update entity_test schema.
     $entity_definition_update_manager = \Drupal::entityDefinitionUpdateManager();
-    $mock_entity_type = $this->prophesize(EntityTypeInterface::class);
+    $mock_entity_type = $this->getProphet()->prophesize(EntityTypeInterface::class);
     $mock_entity_type->id()->willReturn('entity_test');
     $field_storage_definitions = dynamic_entity_reference_entity_test_entity_base_field_info($mock_entity_type->reveal());
     foreach ($field_storage_definitions as $field_name => $field_storage_definition) {
