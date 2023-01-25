@@ -2,8 +2,8 @@ name: 'Dynamic Entity Reference Entity Test'
 type: module
 description: 'Provides base fields for dynamic_entity_reference tests of entity_test entity type.'
 package: Testing
-core_version_requirement: ^9.3 || ^10
-php: 8.0
+core_version_requirement: ^10
+php: 8.1
 hidden: TRUE
 dependencies:
   - dynamic_entity_reference:dynamic_entity_reference
