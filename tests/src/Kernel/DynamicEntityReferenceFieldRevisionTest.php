@@ -123,7 +123,9 @@ class DynamicEntityReferenceFieldRevisionTest extends EntityKernelTestBase {
     $this->assertEquals($entity_old->{$field_name}->target_id, $referenced_entity_1->id());
     $this->assertEquals($entity_new->{$field_name}->target_id, $referenced_entity_2->id());
     $storage->resetCache();
+    /* @phpstan-ignore-next-line */
     $revision_1 = $storage->loadRevision($revision_id_1);
+    /* @phpstan-ignore-next-line */
     $revision_2 = $storage->loadRevision($revision_id_2);
     $this->assertEquals($revision_1->{$field_name}->target_id, $referenced_entity_1->id());
     $this->assertEquals($revision_2->{$field_name}->target_id, $referenced_entity_2->id());
