@@ -303,6 +303,7 @@ class DynamicEntityReferenceFormatterTest extends EntityKernelTestBase {
     // lacking any URL info.
     $expected_item_2 = [
       '#plain_text' => $this->unsavedReferencedEntity->label(),
+      '#entity' => $this->unsavedReferencedEntity,
       '#cache' => [
         'contexts' => [
           'user.permissions',
