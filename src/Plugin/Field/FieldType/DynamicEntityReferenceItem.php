@@ -31,7 +31,7 @@ use Drupal\dynamic_entity_reference\DataDynamicReferenceDefinition;
  *   id = "dynamic_entity_reference",
  *   label = @Translation("Dynamic entity reference"),
  *   description = @Translation("An entity field containing a dynamic entity reference."),
- *   category = @Translation("Dynamic Reference"),
+ *   category = "reference",
  *   no_ui = FALSE,
  *   list_class = "\Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceFieldItemList",
  *   default_widget = "dynamic_entity_reference_default",
