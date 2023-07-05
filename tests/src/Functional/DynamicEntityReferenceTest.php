@@ -216,6 +216,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     // Check the default settings.
     $this->drupalGet('entity_test/structure/entity_test/fields/entity_test.entity_test.field_foobar');
     $this->submitForm([
+      'set_default_value' => '1',
       'default_value_input[field_foobar][0][target_type]' => 'user',
       'default_value_input[field_foobar][0][target_id]' => $this->adminUser->label() . ' (' . $this->adminUser->id() . ')',
     ], t('Save settings'));

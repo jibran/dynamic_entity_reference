@@ -135,6 +135,7 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $page->uncheckField('settings[exclude_entity_types]');
     $this->submitForm([], t('Save field settings'), 'field-storage-config-edit-form');
     $page = $this->getSession()->getPage();
+    $page->checkField('set_default_value');
     $autocomplete_field = $page->findField('default_value_input[field_foobar][0][target_id]');
     $autocomplete_field_1 = $page->findField('default_value_input[field_foobar][1][target_id]');
     $target_type_select = $assert_session->selectExists('default_value_input[field_foobar][0][target_type]');
