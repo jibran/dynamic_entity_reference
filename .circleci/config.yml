@@ -6,16 +6,16 @@ workflows:
       - test:
           matrix:
             parameters:
-              php: ["8.1"]
-              drupal-version: ["10.0.x", "10.1.x"]
+              php: ["8.1", "8.2"]
+              drupal-version: ["10.1.x", "11.x"]
   # Run nightly tests every day 8 AM.
   nightly:
     jobs:
     - test:
         matrix:
           parameters:
-            php: ["8.1"]
-            drupal-version: ["10.0.x", "10.1.x"]
+            php: ["8.1", "8.2"]
+            drupal-version: ["10.1.x", "11.x"]
     triggers:
     - schedule:
         # Weekday (22=10pm UTC). Evaluates to 8am AEST.
