@@ -8,10 +8,6 @@ deploystacks:
     strategy: depend
   parallel:
     matrix:
-      - DRUPAL_CORE_CONSTRAINT: ["9.4", "9.5"]
-        PHP_VERSION: ["8.0", "8.1"]
-        MYSQL_VERSION: ["8"]
-      # Drupal 10 requires PHP 8.1
-      - DRUPAL_CORE_CONSTRAINT: ["10.0", "10.1"]
-        PHP_VERSION: ["8.1"]
+      - DRUPAL_CORE_CONSTRAINT: ["10.1", "11"]
+        PHP_VERSION: ["8.1", "8.2"]
         MYSQL_VERSION: ["8"]
