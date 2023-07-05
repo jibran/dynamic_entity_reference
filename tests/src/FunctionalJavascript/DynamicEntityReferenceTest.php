@@ -102,7 +102,7 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     // We will query on the first two characters of the second username.
     $autocomplete_query = mb_substr($this->anotherUser->label(), 0, 3);
     $this->testEntity = EntityTest::create([
-      // Make this partially match the second user name.
+      // Make this partially match the second username.
       'name' => $autocomplete_query . $this->randomMachineName(5),
       'type' => 'entity_test',
     ]);
@@ -111,8 +111,16 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    $select = $assert_session->selectExists('new_storage_type');
-    $select->selectOption('dynamic_entity_reference');
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $page = $this->getSession()->getPage();
+      $page->find('css', "[name='new_storage_type'][value='reference']")->click();
+      $assert_session->waitForText('Choose an option below');
+      $assert_session->elementExists('css', "[name='group_field_options_wrapper'][value='dynamic_entity_reference']")->click();
+    }
+    else {
+      $select = $assert_session->selectExists('new_storage_type');
+      $select->selectOption('dynamic_entity_reference');
+    }
     $label = $assert_session->fieldExists('label');
     $label->setValue('Foobar');
     // Wait for the machine name.
@@ -191,8 +199,16 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalCreateContentType(['type' => 'test_content']);
     $this->drupalGet('/admin/structure/types/manage/test_content/fields/add-field');
-    $select = $assert_session->selectExists('new_storage_type');
-    $select->selectOption('dynamic_entity_reference');
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $page = $this->getSession()->getPage();
+      $page->find('css', "[name='new_storage_type'][value='reference']")->click();
+      $assert_session->waitForText('Choose an option below');
+      $assert_session->elementExists('css', "[name='group_field_options_wrapper'][value='dynamic_entity_reference']")->click();
+    }
+    else {
+      $select = $assert_session->selectExists('new_storage_type');
+      $select->selectOption('dynamic_entity_reference');
+    }
     $label = $assert_session->fieldExists('label');
     $label->setValue('Foobar');
     // Wait for the machine name.

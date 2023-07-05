@@ -122,11 +122,24 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    $edit = [
-      'label' => 'Foobar',
-      'field_name' => 'foobar',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $test = [
+        'new_storage_type' => 'reference',
+      ];
+      $this->submitForm($test, 'Change field group');
+      $edit = [
+        'group_field_options_wrapper' => 'dynamic_entity_reference',
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+      ];
+    }
+    else {
+      $edit = [
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+        'new_storage_type' => 'dynamic_entity_reference',
+      ];
+    }
     $this->submitForm($edit, t('Save and continue'));
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
@@ -222,11 +235,24 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    $edit = [
-      'label' => 'Foobar',
-      'field_name' => 'foobar',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $test = [
+        'new_storage_type' => 'reference',
+      ];
+      $this->submitForm($test, 'Change field group');
+      $edit = [
+        'group_field_options_wrapper' => 'dynamic_entity_reference',
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+      ];
+    }
+    else {
+      $edit = [
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+        'new_storage_type' => 'dynamic_entity_reference',
+      ];
+    }
     $this->submitForm($edit, t('Save and continue'));
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_no_id]');
     $assert_session->optionNotExists('settings[entity_type_ids][]', 'settings[entity_test_no_id][handler_settings][target_bundles][entity_test_string_id]');
@@ -470,11 +496,24 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    $edit = [
-      'label' => 'Foobar',
-      'field_name' => 'foobar',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $test = [
+        'new_storage_type' => 'reference',
+      ];
+      $this->submitForm($test, 'Change field group');
+      $edit = [
+        'group_field_options_wrapper' => 'dynamic_entity_reference',
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+      ];
+    }
+    else {
+      $edit = [
+        'label' => 'Foobar',
+        'field_name' => 'foobar',
+        'new_storage_type' => 'dynamic_entity_reference',
+      ];
+    }
     $this->submitForm($edit, t('Save and continue'));
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
@@ -558,11 +597,24 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     // Add a new dynamic entity reference field.
     $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
-    $edit = [
-      'label' => 'DER',
-      'field_name' => 'der',
-      'new_storage_type' => 'dynamic_entity_reference',
-    ];
+    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+      $test = [
+        'new_storage_type' => 'reference',
+      ];
+      $this->submitForm($test, 'Change field group');
+      $edit = [
+        'group_field_options_wrapper' => 'dynamic_entity_reference',
+        'label' => 'DER',
+        'field_name' => 'der',
+      ];
+    }
+    else {
+      $edit = [
+        'label' => 'DER',
+        'field_name' => 'der',
+        'new_storage_type' => 'dynamic_entity_reference',
+      ];
+    };
     $this->submitForm($edit, t('Save and continue'));
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
