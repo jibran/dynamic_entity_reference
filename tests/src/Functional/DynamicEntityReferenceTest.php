@@ -143,6 +143,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings[entity_type_ids][]' => ['user', 'entity_test_label'],
     ], t('Save field settings'));
+    $this->assertTrue(\Drupal::database()->schema()->tableExists('entity_test__field_foobar'));
+    $this->assertTrue(\Drupal::database()->schema()->fieldExists('entity_test__field_foobar', 'field_foobar_target_id_int'));
     $assert_session->fieldExists('default_value_input[field_foobar][0][target_type]');
     $assert_session->optionExists('default_value_input[field_foobar][0][target_type]', 'entity_test');
     $assert_session->optionNotExists('default_value_input[field_foobar][0][target_type]', 'user');
@@ -166,6 +168,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       }
     }
     $this->submitForm($edit, t('Save settings'));
+    $this->assertTrue(\Drupal::database()->schema()->tableExists('entity_test__field_foobar'));
+    $this->assertTrue(\Drupal::database()->schema()->fieldExists('entity_test__field_foobar', 'field_foobar_target_id_int'));
     $assert_session->responseContains(t('Saved %name configuration', ['%name' => 'Foobar']));
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
@@ -202,6 +206,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     ];
     $this->submitForm($edit, t('Save settings'));
     $assert_session->responseContains(t('Saved %name configuration', ['%name' => 'Foobar']));
+    $this->assertTrue(\Drupal::database()->schema()->tableExists('entity_test__field_foobar'));
+    $this->assertTrue(\Drupal::database()->schema()->fieldExists('entity_test__field_foobar', 'field_foobar_target_id_int'));
     $excluded_entity_type_ids = FieldStorageConfig::loadByName('entity_test', 'field_foobar')
       ->getSetting('entity_type_ids');
     $this->assertNotNull($excluded_entity_type_ids);

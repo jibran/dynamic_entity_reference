@@ -79,6 +79,7 @@ class FieldStorageSubscriber implements EventSubscriberInterface {
     // FieldStorageConfig object or enabling a module implementing
     // hook_entity_base_field_info().
     $events[FieldStorageDefinitionEvents::CREATE][] = ['onFieldStorage', 100];
+    $events[FieldStorageDefinitionEvents::UPDATE][] = ['onFieldStorage', 100];
     $events[EntityTypeEvents::CREATE][] = ['onEntityType', 100];
     return $events;
   }
