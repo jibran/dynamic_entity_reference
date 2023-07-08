@@ -120,7 +120,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -232,7 +232,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -398,13 +398,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     // We don't know the order in which the entities will be listed, so just
     // assert parts and make sure both are shown.
-    // @todo remove this once 9.1 and 9.0 are not supported anymore.
-    if (version_compare(\Drupal::VERSION, '9.2', '>=')) {
-      $error_message = t('Multiple test entity entities match this reference;');
-    }
-    else {
-      $error_message = t('Multiple entities match this reference;');
-    }
+    $error_message = t('Multiple test entity entities match this reference;');
     $assert_session->responseContains($error_message);
     $assert_session->responseContains($labels[0]);
     $assert_session->responseContains($labels[1]);
@@ -427,13 +421,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     ];
     // We don't know which id it will display, so just assert a part of the
     // error.
-    // @todo remove this once 9.1 and 9.0 are not supported anymore.
-    if (version_compare(\Drupal::VERSION, '9.2', '>=')) {
-      $error_message = t('Many test entity entities are called %value. Specify the one you want by appending the id in parentheses', $params);
-    }
-    else {
-      $error_message = t('Many entities are called %value. Specify the one you want by appending the id in parentheses', $params);
-    }
+    $error_message = t('Many test entity entities are called %value. Specify the one you want by appending the id in parentheses', $params);
     $assert_session->responseContains($error_message);
 
     // Submit with a label that does not match anything.
@@ -443,13 +431,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
       'field_foobar[1][target_id]' => 'does not exist',
     ];
     $this->submitForm($edit, t('Save'));
-    // @todo remove this once 9.1 and 9.0 are not supported anymore.
-    if (version_compare(\Drupal::VERSION, '9.2', '>=')) {
-      $assert_session->responseContains(t('There are no test entity entities matching "%value".', ['%value' => 'does not exist']));
-    }
-    else {
-      $assert_session->responseContains(t('There are no entities matching "%value".', ['%value' => 'does not exist']));
-    }
+
+    $assert_session->responseContains(t('There are no test entity entities matching "%value".', ['%value' => 'does not exist']));
 
     $this->drupalGet('entity_test/manage/' . $entity->id() . '/edit');
     $edit = [
@@ -489,7 +472,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -589,7 +572,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     // Add a new dynamic entity reference field.
     $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '10.1.1', '>')) {
+    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
