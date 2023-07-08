@@ -136,6 +136,11 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->submitForm([], t('Save field settings'), 'field-storage-config-edit-form');
     $page = $this->getSession()->getPage();
     $page->checkField('set_default_value');
+    $assert_session->fieldExists('default_value_input[field_foobar][0][target_id]');
+    $assert_session->fieldNotExists('default_value_input[field_foobar][1][target_id]');
+    $this->submitForm([], 'Add another item');
+    $assert_session->assertWaitOnAjaxRequest(20000);
+    $assert_session->fieldExists('default_value_input[field_foobar][1][target_id]');
     $autocomplete_field = $page->findField('default_value_input[field_foobar][0][target_id]');
     $autocomplete_field_1 = $page->findField('default_value_input[field_foobar][1][target_id]');
     $target_type_select = $assert_session->selectExists('default_value_input[field_foobar][0][target_type]');
