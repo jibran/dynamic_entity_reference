@@ -111,7 +111,7 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $page = $this->getSession()->getPage();
       $page->find('css', "[name='new_storage_type'][value='reference']")->click();
       $assert_session->waitForText('Choose an option below');
@@ -205,7 +205,7 @@ class DynamicEntityReferenceTest extends WebDriverTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalCreateContentType(['type' => 'test_content']);
     $this->drupalGet('/admin/structure/types/manage/test_content/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $page = $this->getSession()->getPage();
       $page->find('css', "[name='new_storage_type'][value='reference']")->click();
       $assert_session->waitForText('Choose an option below');
