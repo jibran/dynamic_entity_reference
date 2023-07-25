@@ -37,6 +37,11 @@ class DerRevUpdateTest extends UpdatePathTestBase {
    * @see dynamic_entity_reference_update_8201()
    */
   public function testUpdate8201() {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_unique_constraint');
+      $update_manager->installEntityType($entity_type);
+    }
     $connection = \Drupal::database();
     $this->runUpdates();
     // The db dump contain two entity_test_rev entities referencing one

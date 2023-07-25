@@ -74,6 +74,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     'entity_test_computed_field',
     'entity_test_map_field',
     'entity_test_no_bundle_with_label',
+    'entity_test_unique_constraint',
   ];
 
   /**

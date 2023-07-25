@@ -37,6 +37,11 @@ class DerUpdateTest extends UpdatePathTestBase {
    * @see dynamic_entity_reference_update_8201()
    */
   public function testUpdate8201() {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_unique_constraint');
+      $update_manager->installEntityType($entity_type);
+    }
     $connection = \Drupal::database();
     if ($connection->driver() == 'mysql') {
       // This might force an 1071 Specified key was too long; max key length

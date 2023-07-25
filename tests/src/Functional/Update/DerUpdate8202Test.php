@@ -32,6 +32,11 @@ class DerUpdate8202Test extends UpdatePathTestBase {
    * @see \dynamic_entity_reference_update_8202()
    */
   public function testUpdate8202() {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_unique_constraint');
+      $update_manager->installEntityType($entity_type);
+    }
     // The index should not exist initially.
     $schema = \Drupal::database()->schema();
     $index_mapping = [
