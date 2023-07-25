@@ -122,7 +122,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -236,7 +236,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -480,7 +480,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Add a new dynamic entity reference field.
     $this->drupalGet('entity_test/structure/entity_test/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
@@ -581,7 +581,7 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
 
     // Add a new dynamic entity reference field.
     $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
-    if (version_compare(\Drupal::VERSION, '11.0-dev', '>=')) {
+    if (version_compare(\Drupal::VERSION, '10.2-dev', '>=')) {
       $test = [
         'new_storage_type' => 'reference',
       ];
