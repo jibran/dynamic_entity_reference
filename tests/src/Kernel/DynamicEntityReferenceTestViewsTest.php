@@ -18,6 +18,11 @@ class DynamicEntityReferenceTestViewsTest extends KernelTestBase {
   use SchemaCheckTestTrait;
 
   /**
+   * {@inheritdoc}
+   */
+  protected static $modules = ['entity_test'];
+
+  /**
    * Tests default configuration data type.
    */
   public function testDefaultConfig() {
@@ -30,6 +35,7 @@ class DynamicEntityReferenceTestViewsTest extends KernelTestBase {
       \Drupal::service('module_handler'),
       \Drupal::service('class_resolver')
     );
+    $typed_config->setValidationConstraintManager(\Drupal::service('validation.constraint'));
 
     // Create a configuration storage with access to default configuration in
     // every module, profile and theme.
