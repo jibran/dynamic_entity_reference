@@ -24,7 +24,7 @@
         autocomplete.dataset['autocompletePath'] = drupalSettings.dynamic_entity_reference[selectElement.dataset['dynamicEntityReference']][entityTypeId];
         Drupal.autocomplete.cache[autocomplete.id] = {};
       }
-      Object.keys(drupalSettings.dynamic_entity_reference || {}).forEach(function(field_class) {
+      Object.keys(drupalSettings.dynamic_entity_reference || {}).forEach(function (field_class) {
         var field = context.querySelector('.' + field_class);
         if (field && !field.classList.contains(field_class + '-processed')) {
           field.classList.add(field_class + '-processed');

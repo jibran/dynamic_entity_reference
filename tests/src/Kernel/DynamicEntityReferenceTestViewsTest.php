@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\dynamic_entity_reference\Kernel;
 
-use Drupal\Tests\SchemaCheckTestTrait;
 use Drupal\config_test\TestInstallStorage;
 use Drupal\Core\Config\InstallStorage;
 use Drupal\Core\Config\TypedConfigManager;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\SchemaCheckTestTrait;
 
 /**
  * Tests that test views provided by dynamic_entity_reference match schema.
