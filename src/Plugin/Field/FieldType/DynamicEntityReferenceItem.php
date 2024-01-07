@@ -197,7 +197,6 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    * {@inheritdoc}
    */
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
-    // @todo inject this.
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
     $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
     foreach (array_keys($options) as $entity_type_id) {
@@ -339,6 +338,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     ];
     $form['handler']['handler_submit'] = [
       '#type' => 'submit',
+      '#name' => 'handler_settings_submit',
       '#value' => t('Change handler'),
       '#limit_validation_errors' => [],
       '#attributes' => [
