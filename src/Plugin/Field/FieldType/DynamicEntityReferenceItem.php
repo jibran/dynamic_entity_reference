@@ -749,4 +749,21 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     return $summary;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function getReferenceableBundles(FieldDefinitionInterface $field_definition):array {
+    $settings = $field_definition->getSettings();
+    $referenceable_bundles = [];
+    foreach (static::getTargetTypes($settings) as $target_type_id) {
+      $handler_settings = $settings[$target_type_id]['handler_settings'];
+      $has_target_bundles = isset($handler_settings['target_bundles']) && !empty($handler_settings['target_bundles']);
+      $target_bundles = $has_target_bundles ? $handler_settings['target_bundles']
+        : array_keys(\Drupal::service('entity_type.bundle.info')->getBundleInfo($target_type_id));
+      $referenceable_bundles[$target_type_id] = $target_bundles;
+    }
+
+    return $referenceable_bundles;
+  }
+
 }
