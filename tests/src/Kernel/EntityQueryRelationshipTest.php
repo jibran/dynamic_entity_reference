@@ -8,8 +8,8 @@ use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\entity_test\Entity\EntityTestStringId;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**

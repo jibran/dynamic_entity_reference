@@ -4,8 +4,8 @@ namespace Drupal\dynamic_entity_reference;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
-use Drupal\Core\Entity\Query\Sql\QueryFactory as BaseQueryFactory;
 use Drupal\Core\Entity\Query\Sql\pgsql\QueryFactory as BasePgsqlQueryFactory;
+use Drupal\Core\Entity\Query\Sql\QueryFactory as BaseQueryFactory;
 use Drupal\dynamic_entity_reference\Normalizer\DynamicEntityReferenceItemNormalizer;
 use Drupal\dynamic_entity_reference\Query\PgsqlQueryFactory;
 use Drupal\dynamic_entity_reference\Query\QueryFactory;
