@@ -74,7 +74,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['target_id'] = DataReferenceTargetDefinition::create('integer')
-      ->setLabel(t('Entity ID'))
+      ->setLabel(new TranslatableMarkup('Entity ID'))
       ->setSetting('unsigned', TRUE)
       ->setRequired(TRUE);
 
@@ -109,14 +109,12 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
       ],
     ];
 
-    $schema = [
+    return [
       'columns' => $columns,
       'indexes' => [
         'target_id' => ['target_id', 'target_type'],
       ],
     ];
-
-    return $schema;
   }
 
   /**
@@ -198,7 +196,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    $options = $labels[(string) t('Content', [], ['context' => 'Entity type group'])];
+    $options = $labels[(string) $this->t('Content', [], ['context' => 'Entity type group'])];
     foreach (array_keys($options) as $entity_type_id) {
       if (!static::entityHasIntegerId($entity_type_id)) {
         unset($options[$entity_type_id]);
@@ -206,14 +204,14 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     }
     $element['exclude_entity_types'] = [
       '#type' => 'checkbox',
-      '#title' => t('Exclude the selected items'),
+      '#title' => $this->t('Exclude the selected items'),
       '#default_value' => $this->getSetting('exclude_entity_types'),
       '#disabled' => $has_data,
     ];
 
     $element['entity_type_ids'] = [
       '#type' => 'select',
-      '#title' => t('Select items'),
+      '#title' => $this->t('Select items'),
       '#options' => $options,
       '#default_value' => $this->getSetting('entity_type_ids'),
       '#disabled' => $has_data,
@@ -265,7 +263,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     foreach (static::getTargetTypes($settings) as $target_type) {
       $entity_type = \Drupal::entityTypeManager()->getDefinition($target_type);
       $settings_form[$target_type] = $this->targetTypeFieldSettingsForm($form, $form_state, $target_type);
-      $settings_form[$target_type]['handler']['#title'] = t('Reference type for @target_type', ['@target_type' => $entity_type->getLabel()]);
+      $settings_form[$target_type]['handler']['#title'] = $this->t('Reference type for @target_type', ['@target_type' => $entity_type->getLabel()]);
     }
     return $settings_form;
   }
@@ -321,7 +319,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     ];
     $form['handler'] = [
       '#type' => 'details',
-      '#title' => t('Reference type'),
+      '#title' => $this->t('Reference type'),
       '#open' => TRUE,
       '#tree' => TRUE,
       '#process' => [[EntityReferenceItem::class, 'formProcessMergeParent']],
@@ -329,7 +327,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
 
     $form['handler']['handler'] = [
       '#type' => 'select',
-      '#title' => t('Reference method'),
+      '#title' => $this->t('Reference method'),
       '#options' => $handlers_options,
       '#default_value' => $field_settings[$target_type]['handler'],
       '#required' => TRUE,
@@ -338,8 +336,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
     ];
     $form['handler']['handler_submit'] = [
       '#type' => 'submit',
-      '#name' => 'handler_settings_submit',
-      '#value' => t('Change handler'),
+      '#value' => $this->t('Change handler'),
       '#limit_validation_errors' => [],
       '#attributes' => [
         'class' => ['js-hide'],
@@ -524,6 +521,7 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
         return $values;
       }
     }
+    return [];
   }
 
   /**

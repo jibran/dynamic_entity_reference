@@ -184,9 +184,8 @@ class DynamicEntityReferenceTest extends BrowserTestBase {
     ], t('Save field settings'));
     $assert_session->pageTextContains('Select at least one entity type ID.');
     $options = array_filter(array_keys($labels[(string) t('Content', [], ['context' => 'Entity type group'])]), function ($entity_type_id) {
-      return DynamicEntityReferenceItem::entityHasIntegerId($entity_type_id);
+      return DynamicEntityReferenceItem::entityHasIntegerId($entity_type_id) || $entity_type_id === 'entity_test_no_id';
     });
-    unset($options['entity_test_no_id']);
     $this->submitForm([
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'settings[exclude_entity_types]' => TRUE,
