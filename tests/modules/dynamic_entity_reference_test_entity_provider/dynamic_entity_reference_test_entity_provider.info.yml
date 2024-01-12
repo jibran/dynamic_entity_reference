@@ -1,6 +1,6 @@
-name: 'Dynamic Entity Reference Entity Provider'
+name: "Dynamic Entity Reference Entity Provider"
 type: module
-description: 'A provider of an entity type.'
+description: "A provider of an entity type."
 package: Testing
 core_version_requirement: ^10 || ^11
 php: 8.1

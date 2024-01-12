@@ -1,13 +1,80 @@
-include:
-  # https://docs.gitlab.com/ee/ci/yaml/index.html#includetemplate
-  - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+################
+# DrupalCI GitLabCI template
+#
+# Gitlab-ci.yml to replicate DrupalCI testing for Contrib
+#
+# With thanks to:
+#   * The GitLab Acceleration Initiative participants
+#   * DrupalSpoons
+################
 
-deploystacks:
-  trigger:
-    include: .drupalci/.gitlab-single-pipeline.yml
-    strategy: depend
-  parallel:
-    matrix:
-      - DRUPAL_CORE_CONSTRAINT: ["10.1", "11"]
-        PHP_VERSION: ["8.1", "8.2"]
-        MYSQL_VERSION: ["8"]
+################
+# Guidelines
+#
+# This template is designed to give any Contrib maintainer everything they need to test, without requiring modification. It is also designed to keep up to date with Core Development automatically through the use of include files that can be centrally maintained.
+#
+# However, you can modify this template if you have additional needs for your project.
+################
+
+################
+# Includes
+#
+# Additional configuration can be provided through includes.
+# One advantage of include files is that if they are updated upstream, the changes affect all pipelines using that include.
+#
+# Includes can be overridden by re-declaring anything provided in an include, here in gitlab-ci.yml
+# https://docs.gitlab.com/ee/ci/yaml/includes.html#override-included-configuration-values
+################
+
+include:
+  ################
+  # DrupalCI includes:
+  # As long as you include this, any future includes added by the Drupal Association will be accessible to your pipelines automatically.
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  ################
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      # EXPERIMENTAL: For Drupal 7, remove the above line and uncomment the below.
+      # - '/includes/include.drupalci.main-d7.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+################
+# Pipeline configuration variables
+#
+# These are the variables provided to the Run Pipeline form that a user may want to override.
+#
+# Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
+################
+variables:
+#   SKIP_ESLINT: '1'
+  # Broaden test coverage. Current Drupal version is 10.1.x.
+  # Opt in to testing previous & next minor (Drupal 10.0.x and 10.2.x).
+#  OPT_IN_TEST_PREVIOUS_MINOR: '1'
+#  OPT_IN_TEST_NEXT_MINOR: '1'
+  # Opt in to testing previous major (Drupal 9.5.x).
+#  OPT_IN_TEST_PREVIOUS_MAJOR: '1'
+  # Show more log output
+  # Convenient, and we have no secrets.
+  _SHOW_ENVIRONMENT_VARIABLES: '1'
+  _PHPUNIT_EXTRA: '--verbose'
+
+# Use default DB services instead of one provided by DrupalCI containers for SQL triggers support.
+.with-db: &with-db
+  name: $_TARGET_DB_TYPE:$_TARGET_DB_VERSION
+  alias: database
+
+phpunit:
+  extends: .phpunit-base
+  services:
+    - !reference [.with-db]
+    - !reference [.with-chrome]
+  variables:
+    # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
+    MYSQL_ROOT_PASSWORD: 'drupal'
+    MYSQL_DATABASE: 'drupal'
+    MYSQL_USER: 'drupal'
+    MYSQL_PASSWORD: 'drupal'
+    _TARGET_DB_TYPE: "mysql"
