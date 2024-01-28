@@ -2,6 +2,7 @@
 
 namespace Drupal\dynamic_entity_reference\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -11,6 +12,7 @@ use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
@@ -232,11 +234,21 @@ class DynamicEntityReferenceItem extends EntityReferenceItem {
    */
   public static function storageSettingsFormValidate(array &$element, FormStateInterface $form_state, array $form) {
     $labels = \Drupal::service('entity_type.repository')->getEntityTypeLabels(TRUE);
-    $exclude_entity_types = $form_state->getValue([
+    // 10.2 combined the field storage form into the field config form. To get
+    // the field values we want, we need to either use the passed form state
+    // for 10.1 and below, or create a subform state for 10.2 and above.
+    // @see \Drupal\field_ui\Form\FieldConfigEditForm::validateForm
+    $subform_state = DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION,
+      10.2,
+      fn() => SubformState::createForSubform($form['field_storage']['subform'], $form, $form_state),
+      fn() => $form_state
+    );
+    $exclude_entity_types = $subform_state->getValue([
       'settings',
       'exclude_entity_types',
     ], 0);
-    $entity_type_ids = $form_state->getValue([
+    $entity_type_ids = $subform_state->getValue([
       'settings',
       'entity_type_ids',
     ], []);

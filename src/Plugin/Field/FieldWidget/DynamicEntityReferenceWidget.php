@@ -337,12 +337,13 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
     foreach ($target_types as $target_type) {
       // Store the selection settings in the key/value store and pass a hashed
       // key in the route parameters.
-      $selection_settings = $settings[$target_type]['handler_settings'] ?: [];
+      $selection_settings = $settings[$target_type]['handler_settings'] ?? [];
       $selection_settings += [
         'match_operator' => $this->getSetting('match_operator'),
         'match_limit' => $this->getSetting('match_limit'),
       ];
-      $data = serialize($selection_settings) . $target_type . $settings[$target_type]['handler'];
+      $handler = $settings[$target_type]['handler'] ?? 'default:' . $target_type;
+      $data = serialize($selection_settings) . $target_type . $handler;
       $selection_settings_key = Crypt::hmacBase64($data, Settings::getHashSalt());
       $key_value_storage = $this->keyValue->get('entity_autocomplete');
       if (!$key_value_storage->has($selection_settings_key)) {
@@ -350,7 +351,7 @@ class DynamicEntityReferenceWidget extends EntityReferenceAutocompleteWidget {
       }
       $auto_complete_paths[$target_type] = Url::fromRoute('system.entity_autocomplete', [
         'target_type' => $target_type,
-        'selection_handler' => $settings[$target_type]['handler'],
+        'selection_handler' => $handler,
         'selection_settings_key' => $selection_settings_key,
       ])->toString();
     }
