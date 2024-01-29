@@ -43,6 +43,11 @@ class DerRevUpdateTest extends UpdatePathTestBase {
       $update_manager->installEntityType($entity_type);
     }
     $connection = \Drupal::database();
+    // Enable the DB driver specific module.
+    $driver = $connection->driver();
+    if (!\Drupal::moduleHandler()->moduleExists($driver)) {
+      \Drupal::service('module_installer')->install([$driver]);
+    }
     $this->runUpdates();
     // The db dump contain two entity_test_rev entities referencing one
     // entity_test_rev entity and one entity_test_mulrev entity.

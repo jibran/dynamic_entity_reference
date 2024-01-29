@@ -49,32 +49,116 @@ include:
 # Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
 ################
 variables:
-#   SKIP_ESLINT: '1'
-  # Broaden test coverage. Current Drupal version is 10.1.x.
-  # Opt in to testing previous & next minor (Drupal 10.0.x and 10.2.x).
+  # Enable these for manual re-run of the pipeline.
 #  OPT_IN_TEST_PREVIOUS_MINOR: '1'
-#  OPT_IN_TEST_NEXT_MINOR: '1'
-  # Opt in to testing previous major (Drupal 9.5.x).
 #  OPT_IN_TEST_PREVIOUS_MAJOR: '1'
+#  OPT_IN_TEST_NEXT_MINOR: '1'
+#  OPT_IN_TEST_NEXT_MAJOR: '1'
   # Show more log output
   # Convenient, and we have no secrets.
   _SHOW_ENVIRONMENT_VARIABLES: '1'
   _PHPUNIT_EXTRA: '--verbose'
 
+.run-on-mr: &run-on-mr
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
+
+.run-on-commit: &run-on-commit
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ROOT_NAMESPACE == "project"
+      allow_failure: true
+
 # Use default DB services instead of one provided by DrupalCI containers for SQL triggers support.
-.with-db: &with-db
-  name: $_TARGET_DB_TYPE:$_TARGET_DB_VERSION
+.with-db:
+  name: $DB_SERVICE:$DB_SERVICE_VERSION
   alias: database
 
-phpunit:
+.phpunit-mysql: &phpunit-mysql
   extends: .phpunit-base
   services:
     - !reference [.with-db]
     - !reference [.with-chrome]
   variables:
-    # Configure mysql environment variables (https://hub.docker.com/_/mysql/)
+    # Configure mysql environment variables (https://docs.gitlab.com/ee/ci/services/mysql.html)
     MYSQL_ROOT_PASSWORD: 'drupal'
     MYSQL_DATABASE: 'drupal'
     MYSQL_USER: 'drupal'
     MYSQL_PASSWORD: 'drupal'
     _TARGET_DB_TYPE: "mysql"
+    # Service name.
+    DB_SERVICE: "mysql"
+    # See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml#L305
+    DB_SERVICE_VERSION: "$CORE_MYSQL_TEST_DEFAULT"
+
+.phpunit-postgre-sql: &phpunit-postgre-sql
+  extends: .phpunit-base
+  services:
+    - !reference [.with-db]
+    - !reference [.with-chrome]
+  variables:
+    # Configure postgres environment variables (https://docs.gitlab.com/ee/ci/services/postgres.html)
+    POSTGRES_HOST_AUTH_METHOD: 'trust'
+    POSTGRES_DB: 'drupal'
+    POSTGRES_USER: 'drupal'
+    POSTGRES_PASSWORD: 'drupal'
+    _TARGET_DB_TYPE: "pgsql"
+    # Service name.
+    DB_SERVICE: "postgres"
+    # The maximum version of PostgreSQL supported by modern Drupal.
+    DB_SERVICE_VERSION: "14.1"
+
+.phpunit-sqlite: &phpunit-sqlite
+  extends: .phpunit-base
+  services:
+    - !reference [.with-db]
+    - !reference [.with-chrome]
+  variables:
+    _TARGET_DB_TYPE: "sqlite"
+    # Service name.
+    DB_SERVICE: "$_CONFIG_DOCKERHUB_ROOT/sqlite-3"
+    # The maximum version of SQLite supported by modern Drupal.
+    DB_SERVICE_VERSION: "production"
+
+# https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L580
+phpunit:
+  extends: .phpunit-mysql
+
+# https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L584
+phpunit (max PHP version):
+  extends: .phpunit-mysql
+
+# See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L595
+phpunit (previous major):
+  extends: .phpunit-mysql
+
+# See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L607
+phpunit (previous minor):
+  extends: .phpunit-mysql
+
+# See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L619
+phpunit (next minor):
+  extends: .phpunit-mysql
+
+# See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.main.yml#L631
+phpunit (next major):
+  extends: .phpunit-mysql
+
+phpunit-mysql-max (on commit):
+  <<: [ *phpunit-mysql, *run-on-commit ]
+  variables:
+    # See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml#L299
+    DB_SERVICE_VERSION: $CORE_MYSQL_MAX
+
+phpunit-postgre-sql:
+  <<: [ *phpunit-postgre-sql, *run-on-mr ]
+
+phpunit-postgre-sql (on commit):
+  <<: [ *phpunit-postgre-sql, *run-on-commit ]
+
+phpunit-sqlite:
+  <<: [ *phpunit-sqlite, *run-on-mr ]
+
+phpunit-sqlite (on commit):
+  <<: [ *phpunit-sqlite, *run-on-commit ]

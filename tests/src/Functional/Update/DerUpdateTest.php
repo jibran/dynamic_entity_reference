@@ -48,6 +48,11 @@ class DerUpdateTest extends UpdatePathTestBase {
       // is 767 bytes error if innodb_large_prefix is ON so test it.
       $connection->query('ALTER TABLE {entity_test__field_test} ROW_FORMAT=compact');
     }
+    // Enable the DB driver specific module.
+    $driver = $connection->driver();
+    if (!\Drupal::moduleHandler()->moduleExists($driver)) {
+      \Drupal::service('module_installer')->install([$driver]);
+    }
     $this->runUpdates();
     // The db dump contain two entity_test entities referencing one entity_test
     // entity and one entity_test_mul entity.

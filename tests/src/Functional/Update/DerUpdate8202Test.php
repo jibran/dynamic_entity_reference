@@ -37,8 +37,14 @@ class DerUpdate8202Test extends UpdatePathTestBase {
       $entity_type = \Drupal::entityTypeManager()->getDefinition('entity_test_unique_constraint');
       $update_manager->installEntityType($entity_type);
     }
+    $connection = \Drupal::database();
+    // Enable the DB driver specific module.
+    $driver = $connection->driver();
+    if (!\Drupal::moduleHandler()->moduleExists($driver)) {
+      \Drupal::service('module_installer')->install([$driver]);
+    }
     // The index should not exist initially.
-    $schema = \Drupal::database()->schema();
+    $schema = $connection->schema();
     $index_mapping = [
       // Table => index name.
       'entity_test__field_test' => 'field_test_target_id_int',
