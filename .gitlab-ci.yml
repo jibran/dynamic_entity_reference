@@ -146,10 +146,19 @@ phpunit (next major):
   extends: .phpunit-mysql
 
 phpunit-mysql-max (on commit):
-  <<: [ *phpunit-mysql, *run-on-commit ]
+  extends: .phpunit-mysql
+  <<: [ *run-on-commit ]
   variables:
+    # Configure mysql environment variables (https://docs.gitlab.com/ee/ci/services/mysql.html)
+    MYSQL_ROOT_PASSWORD: 'drupal'
+    MYSQL_DATABASE: 'drupal'
+    MYSQL_USER: 'drupal'
+    MYSQL_PASSWORD: 'drupal'
+    _TARGET_DB_TYPE: "mysql"
+    # Service name.
+    DB_SERVICE: "mysql"
     # See https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml#L299
-    DB_SERVICE_VERSION: $CORE_MYSQL_MAX
+    DB_SERVICE_VERSION: "$CORE_MYSQL_MAX"
 
 phpunit-postgre-sql:
   <<: [ *phpunit-postgre-sql, *run-on-mr ]
